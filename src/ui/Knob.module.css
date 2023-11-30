@@ -1,0 +1,39 @@
+.knob {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  /* margin-top: 0.5rem; */
+}
+
+.dial {
+  /* padding-left: 1rem;
+  padding-right: 1rem; */
+  /* margin-bottom: -0.5rem; */
+  align-self: center;
+  /* width: 100%; */
+}
+
+.label {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-weight: bold;
+}
+
+.scale {
+  /* margin-bottom: 0.5rem; */
+  font-size: x-small;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.scales {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.value {
+  margin-top: -0.5rem;
+  text-align: center;
+}

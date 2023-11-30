@@ -1,0 +1,7 @@
+.region {
+  position: absolute;
+  height: 3rem;
+  border: 1px solid gray;
+  border-radius: 0.5rem;
+  padding: 0.25rem;
+}

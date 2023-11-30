@@ -1,0 +1,24 @@
+.trackinfo {
+}
+
+.controls {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  width: 12rem;
+  /* border: black 1px solid; */
+}
+
+.control {
+}
+
+.volume {
+  /* border: black 1px solid; */
+  margin-top: 0.2rem;
+  width: 12rem;
+}
+
+.name {
+  width: 10rem;
+  margin-right: 0.25rem;
+}

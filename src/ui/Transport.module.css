@@ -1,0 +1,19 @@
+.transport {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.bpm {
+  width: 2rem;
+}
+
+.denominator {
+  width: 1rem;
+}
+
+.numerator {
+  width: 1rem;
+}

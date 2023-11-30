@@ -1,0 +1,32 @@
+.channel {
+  display: flex;
+  flex-direction: column;
+  /* width: 50rem; */
+  border: lightgrey 1px solid;
+  margin-right: 0.5rem;
+}
+
+.volume {
+  /* border: black 1px solid; */
+  /* width: 20rem; */
+  margin-bottom: 1rem;
+  margin-top: 0.5rem;
+  margin-left: 0.5rem;
+  margin-right: 2rem;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.name {
+  margin-top: 0.5rem;
+}
+
+.editor {
+  text-align: center;
+  font-weight: bold;
+  padding: 0.2rem;
+}
