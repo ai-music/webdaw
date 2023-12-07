@@ -8,8 +8,14 @@
 # testing
 /coverage
 
+# generated documentation
+/docs
+
 # production
 /build
+
+# credentials
+google-drive-credentials.json
 
 # misc
 .vscode

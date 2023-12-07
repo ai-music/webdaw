@@ -11,10 +11,12 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "@types/gapi": "^0.0.47",
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.62",
     "@types/react": "^18.2.39",
     "@types/react-dom": "^18.2.17",
+    "gapi-script": "^1.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
@@ -25,6 +27,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "docs": "typedoc --out docs src",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -55,6 +58,7 @@
     "prettier": "^3.1.0",
     "sass": "^1.69.5",
     "sass-loader": "^13.3.2",
-    "style-loader": "^3.3.3"
+    "style-loader": "^3.3.3",
+    "typedoc": "^0.25.4"
   }
 }
