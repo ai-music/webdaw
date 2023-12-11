@@ -5,9 +5,11 @@ import { Region, RegionProps } from './Region';
 import { TrackAutomation } from './TrackAutomation';
 
 import styles from './Track.module.css';
+import { TrackInterface } from '../core/Track';
 
-export interface TrackProps extends TrackInfoProps {
-  regions: RegionProps[];
+export interface TrackProps {
+  track: TrackInterface;
+  index: number;
   start: number;
   scale: number;
 }
@@ -16,10 +18,10 @@ export const Track: FunctionComponent<TrackProps> = (props: TrackProps) => {
   // Fixed size TrackInfo and stack of track content and TrackAutomation
   return (
     <div className={styles.track}>
-      <TrackInfo {...props} />
+      <TrackInfo index={props.index} name={props.track.name} color={props.track.color} />
       <div className={styles.rail}>
-        {props.regions.map((region) => (
-          <Region {...region} />
+        {props.track.regions.map((region) => (
+          <Region region={region} start={props.start} scale={props.scale} />
         ))}
         {/* <TrackAutomation /> */}
       </div>

@@ -1,26 +1,92 @@
 import { FunctionComponent, useState } from 'react';
 import { Location } from './Location';
 import { Time } from './Time';
-import { Button, ButtonGroup, EditableText, Switch } from '@blueprintjs/core';
+import { Button, ButtonGroup, EditableText, Intent, Switch } from '@blueprintjs/core';
+import { Location as LocationValue } from '../core/Common';
 
 import styles from './Transport.module.css';
 
+/**
+ * The different states of playback
+ */
+export enum PlaybackState {
+  Stopped,
+  Playing,
+  Recording,
+}
+
 export const Transport: FunctionComponent = () => {
+  const [playback, setPlayback] = useState(PlaybackState.Stopped);
+  const [loop, setLoop] = useState(false);
+  const [start, setStart] = useState(new LocationValue(1, 1, 1));
+  const [end, setEnd] = useState(new LocationValue(5, 1, 1));
+  const [current, setCurrent] = useState(new LocationValue(5, 1, 1));
   const [bpm, setBpm] = useState(120);
   const [numerator, setNumerator] = useState(4);
   const [denominator, setDenominator] = useState(4);
 
+  function onBegin() {
+    console.log('To beginning');
+  }
+
+  function onEnd() {
+    console.log('To end');
+  }
+
+  function onForward() {
+    console.log('Advance...');
+  }
+
+  function onBackward() {
+    console.log('Go back...');
+  }
+
+  function play() {
+    console.log('Play');
+    setPlayback(PlaybackState.Playing);
+  }
+
+  function pause() {
+    console.log('Pause');
+    setPlayback(PlaybackState.Stopped);
+  }
+
+  function record() {
+    console.log('Record');
+    setPlayback(PlaybackState.Recording);
+  }
+
+  function repeat() {
+    console.log('Repeat');
+    setLoop(!loop);
+  }
+
   return (
     <div className={styles.transport}>
       <ButtonGroup>
-        <Button icon="step-backward" />
-        <Button icon="fast-backward" />
-        <Button icon="play" />
-        <Button icon="pause" />
-        <Button icon="record" />
-        <Button icon="fast-forward" />
-        <Button icon="step-forward" />
-        <Button icon="repeat" />
+        <Button icon="step-backward" onClick={onBegin} />
+        <Button icon="fast-backward" onClick={onBackward} />
+        <Button
+          icon="play"
+          disabled={playback !== PlaybackState.Stopped}
+          intent={playback === PlaybackState.Playing ? Intent.SUCCESS : undefined}
+          onClick={play}
+        />
+        <Button icon="pause" disabled={playback === PlaybackState.Stopped} onClick={pause} />
+        <Button
+          icon="record"
+          disabled={playback !== PlaybackState.Stopped}
+          intent={playback === PlaybackState.Recording ? Intent.DANGER : undefined}
+          onClick={record}
+        />
+        <Button icon="fast-forward" onClick={onForward} />
+        <Button icon="step-forward" onClick={onEnd} />
+        <Button
+          icon="repeat"
+          onClick={repeat}
+          active={loop}
+          intent={loop ? Intent.PRIMARY : Intent.NONE}
+        />
       </ButtonGroup>
       <div>
         <div className="bp5-text-small">

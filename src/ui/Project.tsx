@@ -4,8 +4,13 @@ import { Arrangement } from './Arrangement';
 import { Transport } from './Transport';
 import { Mixer } from './Mixer';
 import { Section, SectionCard } from '@blueprintjs/core';
+import { Project as ProjectObj } from '../core/Project';
 
-export const Project: FunctionComponent = () => {
+export type ProjectProps = {
+  project: ProjectObj;
+};
+
+export const Project: FunctionComponent<ProjectProps> = (props) => {
   // const [mixerVisible, setMixerVisible] = useState(true);
   // const [infoPanelVisible, setInfoPanelVisible] = useState(false);
 
@@ -17,7 +22,7 @@ export const Project: FunctionComponent = () => {
       <Transport />
       <Section title="Arrangement" compact={true} collapsible={true}>
         <SectionCard title="Arrangement">
-          <Arrangement />
+          <Arrangement project={props.project} />
         </SectionCard>
       </Section>
       <Section title="Mixer" compact={true} collapsible={true}>

@@ -2,6 +2,7 @@
   "name": "webdaw",
   "version": "0.1.0",
   "private": true,
+  "main": "public/main.js",
   "dependencies": {
     "@blueprintjs/core": "^5.7.1",
     "@blueprintjs/icons": "^5.4.1",
@@ -16,6 +17,7 @@
     "@types/node": "^16.18.62",
     "@types/react": "^18.2.39",
     "@types/react-dom": "^18.2.17",
+    "electron": "^28.0.0",
     "gapi-script": "^1.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -28,7 +30,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "docs": "typedoc --out docs src",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "electron-dev": "electron ."
   },
   "eslintConfig": {
     "extends": [
@@ -52,7 +55,7 @@
   "devDependencies": {
     "autoprefixer": "^10.4.16",
     "css-loader": "^6.8.1",
-    "eslint-config-prettier": "^9.0.0",
+    "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.0.1",
     "postcss-loader": "^7.3.3",
     "prettier": "^3.1.0",
