@@ -23,7 +23,12 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props) => {
   return (
     <>
       <Timeline start={timelineStart} scale={timelineScale} />
-      <TrackList start={timelineStart} scale={timelineScale} tracks={props.project.tracks} />
+      <TrackList
+        start={timelineStart}
+        scale={timelineScale}
+        tracks={props.project.tracks}
+        engine={props.engine}
+      />
     </>
   );
 };

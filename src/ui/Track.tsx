@@ -17,14 +17,14 @@ export interface TrackProps {
 export const Track: FunctionComponent<TrackProps> = (props: TrackProps) => {
   // Fixed size TrackInfo and stack of track content and TrackAutomation
   return (
-    <div className={styles.track}>
+    <>
       <TrackInfo index={props.index} name={props.track.name} color={props.track.color} />
-      <div className={styles.rail}>
+      <div className={styles.rail} style={{ gridRow: props.index + 1, gridColumn: 2 }}>
         {props.track.regions.map((region) => (
           <Region region={region} start={props.start} scale={props.scale} />
         ))}
         {/* <TrackAutomation /> */}
       </div>
-    </div>
+    </>
   );
 };

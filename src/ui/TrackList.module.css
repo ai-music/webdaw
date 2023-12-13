@@ -1,4 +1,18 @@
 .trackList {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 15rem 1fr;
+}
+
+.markerArea {
+  position: relative;
+  grid-column: 2 / 2;
+}
+
+.marker {
+  position: absolute;
+  height: 100%;
+  width: 0px;
+  border: 1px solid red;
+  top: 0;
+  z-index: 1000000
 }

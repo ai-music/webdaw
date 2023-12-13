@@ -26,13 +26,13 @@ export type TransportProps = {
 export const Transport: FunctionComponent<TransportProps> = (props: TransportProps) => {
   const [playback, setPlayback] = useState(PlaybackState.Stopped);
   const [loop, setLoop] = useState(false);
-  const [timestamp, setTimestamp] = useState(0); // [hh, mm, ss, uuuu]
   const [start, setStart] = useState(new LocationValue(1, 1, 1));
   const [end, setEnd] = useState(new LocationValue(5, 1, 1));
   const [current, setCurrent] = useState(new LocationValue(5, 1, 1));
   const [bpm, setBpm] = useState(120);
   const [numerator, setNumerator] = useState(4);
   const [denominator, setDenominator] = useState(4);
+  const [timestamp, setTimestamp] = useState(0); // [hh, mm, ss, uuuu]
 
   const positionEventHandler = (event: PlaybackPositionEvent) => {
     setTimestamp(event.timestamp);

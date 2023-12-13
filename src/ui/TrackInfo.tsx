@@ -26,7 +26,7 @@ export const TrackInfo: FunctionComponent<TrackInfoProps> = (props: TrackInfoPro
   const [record, setRecord] = useState(false);
 
   return (
-    <div className={styles.trackinfo}>
+    <div className={styles.trackinfo} style={{ gridRow: props.index + 1, gridColumn: 1 }}>
       <div className={styles.controls}>
         <EditableText className={styles.name} value={name} onChange={(val) => setName(val)} />
         <ButtonGroup className={styles.control}>
