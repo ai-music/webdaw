@@ -218,12 +218,12 @@ export class TransportEvent {
 }
 
 /**
- * A PlaybackPositionEvent indicates the current playback position that the engine is rendering.
+ * A PlaybackPositionEvent indicates the current playback timestamp that the engine is rendering.
  * This event is mean for the UI to update the playback position indicator, and does not provide
  * thew necessary precision for scheduling audio and MIDI events.
  */
 export class PlaybackPositionEvent {
-  constructor(public readonly position: number) {
+  constructor(public readonly timestamp: number) {
     /* ... */
   }
 }

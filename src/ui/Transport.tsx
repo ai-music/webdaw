@@ -1,12 +1,13 @@
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useEffect, useState } from 'react';
 import { Location } from './Location';
 import { Time } from './Time';
 import { Button, ButtonGroup, EditableText, Intent, Switch } from '@blueprintjs/core';
 import { Location as LocationValue } from '../core/Common';
 import { Project as ProjectObj } from '../core/Project';
+import { Engine } from '../core/Engine';
+import { PlaybackPositionEvent } from '../core/Events';
 
 import styles from './Transport.module.css';
-import { Engine } from '../core/Engine';
 
 /**
  * The different states of playback
@@ -25,12 +26,24 @@ export type TransportProps = {
 export const Transport: FunctionComponent<TransportProps> = (props: TransportProps) => {
   const [playback, setPlayback] = useState(PlaybackState.Stopped);
   const [loop, setLoop] = useState(false);
+  const [timestamp, setTimestamp] = useState(0); // [hh, mm, ss, uuuu]
   const [start, setStart] = useState(new LocationValue(1, 1, 1));
   const [end, setEnd] = useState(new LocationValue(5, 1, 1));
   const [current, setCurrent] = useState(new LocationValue(5, 1, 1));
   const [bpm, setBpm] = useState(120);
   const [numerator, setNumerator] = useState(4);
   const [denominator, setDenominator] = useState(4);
+
+  const positionEventHandler = (event: PlaybackPositionEvent) => {
+    setTimestamp(event.timestamp);
+  };
+
+  useEffect(() => {
+    props.engine.registerPlaybackPositionEventHandler(positionEventHandler);
+    return () => {
+      props.engine.unregisterPlaybackPositionEventHandler(positionEventHandler);
+    };
+  }, []);
 
   function onBegin() {
     console.log('To beginning');
@@ -135,7 +148,7 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
           />
         </div>
       </div>
-      <Time label="Time" />
+      <Time label="Time" timestamp={timestamp} />
       <Location label="Current" />
       <Location label="Start" />
       <Location label="End" />
