@@ -31,10 +31,16 @@ export const TrackList: FunctionComponent<Properties> = ({ start, scale, tracks,
   return (
     <div className={styles.trackList}>
       {tracks.map((track, index) => (
-        <Track track={track} index={index} start={start} scale={scale} />
+        <Track
+          track={track}
+          index={index}
+          start={start}
+          scale={scale}
+          resolver={engine.project.locationToTimeConverter()}
+        />
       ))}
       <div className={styles.markerArea} style={{ gridRow: `1 / span ${styles.trackList.length}` }}>
-        <div className={styles.marker} style={{ left: `${timestamp}rem` }}></div>
+        <div className={styles.marker} style={{ left: `${timestamp * 4}rem` }}></div>
       </div>
     </div>
   );

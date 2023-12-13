@@ -4,15 +4,17 @@
 }
 
 .markerArea {
+  margin-left: 1.5rem;
   position: relative;
-  grid-column: 2 / 2;
+  grid-column: 2 / span 1;
+  /* border: 1px solid goldenrod; */
 }
 
 .marker {
-  position: absolute;
+  position: relative;
   height: 100%;
-  width: 0px;
-  border: 1px solid red;
+  width: 1px;
+  border: 1px solid gray;
   top: 0;
   z-index: 1000000
 }

@@ -121,10 +121,13 @@ export class Engine {
   // Has a stop been requested?
   private _stopRequested = false;
 
+  // Is this the initial calback into the rendering loop?
+  private _isFirstCallback = true;
+
   // The last callback time into the rendering loop as measured by the audio system clock.
   private _lastCallbackTime = 0;
 
-  // The offset between logic time in the performand and audio system time. This is
+  // The offset between logic time in the performance and audio system time. This is
   // the audio system time at playback start minus the performance time at playback start.
   private _timeOffset = 0;
 
@@ -152,12 +155,18 @@ export class Engine {
 
       this._playing = true;
       this._stopRequested = false;
+      this._isFirstCallback = true;
 
       // Reset the last callback time and the time offset from audio to arrangement time
+      // TODO: This ended up confusing arrangement time with audio time. Pick one for each
+      // variable and stick with it.
       const audioTime = this.context.currentTime;
       this._lastCallbackTime = audioTime - this.scheduleInterval;
       this._timeOffset = audioTime - this.currentTime;
-      this.lastScheduledAudioTime = audioTime * (1.0 - Number.EPSILON);
+
+      // Reset the last scheduled audio time to the beginning of the arrangement
+      // TODO: Eventually, this should be driven by the locators on the track
+      this.lastScheduledAudioTime = 0;
 
       // Run the first callback.
       this.scheduler();
@@ -198,8 +207,14 @@ export class Engine {
 
     // Logical time within the arrangement
     const arrangementTime = callbackTime - this._timeOffset;
+    const lastScheduledAudioTime = this._isFirstCallback
+      ? -Number.EPSILON
+      : this.lastScheduledAudioTime;
+
+    this._isFirstCallback = false;
+
     const scheduleAheadTime =
-      Math.min(this.lastScheduledAudioTime, arrangementTime) + this.scheduleAhead;
+      Math.min(lastScheduledAudioTime, arrangementTime) + this.scheduleAhead;
 
     console.log(`arrangementTime: ${arrangementTime}`);
     console.log(`lastScheduledAudioTime: ${this.lastScheduledAudioTime}`);
@@ -210,7 +225,7 @@ export class Engine {
       this._project.tracks.forEach((track) => {
         track.scheduleAudioEvents(
           this._timeOffset,
-          this.lastScheduledAudioTime,
+          lastScheduledAudioTime,
           scheduleAheadTime,
           this.locationToTimeConverter,
         );

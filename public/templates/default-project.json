@@ -10,7 +10,7 @@
       "muted": false,
       "regions": [
         {
-          "name": "Haunted Hum",
+          "name": "Haunted Hum 1",
           "color": "#ff0000",
           "muted": false,
           "soloed": false,
@@ -18,7 +18,20 @@
           "audioFile": "library/samples/sample-pi/ambient/ambi_haunted_hum.flac",
           "startTime": 0,
           "endTime": 0,
-          "position": [2, 1, 1],
+          "position": [1, 1, 1],
+          "size": [2, 0, 0],
+          "length": [2, 0, 0]
+        },
+        {
+          "name": "Haunted Hum 2",
+          "color": "#ff0000",
+          "muted": false,
+          "soloed": false,
+          "looping": false,
+          "audioFile": "library/samples/sample-pi/ambient/ambi_haunted_hum.flac",
+          "startTime": 0,
+          "endTime": 0,
+          "position": [3, 1, 1],
           "size": [2, 0, 0],
           "length": [2, 0, 0]
         }
