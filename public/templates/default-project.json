@@ -1,5 +1,7 @@
 {
   "name": "Untitled Project",
+  "bpm": 120,
+  "timeSignature": [4, 4],
   "tracks": [
     {
       "type": "audio",
@@ -13,14 +15,15 @@
           "muted": false,
           "soloed": false,
           "looping": false,
-          "audioFile": "file:./library/samples/sample-pi/ambient/ambi_haunted_hum.flac",
+          "audioFile": "library/samples/sample-pi/ambient/ambi_haunted_hum.flac",
           "startTime": 0,
           "endTime": 0,
-          "position": [1, 1, 1],
+          "position": [2, 1, 1],
           "size": [2, 0, 0],
           "length": [2, 0, 0]
         }
-      ]
+      ],
+      "audioEffects": []
     },
     {
       "type": "instrument",
@@ -33,7 +36,7 @@
   "audioFiles": [
     {
       "name": "Haunted Hum",
-      "url": "file:./library/samples/sample-pi/ambient/ambi_haunted_hum.flac"
+      "url": "library/samples/sample-pi/ambient/ambi_haunted_hum.flac"
     }
   ]
 }

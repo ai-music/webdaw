@@ -2,8 +2,13 @@ import { Registry } from '../effects/Default';
 import { AudioEffect } from './AudioEffect';
 import { AudioFileResolver } from './AudioFile';
 import { AudioRegion } from './AudioRegion';
-import { JSONObject, JSONValue } from './Common';
+import { JSONObject, JSONValue, Location } from './Common';
 import { AbstractTrack } from './Track';
+
+type AudioState = {
+  panner: StereoPannerNode;
+  gain: GainNode;
+};
 
 /**
  * An AudioTrack is a track that contains audio regions, which represent fragments of audio
@@ -22,6 +27,12 @@ export class AudioTrack extends AbstractTrack {
    */
   audioEffects: AudioEffect[] = [];
 
+  /**
+   * The audio state of this track. This is used to keep track of the audio nodes that are
+   * used for rendering within an audio context.
+   */
+  audioState: AudioState | null = null;
+
   constructor(
     regions: AudioRegion[],
     effects: AudioEffect[],
@@ -34,6 +45,32 @@ export class AudioTrack extends AbstractTrack {
     super(name, color, muted, soloed, recording);
     this.regions = regions;
     this.audioEffects = effects;
+  }
+
+  initializeAudio(context: AudioContext): void {
+    if (this.audioState === null) {
+      const gain = context.createGain();
+      const panner = context.createStereoPanner();
+      panner.connect(gain);
+      gain.connect(context.destination);
+      this.audioState = { gain, panner };
+    } else if (this.audioState.gain.context !== context) {
+      throw new Error('Audio nodes already initialized with a different audio context');
+    }
+  }
+
+  deinitializeAudio(): void {
+    if (this.audioState !== null) {
+      this.audioState.gain.disconnect();
+      this.audioState.panner.disconnect();
+      this.audioState = null;
+    } else {
+      throw new Error('Audio nodes not initialized');
+    }
+  }
+
+  isAudioInitialized(): boolean {
+    return this.audioState !== null;
   }
 
   // Support for JSON serialization/deserialization
@@ -68,7 +105,41 @@ export class AudioTrack extends AbstractTrack {
   }
 
   // Playback support
-  scheduleAudioEvents(startTime: number, endTime: number): void {
-    throw new Error('Method not implemented.');
+  scheduleAudioEvents(
+    timeOffset: number,
+    startTime: number,
+    endTime: number,
+    converter: (location: Location) => number,
+  ): void {
+    // In the simplest case, find an audio region that overlaps the time range and schedule it.
+    //
+    // TODO: There are a lot of things missing here for proper playback of regions, including
+    // limiting the audible part of the region to the time range, and handling looping.
+    // In this simplistic form, it is also not possible to cancel playback while it is in the
+    // process of being rendered.
+    this.regions.forEach((region) => {
+      const startPosition = converter(region.position);
+      console.log(`Region ${region.name} starts at ${startPosition}`);
+      if (startPosition > startTime && startPosition <= endTime) {
+        console.log(`Scheduling audio region ${region.name} at ${startPosition}`);
+        const state = this.audioState!;
+        const context = state.panner.context;
+        const source = context.createBufferSource();
+        const buffer = region.audioFile.buffer;
+        console.log(`Buffer duration: ${buffer.duration}`);
+        source.buffer = buffer;
+        source.connect(state.panner);
+        source.start(timeOffset + startPosition);
+      }
+    });
+  }
+
+  scheduleMidiEvents(
+    currentTime: number,
+    startTime: number,
+    endTime: number,
+    converter: (location: Location) => number,
+  ): void {
+    /* No MIDI events on pure audio tracks */
   }
 }

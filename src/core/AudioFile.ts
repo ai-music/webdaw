@@ -1,4 +1,12 @@
-import { Identifiable, JSONObject, JSONValue, NamedObject, ToJson, createId } from './Common';
+import {
+  Identifiable,
+  JSONObject,
+  JSONValue,
+  NamedObject,
+  PUBLIC_URL,
+  ToJson,
+  createId,
+} from './Common';
 
 export class AudioFile implements NamedObject, Identifiable, ToJson {
   private _audioBuffer: AudioBuffer | null;
@@ -54,14 +62,17 @@ export class AudioFile implements NamedObject, Identifiable, ToJson {
   }
 
   async load(context: AudioContext, callback: (audioFile: AudioFile) => void) {
-    if (this._audioBuffer === null) {
+    const file = this;
+    if (file._audioBuffer === null) {
       try {
-        const response = await fetch(this.url);
+        console.log(`Loading audio file ${file.name} from ${file.url}`);
+        const response = await fetch(file.url);
 
         // TODO: Should decoding sit on a work thread?
         context.decodeAudioData(await response.arrayBuffer(), (buffer) => {
-          this._audioBuffer = buffer;
-          callback(this);
+          console.log(`Decoded audio file ${file.name}`);
+          file._audioBuffer = buffer;
+          callback(file);
         });
       } catch (err: any) {
         // TODO: What should we really do with such errors during fetching or decoding?
@@ -88,7 +99,7 @@ export class AudioFile implements NamedObject, Identifiable, ToJson {
 
     const obj = file as JSONObject;
     const name = obj['name'] as string;
-    const urlString = obj['url'] as string;
+    const urlString = `${PUBLIC_URL.toString()}${obj['url'] as string}`;
     console.log(`Loading audio file ${name} from ${urlString}`);
     const url = new URL(urlString);
 

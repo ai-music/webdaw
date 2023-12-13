@@ -8,7 +8,8 @@ import { Project } from '../core/Project';
 export function createProject(callback: (project: Project) => void) {
   /* ... */
   console.log('Creating a new project.');
-  fetch('templates/default-project.json', {
+  //fetch('templates/default-project.json', {
+  fetch('http://localhost:3000/templates/default-project.json', {
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',

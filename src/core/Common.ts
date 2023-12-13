@@ -1,4 +1,9 @@
 /**
+ * The root of the data folder server up by the application.
+ */
+export const PUBLIC_URL = new URL(process.env.PUBLIC_URL || 'http://localhost:3000/');
+
+/**
  * Common properties for things that have a name.
  */
 export interface NamedObject {
@@ -169,5 +174,33 @@ export class Location {
 
   public toJson(): JSONValue {
     return [this.bar, this.beat, this.tick];
+  }
+}
+
+export class TimeSignature {
+  constructor(
+    /**
+     * The number of beats per bar
+     */
+    public beatsPerBar: number = 4,
+
+    /**
+     * The note value that represents a beat
+     */
+    public beatNote: number = 4,
+  ) {
+    /* ... */
+  }
+
+  public static fromJson(file: JSONValue): TimeSignature {
+    if (!Array.isArray(file)) {
+      throw new Error('Invalid JSON value for TimeSignature');
+    }
+
+    return new TimeSignature(file[0] as number, file[1] as number);
+  }
+
+  public toJson(): JSONValue {
+    return [this.beatsPerBar, this.beatNote];
   }
 }

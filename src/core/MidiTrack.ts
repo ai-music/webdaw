@@ -1,4 +1,4 @@
-import { JSONObject, JSONValue } from './Common';
+import { JSONObject, JSONValue, Location } from './Common';
 import { MidiEffect } from './MidiEffect';
 import { MidiRegion } from './MidiRegion';
 import { AbstractTrack } from './Track';
@@ -45,8 +45,34 @@ export class MidiTrack extends AbstractTrack {
     AbstractTrack.registerFactory(MidiTrack.TYPE_TAG, MidiTrack.fromJson);
   }
 
+  initializeAudio(context: AudioContext): void {
+    /* No audio nodes on pure MIDI tracks */
+  }
+
+  deinitializeAudio(): void {
+    /* No audio nodes on pure MIDI tracks */
+  }
+
+  isAudioInitialized(): boolean {
+    return true;
+  }
+
   // Playback support
-  scheduleAudioEvents(startTime: number, endTime: number): void {
+  scheduleAudioEvents(
+    timeOffset: number,
+    startTime: number,
+    endTime: number,
+    converter: (location: Location) => number,
+  ): void {
+    /* No audio events on pure MIDI tracks */
+  }
+
+  scheduleMidiEvents(
+    currentTime: number,
+    startTime: number,
+    endTime: number,
+    converter: (location: Location) => number,
+  ): void {
     throw new Error('Method not implemented.');
   }
 }

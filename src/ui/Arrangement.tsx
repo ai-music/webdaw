@@ -4,9 +4,11 @@ import { TrackList } from './TrackList';
 import { Timeline } from './Timeline';
 import { TrackInterface } from '../core/Track';
 import { Project as ProjectObj } from '../core/Project';
+import { Engine } from '../core/Engine';
 
 export type ArrangementProps = {
   project: ProjectObj;
+  engine: Engine;
 };
 
 export const Arrangement: FunctionComponent<ArrangementProps> = (props) => {

@@ -3,6 +3,7 @@ import {
   ColoredObject,
   JSONObject,
   JSONValue,
+  Location,
   MutableObject,
   NamedObject,
   RecordableObject,
@@ -21,14 +22,67 @@ export interface TrackInterface
     SoloableObject,
     RecordableObject {
   /**
+   * Initialize audio for this track.
+   *
+   * @param context the audio context to use for initialization
+   * @throws {Error} if audio is already initialized for this track using a different audio context.
+   */
+  initializeAudio(context: AudioContext): void;
+
+  /**
+   * Deinitialize audio for this track.
+   *
+   * @throws {Error} if audio is not initialized
+   */
+  deinitializeAudio(): void;
+
+  /**
+   * Is audio initialized for this track?
+   */
+  isAudioInitialized(): boolean;
+
+  /**
    * Schedule {@link AudioParam} changes to be triggered within the given time range.
    *
    * The time range is specified in high-precision time (as exposed via {@link BaseAudioContext.currentTime}).
    *
+   * Even though the signature of this method is similar to {@link TrackInterface#scheduleMidiEvents}, the
+   * semantics of the first parameter is different. In this method, the first parameter is an offset that
+   * is added to the arrangement times of the scheduled events. This is useful when scheduling events
+   * via {@link AudioParam#setValueAtTime} and related functions. In {@link TrackInterface#scheduleMidiEvents},
+   * the first parameter is the current time of the performance within the arrangement. This can be used to
+   * determine the delay value for scheduled MIDI events via {link @MIDIOutput#send}.
+   *
+   * @param timeOffset the offset value to add to arrangement times when scheduling events in the audio context.
    * @param startTime the start time of the time range for which AudioParam changes should be scheduled (exclusive).
    * @param endTime the end time of the time range for which AudioParam changes should be scheduled (inclusive).
+   * @param converter a function that converts a location within the arrangement to a time within the audio context.
    */
-  scheduleAudioEvents(startTime: number, endTime: number): void;
+  scheduleAudioEvents(
+    timeOffset: number,
+    startTime: number,
+    endTime: number,
+    converter: (location: Location) => number,
+  ): void;
+
+  /**
+   * Schedule MIDI events to be triggered within the given time range. This includes events processed by
+   * internal virtual instruments.
+   *
+   * Please see description of {@link TrackInterface#scheduleAudioEvents} for an explanation of the
+   * semantics of the first parameter.
+   *
+   * @param currentTime the current time of the performance within the arrangement
+   * @param startTime the start time of the time range for which MIDI events should be scheduled (exclusive).
+   * @param endTime the end time of the time range for which MIDI events should be scheduled (inclusive).
+   * @param converter a function that converts a location within the arrangement to a time within the audio context.
+   */
+  scheduleMidiEvents(
+    currentTime: number,
+    startTime: number,
+    endTime: number,
+    converter: (location: Location) => number,
+  ): void;
 
   /**
    * Accessor to regions on this track.
@@ -74,7 +128,23 @@ export abstract class AbstractTrack implements TrackInterface, ToJson {
   }
 
   abstract regions: RegionInterface[];
-  abstract scheduleAudioEvents(startTime: number, endTime: number): void;
+
+  abstract initializeAudio(context: AudioContext): void;
+  abstract deinitializeAudio(): void;
+  abstract isAudioInitialized(): boolean;
+
+  abstract scheduleAudioEvents(
+    timeOffset: number,
+    startTime: number,
+    endTime: number,
+    converter: (location: Location) => number,
+  ): void;
+  abstract scheduleMidiEvents(
+    currentTime: number,
+    startTime: number,
+    endTime: number,
+    converter: (location: Location) => number,
+  ): void;
 
   /**
    * Concrete sub-classes implement this type tag property used for conversion to JSON.

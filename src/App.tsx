@@ -3,10 +3,26 @@ import { Project } from './ui/Project';
 import { Project as ProjectObj } from './core/Project';
 import { createProject, loadProject, saveAsProject, saveProject } from './controller/Projects';
 import { copy, cut, doDelete, paste, redo, undo } from './controller/Edit';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Engine } from './core/Engine';
+import { BUFFER_SIZE, SAMPLE_RATE } from './core/Config';
+
+const audioContext = new AudioContext();
 
 function App() {
-  const [project, setProject] = useState(new ProjectObj('Untitled Project', [], []));
+  const [project, setProject] = useState(new ProjectObj());
+  const [engine, setEngine] = useState(
+    new Engine(audioContext, { bufferSize: BUFFER_SIZE, sampleRate: SAMPLE_RATE }),
+  );
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    engine.project = project;
+    setLoading(true);
+    project.loadFiles(engine.context, (project) => {
+      setLoading(false);
+    });
+  }, [engine, project]);
 
   return (
     <>
@@ -52,7 +68,7 @@ function App() {
           <Button className="bp5-minimal" icon="build" text="Tools" />
         </Navbar.Group>
       </Navbar>
-      <Project project={project} />
+      <Project engine={engine} project={project} />
     </>
   );
 }

@@ -1,4 +1,7 @@
+import { Duration, Location } from './Common';
+import { PPQN } from './Config';
 import {
+  PlaybackPositionEvent,
   PlaybackPositionEventHandler,
   RegionEvent,
   RegionEventType,
@@ -8,6 +11,7 @@ import {
   TransportEvent,
   TransportEventType,
 } from './Events';
+import { Project } from './Project';
 
 /**
  * This class encapsulates the rendering engine for audio and MIDI playback.
@@ -24,8 +28,68 @@ export class Engine {
     public readonly context: AudioContext,
     public readonly options: { bufferSize: number; sampleRate: number },
   ) {
-    // ...
+    console.log(`Engine: ${context.sampleRate} ${context.currentTime}`);
+    console.log(`AudioContext state: ${context.state}`);
   }
+
+  /**
+   * The project that is currently loaded into the engine.
+   */
+  private _project: Project = new Project();
+
+  public get project(): Project {
+    return this._project;
+  }
+
+  public set project(value: Project) {
+    if (this._project !== value) {
+      // Unbind tracks from audio destination
+      this._project.tracks.forEach((track) => {
+        track.deinitializeAudio();
+      });
+
+      // set the new project
+      this._project = value;
+
+      // TODO: This will need to be updated when the underlying project settings change
+      this.locationToTimeConverter = value.locationToTimeConverter();
+
+      // Bind tracks to audio destination
+      this._project.tracks.forEach((track) => {
+        track.initializeAudio(this.context);
+      });
+    }
+  }
+
+  /**
+   * The current location in the project. Playback will continue from here, if stopped.
+   * */
+  public currentLocatator: Location = new Location();
+
+  /**
+   * The start locator of the playback loop.
+   */
+  public loopStart: Location = new Location();
+
+  /**
+   * The duration of the playback loop.
+   * */
+  public loopLength: Duration = new Duration();
+
+  /**
+   * The current playback position in seconds.
+   */
+  public currentTime: number = 0;
+
+  /**
+   * Are we currently looping?
+   */
+  public looping: boolean = false;
+
+  /**
+   * Do we have a metronome playing?
+   */
+  public metronome: boolean = false;
 
   /**
    * The interval at which the rendering thread is scheduled.
@@ -51,18 +115,124 @@ export class Engine {
   // Registered playback position event handlers.
   private playbackPositionEventHandlers: PlaybackPositionEventHandler[] = [];
 
+  // Are we currently playing?
+  private _playing = false;
+
+  // Has a stop been requested?
+  private _stopRequested = false;
+
+  // The last callback time into the rendering loop as measured by the audio system clock.
+  private _lastCallbackTime = 0;
+
+  // The offset between logic time in the performand and audio system time. This is
+  // the audio system time at playback start minus the performance time at playback start.
+  private _timeOffset = 0;
+
+  // Conversion of arrangement locations to seconds
+  private locationToTimeConverter: (location: Location) => number = (location) => {
+    return 0.0;
+  };
+
   /**
    * Start playback of audio and MIDI by the rendering engine.
    */
   public start(): void {
-    // ...
+    if (!this._playing) {
+      if (this.context.state === 'suspended') {
+        this.context.resume();
+      }
+
+      // Bind tracks to audio destination; this is a no-op when those bindings already exist
+      this._project.tracks.forEach((track) => {
+        track.initializeAudio(this.context);
+      });
+
+      // TODO: This won't work once we have tempo or signature changes
+      this.locationToTimeConverter = this._project.locationToTimeConverter();
+
+      this._playing = true;
+      this._stopRequested = false;
+
+      // Reset the last callback time and the time offset from audio to arrangement time
+      const audioTime = this.context.currentTime;
+      this._lastCallbackTime = audioTime - this.scheduleInterval;
+      this._timeOffset = audioTime - this.currentTime;
+      this.lastScheduledAudioTime = audioTime * (1.0 - Number.EPSILON);
+
+      // Run the first callback.
+      this.scheduler();
+    }
   }
 
   /**
    * Stop playback of audio and MIDI by the rendering engine.
    */
   public stop(): void {
-    // ...
+    this._stopRequested = true;
+  }
+
+  /**
+   * The scheduler is the main loop of the rendering engine.
+   */
+  scheduler(): void {
+    if (this.context.state === 'suspended') {
+      this.context.resume().then(() => {
+        this.scheduler();
+      });
+      return;
+    }
+
+    // Get the current time of the audio system.
+    const callbackTime = this.context.currentTime;
+    console.log(`callbackTime: ${callbackTime}`);
+    console.log(`context.state: ${this.context.state}`);
+
+    // How much time has passed since the last callback?
+    const deltaTime = callbackTime - this._lastCallbackTime;
+
+    // Update the last callback time.
+    this._lastCallbackTime = callbackTime;
+
+    // What's the clock drift?
+    const clockDrift = deltaTime - this.scheduleInterval;
+
+    // Logical time within the arrangement
+    const arrangementTime = callbackTime - this._timeOffset;
+    const scheduleAheadTime =
+      Math.min(this.lastScheduledAudioTime, arrangementTime) + this.scheduleAhead;
+
+    console.log(`arrangementTime: ${arrangementTime}`);
+    console.log(`lastScheduledAudioTime: ${this.lastScheduledAudioTime}`);
+    console.log(`scheduleAheadTime: ${scheduleAheadTime}`);
+
+    // If we are playing, then schedule audio and MIDI events.
+    if (this._playing) {
+      this._project.tracks.forEach((track) => {
+        track.scheduleAudioEvents(
+          this._timeOffset,
+          this.lastScheduledAudioTime,
+          scheduleAheadTime,
+          this.locationToTimeConverter,
+        );
+      });
+
+      this.lastScheduledAudioTime = scheduleAheadTime;
+    }
+
+    // If we are playing and not stopped, then schedule the next callback.
+    if (this._playing && !this._stopRequested) {
+      setTimeout(() => this.scheduler(), (this.scheduleInterval - clockDrift) * 1000);
+    } else {
+      this._playing = false;
+    }
+
+    // Notify listeners of the current playback head position.
+    if (this.playbackPositionEventHandlers.length > 0) {
+      const event = new PlaybackPositionEvent(arrangementTime);
+      this.playbackPositionEventHandlers.forEach((handler) => {
+        handler(event);
+      });
+    }
   }
 
   /**

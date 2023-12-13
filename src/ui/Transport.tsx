@@ -3,8 +3,10 @@ import { Location } from './Location';
 import { Time } from './Time';
 import { Button, ButtonGroup, EditableText, Intent, Switch } from '@blueprintjs/core';
 import { Location as LocationValue } from '../core/Common';
+import { Project as ProjectObj } from '../core/Project';
 
 import styles from './Transport.module.css';
+import { Engine } from '../core/Engine';
 
 /**
  * The different states of playback
@@ -15,7 +17,12 @@ export enum PlaybackState {
   Recording,
 }
 
-export const Transport: FunctionComponent = () => {
+export type TransportProps = {
+  project: ProjectObj;
+  engine: Engine;
+};
+
+export const Transport: FunctionComponent<TransportProps> = (props: TransportProps) => {
   const [playback, setPlayback] = useState(PlaybackState.Stopped);
   const [loop, setLoop] = useState(false);
   const [start, setStart] = useState(new LocationValue(1, 1, 1));
@@ -44,16 +51,19 @@ export const Transport: FunctionComponent = () => {
   function play() {
     console.log('Play');
     setPlayback(PlaybackState.Playing);
+    props.engine.start();
   }
 
   function pause() {
     console.log('Pause');
     setPlayback(PlaybackState.Stopped);
+    props.engine.stop();
   }
 
   function record() {
     console.log('Record');
     setPlayback(PlaybackState.Recording);
+    props.engine.start();
   }
 
   function repeat() {

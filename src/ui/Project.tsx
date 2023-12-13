@@ -5,9 +5,11 @@ import { Transport } from './Transport';
 import { Mixer } from './Mixer';
 import { Section, SectionCard } from '@blueprintjs/core';
 import { Project as ProjectObj } from '../core/Project';
+import { Engine } from '../core/Engine';
 
 export type ProjectProps = {
   project: ProjectObj;
+  engine: Engine;
 };
 
 export const Project: FunctionComponent<ProjectProps> = (props) => {
@@ -19,10 +21,10 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
   // Browser to the left, InfoPanel to the right, in the center stack of Arrangement, Editor
   return (
     <>
-      <Transport />
+      <Transport engine={props.engine} project={props.project} />
       <Section title="Arrangement" compact={true} collapsible={true}>
         <SectionCard title="Arrangement">
-          <Arrangement project={props.project} />
+          <Arrangement engine={props.engine} project={props.project} />
         </SectionCard>
       </Section>
       <Section title="Mixer" compact={true} collapsible={true}>
