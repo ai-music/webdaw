@@ -19,8 +19,8 @@
           "startTime": 0,
           "endTime": 0,
           "position": [1, 1, 1],
-          "size": [2, 0, 0],
-          "length": [2, 0, 0]
+          "size": [1, 1, 0],
+          "length": [1, 1, 0]
         },
         {
           "name": "Haunted Hum 2",
@@ -32,8 +32,8 @@
           "startTime": 0,
           "endTime": 0,
           "position": [3, 1, 1],
-          "size": [2, 0, 0],
-          "length": [2, 0, 0]
+          "size": [3, 0, 0],
+          "length": [3, 0, 0]
         }
       ],
       "audioEffects": []

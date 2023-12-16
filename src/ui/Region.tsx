@@ -14,7 +14,9 @@ export interface RegionProps {
 export const Region: FunctionComponent<RegionProps> = (props: RegionProps) => {
   const style = {
     backgroundColor: props.region.color,
-    width: `${/*props.region.length*/ 8}rem`, // FIXME: This should be calculated from the region length
+    width: `${
+      props.converter.convertDurationAtLocation(props.region.length, props.region.position) * 4
+    }rem`,
     left: `${props.converter.convertLocation(props.region.position) * 4}rem`,
   };
 
