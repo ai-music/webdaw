@@ -1,4 +1,4 @@
-import { JSONObject, JSONValue, Location } from './Common';
+import { JSONObject, JSONValue, Location, LocationToTime } from './Common';
 import { MidiEffect } from './MidiEffect';
 import { MidiRegion } from './MidiRegion';
 import { AbstractTrack } from './Track';
@@ -62,7 +62,7 @@ export class MidiTrack extends AbstractTrack {
     timeOffset: number,
     startTime: number,
     endTime: number,
-    converter: (location: Location) => number,
+    converter: LocationToTime,
   ): void {
     /* No audio events on pure MIDI tracks */
   }
@@ -71,7 +71,7 @@ export class MidiTrack extends AbstractTrack {
     currentTime: number,
     startTime: number,
     endTime: number,
-    converter: (location: Location) => number,
+    converter: LocationToTime,
   ): void {
     throw new Error('Method not implemented.');
   }

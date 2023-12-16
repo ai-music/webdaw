@@ -4,6 +4,7 @@ import {
   JSONObject,
   JSONValue,
   Location,
+  LocationToTime,
   MutableObject,
   NamedObject,
   RecordableObject,
@@ -56,13 +57,13 @@ export interface TrackInterface
    * @param timeOffset the offset value to add to arrangement times when scheduling events in the audio context.
    * @param startTime the start time of the time range for which AudioParam changes should be scheduled (exclusive).
    * @param endTime the end time of the time range for which AudioParam changes should be scheduled (inclusive).
-   * @param converter a function that converts a location within the arrangement to a time within the audio context.
+   * @param converter an object that converts a location within the arrangement to a time within the audio context.
    */
   scheduleAudioEvents(
     timeOffset: number,
     startTime: number,
     endTime: number,
-    converter: (location: Location) => number,
+    converter: LocationToTime,
   ): void;
 
   /**
@@ -75,13 +76,13 @@ export interface TrackInterface
    * @param currentTime the current time of the performance within the arrangement
    * @param startTime the start time of the time range for which MIDI events should be scheduled (exclusive).
    * @param endTime the end time of the time range for which MIDI events should be scheduled (inclusive).
-   * @param converter a function that converts a location within the arrangement to a time within the audio context.
+   * @param converter an object that converts a location within the arrangement to a time within the audio context.
    */
   scheduleMidiEvents(
     currentTime: number,
     startTime: number,
     endTime: number,
-    converter: (location: Location) => number,
+    converter: LocationToTime,
   ): void;
 
   /**
@@ -137,13 +138,13 @@ export abstract class AbstractTrack implements TrackInterface, ToJson {
     timeOffset: number,
     startTime: number,
     endTime: number,
-    converter: (location: Location) => number,
+    converter: LocationToTime,
   ): void;
   abstract scheduleMidiEvents(
     currentTime: number,
     startTime: number,
     endTime: number,
-    converter: (location: Location) => number,
+    converter: LocationToTime,
   ): void;
 
   /**

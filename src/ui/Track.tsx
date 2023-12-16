@@ -6,14 +6,14 @@ import { TrackAutomation } from './TrackAutomation';
 
 import styles from './Track.module.css';
 import { TrackInterface } from '../core/Track';
-import { Location } from '../core/Common';
+import { Location, LocationToTime } from '../core/Common';
 
 export interface TrackProps {
   track: TrackInterface;
   index: number;
   start: number;
   scale: number;
-  resolver: (location: Location) => number;
+  converter: LocationToTime;
 }
 
 export const Track: FunctionComponent<TrackProps> = (props: TrackProps) => {
@@ -27,7 +27,7 @@ export const Track: FunctionComponent<TrackProps> = (props: TrackProps) => {
             region={region}
             start={props.start}
             scale={props.scale}
-            resolver={props.resolver}
+            converter={props.converter}
           />
         ))}
         {/* <TrackAutomation /> */}

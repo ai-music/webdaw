@@ -36,7 +36,7 @@ export const TrackList: FunctionComponent<Properties> = ({ start, scale, tracks,
           index={index}
           start={start}
           scale={scale}
-          resolver={engine.project.locationToTimeConverter()}
+          converter={engine.project.locationToTime}
         />
       ))}
       <div className={styles.markerArea} style={{ gridRow: `1 / span ${styles.trackList.length}` }}>

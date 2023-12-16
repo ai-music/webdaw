@@ -2,7 +2,7 @@ import { Registry } from '../effects/Default';
 import { AudioEffect } from './AudioEffect';
 import { AudioFileResolver } from './AudioFile';
 import { AudioRegion } from './AudioRegion';
-import { JSONObject, JSONValue, Location } from './Common';
+import { JSONObject, JSONValue, Location, LocationToTime } from './Common';
 import { AbstractTrack } from './Track';
 
 type AudioState = {
@@ -109,7 +109,7 @@ export class AudioTrack extends AbstractTrack {
     timeOffset: number,
     startTime: number,
     endTime: number,
-    converter: (location: Location) => number,
+    converter: LocationToTime,
   ): void {
     // In the simplest case, find an audio region that overlaps the time range and schedule it.
     //
@@ -118,7 +118,7 @@ export class AudioTrack extends AbstractTrack {
     // In this simplistic form, it is also not possible to cancel playback while it is in the
     // process of being rendered.
     this.regions.forEach((region) => {
-      const startPosition = converter(region.position);
+      const startPosition = converter.convertLocation(region.position);
       console.log(`Region ${region.name} starts at ${startPosition}`);
       if (startPosition > startTime && startPosition <= endTime) {
         console.log(`Scheduling audio region ${region.name} at ${startPosition}`);
@@ -138,7 +138,7 @@ export class AudioTrack extends AbstractTrack {
     currentTime: number,
     startTime: number,
     endTime: number,
-    converter: (location: Location) => number,
+    converter: LocationToTime,
   ): void {
     /* No MIDI events on pure audio tracks */
   }

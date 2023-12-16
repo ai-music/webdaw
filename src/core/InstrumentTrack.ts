@@ -1,6 +1,6 @@
 import { AudioEffect } from './AudioEffect';
 import { AudioFileResolver } from './AudioFile';
-import { JSONObject, JSONValue, Location } from './Common';
+import { JSONObject, JSONValue, Location, LocationToTime } from './Common';
 import { Instrument } from './Instrument';
 import { MidiEffect } from './MidiEffect';
 import { MidiRegion } from './MidiRegion';
@@ -112,7 +112,7 @@ export class InstrumentTrack extends AbstractTrack {
     timeOffset: number,
     startTime: number,
     endTime: number,
-    converter: (location: Location) => number,
+    converter: LocationToTime,
   ): void {
     //throw new Error('Method not implemented.');
   }
@@ -121,7 +121,7 @@ export class InstrumentTrack extends AbstractTrack {
     currentTime: number,
     startTime: number,
     endTime: number,
-    converter: (location: Location) => number,
+    converter: LocationToTime,
   ): void {
     //throw new Error('Method not implemented.');
   }

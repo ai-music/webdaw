@@ -1,6 +1,15 @@
 import { DirectionLeft } from '@blueprintjs/icons/lib/esm/generated/16px/paths';
 import { AudioFile, AudioFileResolver } from './AudioFile';
-import { JSONValue, JSONObject, NamedObject, ToJson, TimeSignature, Location } from './Common';
+import {
+  JSONValue,
+  JSONObject,
+  NamedObject,
+  ToJson,
+  TimeSignature,
+  Location,
+  LocationToTime,
+  Duration,
+} from './Common';
 import { AbstractTrack } from './Track';
 import { AudioTrack } from './AudioTrack';
 import { InstrumentTrack } from './InstrumentTrack';
@@ -118,10 +127,16 @@ export class Project implements NamedObject, ToJson, AudioFileResolver {
     }
   }
 
+  private _locationToTime: LocationToTime = this.createLocationToTime();
+
   /**
-   * Create a conversation function from a location to a time in seconds.
+   * Create a conversation object from arrangement locations to a time in seconds.
    */
-  public locationToTimeConverter(): (location: Location) => number {
+  public get locationToTime(): LocationToTime {
+    return this._locationToTime;
+  }
+
+  private createLocationToTime() {
     const timeSignature = this.timeSignature;
     const beatTime = 60.0 / this.bpm;
     const factor = {
@@ -130,9 +145,15 @@ export class Project implements NamedObject, ToJson, AudioFileResolver {
       ticks: (beatTime / PPQN) * (4.0 / timeSignature.beatNote),
     };
 
-    return (location: Location) =>
+    let locationToTime = (location: Location) =>
       (location.bar - 1) * factor.bars +
       (location.beat - 1) * factor.beats +
       (location.tick - 1) * factor.ticks;
+
+    return {
+      convertLocation: locationToTime,
+      convertDurationAtLocation: (duration: Duration, location: Location) =>
+        locationToTime(location.add(duration, timeSignature)) - locationToTime(location),
+    };
   }
 }

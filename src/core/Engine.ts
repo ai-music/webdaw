@@ -51,9 +51,6 @@ export class Engine {
       // set the new project
       this._project = value;
 
-      // TODO: This will need to be updated when the underlying project settings change
-      this.locationToTimeConverter = value.locationToTimeConverter();
-
       // Bind tracks to audio destination
       this._project.tracks.forEach((track) => {
         track.initializeAudio(this.context);
@@ -131,11 +128,6 @@ export class Engine {
   // the audio system time at playback start minus the performance time at playback start.
   private _timeOffset = 0;
 
-  // Conversion of arrangement locations to seconds
-  private locationToTimeConverter: (location: Location) => number = (location) => {
-    return 0.0;
-  };
-
   /**
    * Start playback of audio and MIDI by the rendering engine.
    */
@@ -149,9 +141,6 @@ export class Engine {
       this._project.tracks.forEach((track) => {
         track.initializeAudio(this.context);
       });
-
-      // TODO: This won't work once we have tempo or signature changes
-      this.locationToTimeConverter = this._project.locationToTimeConverter();
 
       this._playing = true;
       this._stopRequested = false;
@@ -227,7 +216,7 @@ export class Engine {
           this._timeOffset,
           lastScheduledAudioTime,
           scheduleAheadTime,
-          this.locationToTimeConverter,
+          this._project.locationToTime,
         );
       });
 
