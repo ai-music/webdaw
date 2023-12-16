@@ -129,7 +129,9 @@ export class AudioTrack extends AbstractTrack {
         console.log(`Buffer duration: ${buffer.duration}`);
         source.buffer = buffer;
         source.connect(state.panner);
-        source.start(timeOffset + startPosition);
+        const bufferDuration = converter.convertDurationAtLocation(region.length, region.position);
+        const duration = Math.min(buffer.duration, bufferDuration);
+        source.start(timeOffset + startPosition, 0, duration);
       }
     });
   }
