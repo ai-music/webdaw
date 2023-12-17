@@ -1,6 +1,6 @@
 {
-  "short_name": "WebDaw",
-  "name": "The DAW for the Web",
+  "short_name": "WebDAW",
+  "name": "WebDAW App",
   "icons": [
     {
       "src": "favicon.ico",
