@@ -4,7 +4,8 @@
 
 WebDAW is a portable music composition and production environment that runs in your browser. It is based on the [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API) and the [Web MIDI API](https://developer.mozilla.org/en-US/docs/Web/API/Web_MIDI_API) to provide a performant and feature rich foundation for music creation. Our intention is to use [Web Audio Modules 2.0](https://doi.org/10.1145/3487553.3524225) as plugin architecture to enable easy integration of synthesizers, effects and other relevant components.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app). Because it is client-side only, there's going to be functional builds 
+accessible via the [gitpages for this project](https://ai-music.github.io/webdaw/). In order to get started with some audio content, the project is referencing the [sample-pi](https://github.com/alex-esc/sample-pi) repository.
 
 ## Available Scripts
 
