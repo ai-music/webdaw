@@ -9,6 +9,15 @@ import { BUFFER_SIZE, SAMPLE_RATE } from './core/Config';
 
 const audioContext = new AudioContext();
 
+/**
+ * Open the application documentation in a new window.
+ * @returns false
+ */
+function openDocumentation() {
+  window.open('https://ai-music.github.io/webdaw-doc/', 'Documentation', 'width=800, height=600');
+  return false;
+}
+
 function App() {
   const [project, setProject] = useState(new ProjectObj());
   const [engine, setEngine] = useState(
@@ -69,12 +78,7 @@ function App() {
           <Popover
             content={
               <Menu>
-                <MenuItem
-                  icon="manual"
-                  text="Documentation"
-                  href="https://ai-music.github.io/webdaw-doc/"
-                  target="_blank"
-                />
+                <MenuItem icon="manual" text="Documentation" href="#" onClick={openDocumentation} />
                 <MenuItem
                   icon="git-repo"
                   text="Github"
