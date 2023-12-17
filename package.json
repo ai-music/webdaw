@@ -1,7 +1,7 @@
 {
   "name": "webdaw",
   "version": "0.1.0",
-  "homepage": "https://ai-music.github.io/",
+  "homepage": "https://ai-music.github.io/webdaw",
   "private": true,
   "main": "public/main.js",
   "dependencies": {

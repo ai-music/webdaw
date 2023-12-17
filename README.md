@@ -34,6 +34,11 @@ Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
+### `npm run deploy`
+
+Deploys the app into the Gitpages associated with the Github repository. If you want to create a fork of the
+application on your own, please follow [these instructions to configure Git Pages appropriately](https://github.com/gitname/react-gh-pages). In particular, you will need to update `homepage` in `package.json` to point to your own account.
+
 ### `npm run docs`
 
 Creates HTML documentation for the project in the `./docs` directory using the typedoc tool. The `typedoc.json` file serves as configuration file for this process.
