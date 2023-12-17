@@ -123,6 +123,7 @@ function App() {
                   icon="issue"
                   text="Report an issue"
                   href="https://github.com/ai-music/webdaw/issues"
+                  target="_blank"
                 />
               </Menu>
             }
