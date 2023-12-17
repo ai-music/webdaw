@@ -67,6 +67,9 @@ export class AudioFile implements NamedObject, Identifiable, ToJson {
       try {
         console.log(`Loading audio file ${file.name} from ${file.url}`);
         const response = await fetch(file.url);
+        console.log(
+          `Fetched audio file ${file.name} with response ${response.status} ${response.statusText}`,
+        );
 
         // TODO: Should decoding sit on a work thread?
         context.decodeAudioData(await response.arrayBuffer(), (buffer) => {

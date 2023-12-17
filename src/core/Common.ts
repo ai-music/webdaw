@@ -3,7 +3,8 @@ import { PPQN } from './Config';
 /**
  * The root of the data folder server up by the application.
  */
-export const PUBLIC_URL = new URL(process.env.PUBLIC_URL || 'http://localhost:3000/');
+export const PUBLIC_URL = new URL(`${window.location.href}`);
+//export const PUBLIC_URL = new URL(process.env.PUBLIC_URL || 'http://localhost:3000/');
 
 /**
  * Common properties for things that have a name.

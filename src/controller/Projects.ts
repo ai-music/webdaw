@@ -1,5 +1,6 @@
 // This file contains controller functions associated with the "Project" menu
 
+import { PUBLIC_URL } from '../core/Common';
 import { Project } from '../core/Project';
 
 /**
@@ -8,8 +9,10 @@ import { Project } from '../core/Project';
 export function createProject(callback: (project: Project) => void) {
   /* ... */
   console.log('Creating a new project.');
-  //fetch('templates/default-project.json', {
-  fetch('http://localhost:3000/templates/default-project.json', {
+  const urlString = `${PUBLIC_URL.toString()}/templates/default-project.json`;
+  console.log(`Creating a new project using template ${urlString}.`);
+
+  fetch(urlString, {
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
