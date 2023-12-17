@@ -1,4 +1,15 @@
-import { Alignment, Button, Menu, MenuDivider, MenuItem, Navbar, Popover } from '@blueprintjs/core';
+import {
+  Alignment,
+  Button,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  Menu,
+  MenuDivider,
+  MenuItem,
+  Navbar,
+  Popover,
+} from '@blueprintjs/core';
 import { Project } from './ui/Project';
 import { Project as ProjectObj } from './core/Project';
 import { createProject, loadProject, saveAsProject, saveProject } from './controller/Projects';
@@ -24,6 +35,7 @@ function App() {
     new Engine(audioContext, { bufferSize: BUFFER_SIZE, sampleRate: SAMPLE_RATE }),
   );
   const [loading, setLoading] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
 
   useEffect(() => {
     engine.project = project;
@@ -35,6 +47,28 @@ function App() {
 
   return (
     <>
+      <Dialog title="Attention" icon="warning-sign" isOpen={showDisclaimer}>
+        <DialogBody>
+          <p>
+            This application is a work in progress. It is not feature complete. There are many bugs
+            and missing features. At this point in time, do not expect any particular feature to be
+            available or working.
+          </p>
+          <p>
+            It is definitively not intended for use in a production environment. USE AT YOUR OWN
+            RISK.
+          </p>
+          <p>
+            That being said, if you are interested in actively contributing to this project, please
+            get in touch via the <a href="https://github.com/ai-music/webdaw">Github repository</a>.
+          </p>
+        </DialogBody>
+        <DialogFooter
+          actions={
+            <Button intent="danger" text="I Acknowledge" onClick={() => setShowDisclaimer(false)} />
+          }
+        />
+      </Dialog>
       <Navbar>
         <Navbar.Group align={Alignment.LEFT}>
           <Navbar.Heading>WebDAW</Navbar.Heading>
@@ -84,6 +118,11 @@ function App() {
                   text="Github"
                   href="https://github.com/ai-music/webdaw"
                   target="_blank"
+                />
+                <MenuItem
+                  icon="issue"
+                  text="Report an issue"
+                  href="https://github.com/ai-music/webdaw/issues"
                 />
               </Menu>
             }
