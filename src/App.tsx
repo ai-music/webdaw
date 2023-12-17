@@ -66,6 +66,27 @@ function App() {
             <Button className="bp5-minimal" icon="edit" text="Edit" />
           </Popover>
           <Button className="bp5-minimal" icon="build" text="Tools" />
+          <Popover
+            content={
+              <Menu>
+                <MenuItem
+                  icon="manual"
+                  text="Documentation"
+                  href="https://ai-music.github.io/webdaw-doc/"
+                  target="_blank"
+                />
+                <MenuItem
+                  icon="git-repo"
+                  text="Github"
+                  href="https://github.com/ai-music/webdaw"
+                  target="_blank"
+                />
+              </Menu>
+            }
+            placement="bottom"
+          >
+            <Button className="bp5-minimal" icon="help" text="Help" />
+          </Popover>
         </Navbar.Group>
       </Navbar>
       <Project engine={engine} project={project} />
