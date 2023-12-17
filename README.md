@@ -32,12 +32,10 @@ It correctly bundles React in production mode and optimizes the build for the be
 The build is minified and the filenames include the hashes.\
 Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
 ### `npm run deploy`
 
-Deploys the app into the Gitpages associated with the Github repository. If you want to create a fork of the
-application on your own, please follow [these instructions to configure Git Pages appropriately](https://github.com/gitname/react-gh-pages). In particular, you will need to update `homepage` in `package.json` to point to your own account.
+Deploys the app into the GitHub Pages associated with this Github repository. If you want to create a fork of the
+application on your own, please follow [these instructions to configure GitHub Pages appropriately](https://github.com/gitname/react-gh-pages). In particular, you will need to update `homepage` in `package.json` to point to your own account.
 
 ### `npm run docs`
 
