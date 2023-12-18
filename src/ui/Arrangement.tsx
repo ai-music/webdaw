@@ -5,6 +5,7 @@ import { Timeline } from './Timeline';
 import { TrackInterface } from '../core/Track';
 import { Project as ProjectObj } from '../core/Project';
 import { Engine } from '../core/Engine';
+import { Project } from './Project';
 
 export type ArrangementProps = {
   project: ProjectObj;
@@ -22,12 +23,17 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props) => {
 
   return (
     <>
-      <Timeline start={timelineStart} scale={timelineScale} />
+      <Timeline
+        start={timelineStart}
+        scale={timelineScale}
+        converter={props.project.locationToTime}
+      />
       <TrackList
         start={timelineStart}
         scale={timelineScale}
         tracks={props.project.tracks}
         engine={props.engine}
+        converter={props.project.locationToTime}
       />
     </>
   );

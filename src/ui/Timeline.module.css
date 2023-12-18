@@ -1,0 +1,42 @@
+.timeline {
+  display: flex;
+  width: 100%;
+  /* border: 1px solid blue; */
+  height: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.timelineFront {
+  width: 13rem;
+  min-width: 13rem;
+  position: relative;
+  /* border: 1px solid blue; */
+}
+
+.timelineRuler {
+  position: relative;
+  margin-left: 0.5rem;
+  position: relative;
+  background-color: lightgray;
+  width: 100%;
+  overflow: hidden;
+}
+
+.timelineTick {
+  position: absolute;
+  border-left: 1px solid black;
+  height: 0.5rem;
+}
+
+.timelineMajorTick {
+  position: absolute;
+  border-left: 2px solid black;
+}
+
+.timelineTickLabel {
+  top: 0;
+  left: 0;
+  /* transform: translate(-50%, -50%); */
+  font-size: 0.75rem;
+  margin-left: 0.1rem;
+}

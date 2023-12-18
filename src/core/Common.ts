@@ -327,6 +327,30 @@ export class Location {
   }
 
   /**
+   * Compare this location to another one.
+   *
+   * @param other   the other location
+   * @returns       -1 if this location is before the other one, 1 if it is after, and 0 if they are equal
+   */
+  public compare(other: Location): number {
+    if (this.bar < other.bar) {
+      return -1;
+    } else if (this.bar > other.bar) {
+      return 1;
+    } else if (this.beat < other.beat) {
+      return -1;
+    } else if (this.beat > other.beat) {
+      return 1;
+    } else if (this.tick < other.tick) {
+      return -1;
+    } else if (this.tick > other.tick) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
+  /**
    * Recreate a location from a JSON value.
    *
    * The JSON value must be an array of three numbers representing the number of bars, beats and ticks.

@@ -26,9 +26,10 @@ export type TransportProps = {
 export const Transport: FunctionComponent<TransportProps> = (props: TransportProps) => {
   const [playback, setPlayback] = useState(PlaybackState.Stopped);
   const [loop, setLoop] = useState(false);
-  const [start, setStart] = useState(new LocationValue(1, 1, 1));
-  const [end, setEnd] = useState(new LocationValue(5, 1, 1));
+  const [loopStart, setLoopStart] = useState(new LocationValue(1, 1, 1));
+  const [loopEnd, setLoopEnd] = useState(new LocationValue(5, 1, 1));
   const [current, setCurrent] = useState(new LocationValue(5, 1, 1));
+  const [end, setEnd] = useState(new LocationValue(5, 1, 1));
   const [bpm, setBpm] = useState(120);
   const [numerator, setNumerator] = useState(4);
   const [denominator, setDenominator] = useState(4);
@@ -150,7 +151,8 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
       </div>
       <Time label="Time" timestamp={timestamp} />
       <Location label="Current" />
-      <Location label="Start" />
+      <Location label="Loop Start" />
+      <Location label="Loop End" />
       <Location label="End" />
     </div>
   );

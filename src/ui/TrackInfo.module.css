@@ -1,4 +1,7 @@
 .trackinfo {
+  width: 13rem;
+  overflow: hidden;
+  /* border: black 1px solid; */
 }
 
 .controls {
@@ -7,9 +10,6 @@
   align-items: center;
   width: 12rem;
   /* border: black 1px solid; */
-}
-
-.control {
 }
 
 .volume {

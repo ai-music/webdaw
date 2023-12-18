@@ -1,10 +1,10 @@
 .trackList {
   display: grid;
-  grid-template-columns: 15rem 1fr;
+  grid-template-columns: 13rem 1fr;
 }
 
 .markerArea {
-  margin-left: 1.5rem;
+  margin-left: 0.5rem;
   position: relative;
   grid-column: 2 / span 1;
   /* border: 1px solid goldenrod; */

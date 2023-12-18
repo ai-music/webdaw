@@ -58,7 +58,7 @@ export const TrackInfo: FunctionComponent<TrackInfoProps> = (props: TrackInfoPro
             intent={record ? 'danger' : 'none'}
           />
         </ButtonGroup>
-        <div className={styles.control}>
+        <div>
           <Knob
             label="Pan"
             min={-50}
