@@ -10,6 +10,7 @@ import { Project } from './Project';
 export type ArrangementProps = {
   project: ProjectObj;
   engine: Engine;
+  timelineScale: number;
 };
 
 export const Arrangement: FunctionComponent<ArrangementProps> = (props) => {
@@ -19,18 +20,17 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props) => {
   // drawn across all tracks.
 
   const [timelineStart, setTimelineStart] = useState(0);
-  const [timelineScale, setTimelineScale] = useState(2);
 
   return (
     <>
       <Timeline
         start={timelineStart}
-        scale={timelineScale}
+        scale={props.timelineScale}
         converter={props.project.locationToTime}
       />
       <TrackList
         start={timelineStart}
-        scale={timelineScale}
+        scale={props.timelineScale}
         tracks={props.project.tracks}
         engine={props.engine}
         converter={props.project.locationToTime}

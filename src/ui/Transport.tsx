@@ -1,13 +1,15 @@
 import { FunctionComponent, useEffect, useState } from 'react';
 import { Location } from './Location';
 import { Time } from './Time';
-import { Button, ButtonGroup, EditableText, Intent, Switch } from '@blueprintjs/core';
+import { Button, ButtonGroup, EditableText, Intent, Popover, Switch } from '@blueprintjs/core';
 import { Location as LocationValue } from '../core/Common';
 import { Project as ProjectObj } from '../core/Project';
 import { Engine } from '../core/Engine';
 import { PlaybackPositionEvent } from '../core/Events';
 
 import styles from './Transport.module.css';
+import { auto } from '@popperjs/core';
+import { MAX_TIMELINE_SCALE, MIN_TIMELINE_SCALE, Timeline } from './Timeline';
 
 /**
  * The different states of playback
@@ -21,6 +23,42 @@ export enum PlaybackState {
 export type TransportProps = {
   project: ProjectObj;
   engine: Engine;
+  timelineScale: number;
+  setTimelineScale: (scale: number) => void;
+
+  // setBpm: (bpm: number) => void;
+  // bpm: number;
+  // setNumerator: (numerator: number) => void;
+  // numerator: number;
+  // setDenominator: (denominator: number) => void;
+  // denominator: number;
+  // setLoop: (loop: boolean) => void;
+  // loop: boolean;
+  // setLoopStart: (loopStart: LocationValue) => void;
+  // loopStart: LocationValue;
+  // setLoopEnd: (loopEnd: LocationValue) => void;
+  // loopEnd: LocationValue;
+  // setCurrent: (current: LocationValue) => void;
+  // current: LocationValue;
+  // setEnd: (end: LocationValue) => void;
+  // end: LocationValue;
+  // setTimestamp: (timestamp: number) => void;
+  // timestamp: number;
+
+  // toBeginning: () => void;
+  // toEnd: () => void;
+  // advance: () => void;
+  // goBack: () => void;
+
+  // setPlayback: (playback: PlaybackState) => void;
+  // playback: PlaybackState;
+
+  // zoomIn: () => void;
+  // zoomOut: () => void;
+  // zoomToFit: () => void;
+
+  // canZoomIn: boolean;
+  // canZoomOut: boolean;
 };
 
 export const Transport: FunctionComponent<TransportProps> = (props: TransportProps) => {
@@ -34,6 +72,8 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
   const [numerator, setNumerator] = useState(4);
   const [denominator, setDenominator] = useState(4);
   const [timestamp, setTimestamp] = useState(0); // [hh, mm, ss, uuuu]
+
+  const [showZoom, setShowZoom] = useState(false);
 
   const positionEventHandler = (event: PlaybackPositionEvent) => {
     setTimestamp(event.timestamp);
@@ -85,6 +125,20 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
     setLoop(!loop);
   }
 
+  function zoomIn() {
+    console.log('Zoom in');
+    props.setTimelineScale(Math.min(props.timelineScale * 2, MAX_TIMELINE_SCALE));
+  }
+
+  function zoomOut() {
+    console.log('Zoom out');
+    props.setTimelineScale(Math.max(props.timelineScale / 2, MIN_TIMELINE_SCALE));
+  }
+
+  function zoomToFit() {
+    console.log('Zoom to fit');
+  }
+
   return (
     <div className={styles.transport}>
       <ButtonGroup>
@@ -116,7 +170,7 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
         <div className="bp5-text-small">
           <label>Metronome</label>
         </div>
-        <Switch inline />
+        <Switch inline style={{ maxHeight: '0.80rem' }} />
       </div>
       <div>
         <div className="bp5-text-small">
@@ -154,6 +208,27 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
       <Location label="Loop Start" />
       <Location label="Loop End" />
       <Location label="End" />
+      <div className={styles.spacer}>&nbsp;</div>
+      <ButtonGroup className={styles.zoomButtons}>
+        {/* <Popover
+          content={<div>TODO: Zoom using a slider</div>}
+          interactionKind="click"
+          placement="bottom"
+          renderTarget={() => <Button icon="rect-width" onClick={() => setShowZoom(!showZoom)} />}
+          isOpen={showZoom}
+        /> */}
+        <Button
+          icon="zoom-out"
+          onClick={zoomOut}
+          disabled={props.timelineScale <= MIN_TIMELINE_SCALE}
+        />
+        <Button
+          icon="zoom-in"
+          onClick={zoomIn}
+          disabled={props.timelineScale >= MAX_TIMELINE_SCALE}
+        />
+        <Button icon="zoom-to-fit" onClick={zoomToFit} />
+      </ButtonGroup>
     </div>
   );
 };

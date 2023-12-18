@@ -8,6 +8,7 @@ import { TimelineProps } from './Timeline';
 import { TrackInterface } from '../core/Track';
 import { PlaybackPositionEvent } from '../core/Events';
 import { Engine } from '../core/Engine';
+import { Properties } from '@blueprintjs/icons';
 
 interface Properties extends TimelineProps {
   tracks: TrackInterface[];
@@ -40,7 +41,7 @@ export const TrackList: FunctionComponent<Properties> = ({ start, scale, tracks,
         />
       ))}
       <div className={styles.markerArea} style={{ gridRow: `1 / span ${styles.trackList.length}` }}>
-        <div className={styles.marker} style={{ left: `${timestamp * 4}rem` }}></div>
+        <div className={styles.marker} style={{ left: `${timestamp * scale}rem` }}></div>
       </div>
     </div>
   );

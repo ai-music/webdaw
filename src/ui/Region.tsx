@@ -15,9 +15,10 @@ export const Region: FunctionComponent<RegionProps> = (props: RegionProps) => {
   const style = {
     backgroundColor: props.region.color,
     width: `${
-      props.converter.convertDurationAtLocation(props.region.length, props.region.position) * 4
+      props.converter.convertDurationAtLocation(props.region.length, props.region.position) *
+      props.scale
     }rem`,
-    left: `${props.converter.convertLocation(props.region.position) * 4}rem`,
+    left: `${props.converter.convertLocation(props.region.position) * props.scale}rem`,
   };
 
   return (

@@ -15,7 +15,9 @@
 .volume {
   /* border: black 1px solid; */
   margin-top: 0.2rem;
-  width: 12rem;
+  margin-left: 1.5rem;
+  margin-right: 1.0rem;
+  width: 5rem;
 }
 
 .name {
