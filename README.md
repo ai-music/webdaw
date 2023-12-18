@@ -4,12 +4,30 @@
 
 WebDAW is a portable music composition and production environment that runs in your browser. It is based on the [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API) and the [Web MIDI API](https://developer.mozilla.org/en-US/docs/Web/API/Web_MIDI_API) to provide a performant and feature rich foundation for music creation. Our intention is to use [Web Audio Modules 2.0](https://doi.org/10.1145/3487553.3524225) as plugin architecture to enable easy integration of synthesizers, effects and other relevant components.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app). Because it is client-side only, there's going to be functional builds 
-accessible via the [gitpages for this project](https://ai-music.github.io/webdaw/). In order to get started with some audio content, the project is referencing the [sample-pi](https://github.com/alex-esc/sample-pi) repository.
+Currently, WebDAW a pure client-side application, and  functional builds are
+accessible via the [GitHub Pages for this project](https://ai-music.github.io/webdaw/). The project is referencing and incorporating the [sample-pi](https://github.com/alex-esc/sample-pi) repository to include some initial audio content.
 
-## Available Scripts
+## Getting Started
 
-In the project directory, you can run:
+To invoke the application, simply navigate to [https://ai-music.github.io/webdaw/](https://ai-music.github.io/webdaw/).
+
+End-user documentation is accesible from the _Help_ menu inside the application.
+
+## Similar Projects
+
+Here is a list of similar projects that I have come across. This list is likely incomplete.
+
+- [OpenDAW](https://github.com/pverrecchia/OpenDAW)
+- [WebDAW](https://github.com/jakejarrett/WebDAW) (fork of OpenDAW)
+- [WebDAW](https://www.webdaw.net/)
+- [WebDAW modules](https://github.com/abudaan/webdaw-modules)
+- [Wam-openstudio](https://github.com/TER-M1/wam-openstudio)
+
+## For Developers
+
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app). In addition, the build system is incorporating [react-gh-pages](https://github.com/gitname/react-gh-pages) for simple deployment via GitHub Pages.
+
+In the project directory, you can run the following commands:
 
 ### `npm start`
 
@@ -39,20 +57,6 @@ application on your own, please follow [these instructions to configure GitHub P
 
 ### `npm run docs`
 
-Creates HTML documentation for the project in the `./docs` directory using the typedoc tool. The `typedoc.json` file serves as configuration file for this process.
+Creates HTML _develper_ documentation for the project in the `./docs` directory using the typedoc tool. The `typedoc.json` file serves as configuration file for this process.
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+__Note:__ End-user documentation is maintained in the [webdaw-doc](https://github.com/ai-music/webdaw-doc) repository and served from the corresponding [GitHub Pages](https://ai-music.github.io/webdaw-doc).
