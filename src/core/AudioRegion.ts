@@ -1,6 +1,6 @@
 import { AudioFile, AudioFileResolver } from './AudioFile';
 import { Duration, JSONObject, JSONValue, Location, PUBLIC_URL } from './Common';
-import { AbstractRegion } from './Region';
+import { AbstractRegion, AudioRegionData, RegionDataType } from './Region';
 
 export class AudioRegion extends AbstractRegion {
   constructor(
@@ -15,10 +15,10 @@ export class AudioRegion extends AbstractRegion {
     soloed: boolean = false,
 
     /** Start of the audio to render relative to the beginning of the audio buffer, in seconds */
-    startTime: number = 0,
+    public startTime: number = 0,
 
     /** End of the audio to render relative to the beginning of the audio buffer, in seconds */
-    endTime: number = audioFile.buffer.duration,
+    public endTime: number = audioFile.buffer.duration,
   ) {
     super(name, color, position, size, length, looping, muted, soloed);
   }
@@ -56,5 +56,14 @@ export class AudioRegion extends AbstractRegion {
       startTime,
       endTime,
     );
+  }
+
+  get data(): AudioRegionData {
+    return {
+      type: RegionDataType.Audio,
+      audioBuffer: this.audioFile.buffer,
+      startTime: this.startTime,
+      endTime: this.endTime,
+    };
   }
 }

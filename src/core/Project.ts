@@ -73,8 +73,8 @@ export class Project implements NamedObject, ToJson, AudioFileResolver {
     onComplete: (project: Project) => void,
     onProgress: (project: Project, progress: number) => void = (project, progress) => {},
   ) {
-    var remaining = this.audioFiles.length;
-
+    // We determine the number of files that need to be loaded.
+    var remaining = this.audioFiles.reduce((acc, file) => (file.ready ? acc : acc + 1), 0);
     if (remaining === 0) {
       onComplete(this);
       return;

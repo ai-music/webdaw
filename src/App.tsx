@@ -39,13 +39,14 @@ function App() {
   const [loadingProgress, setLoadingProgress] = useState(0); // [0, 1]
   const [showDisclaimer, setShowDisclaimer] = useState(true);
 
-  useEffect(() => {
-    engine.project = project;
+  function loadFiles(project: ProjectObj) {
     setLoading(true);
     project.loadFiles(engine.context, (project) => {
+      engine.project = project;
+      setProject(project);
       setLoading(false);
     });
-  }, [engine, project]);
+  }
 
   return (
     <>
@@ -88,7 +89,7 @@ function App() {
                   icon="new-object"
                   text="New Project"
                   onClick={() => {
-                    createProject(setProject);
+                    createProject(loadFiles);
                   }}
                 />
                 <MenuItem icon="cloud-download" text="Load..." onClick={loadProject} />

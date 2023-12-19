@@ -11,6 +11,11 @@ import {
 export class AudioFile implements NamedObject, Identifiable, ToJson {
   private _audioBuffer: AudioBuffer | null;
 
+  // We maintain a mipmap of renderings of the audio file.
+  // The highst resolution corresponds to 2048 pixels/samples per second.
+  // From the we downsample to the audio by a factor of 2.
+  // Should we use max or average values for downsampling?
+
   /**
    * Create a new temporary audio file that wraps an in-memory buffer
    *

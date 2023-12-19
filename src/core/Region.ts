@@ -7,6 +7,30 @@ import {
   NamedObject,
   SoloableObject,
 } from './Common';
+import { MidiData } from './MidiData';
+
+export enum RegionDataType {
+  Audio,
+  Midi,
+}
+
+export interface BaseRegionData {
+  type: RegionDataType;
+}
+
+export interface AudioRegionData extends BaseRegionData {
+  type: RegionDataType.Audio;
+  audioBuffer: AudioBuffer;
+  startTime: number;
+  endTime: number;
+}
+
+export interface MidiRegionData extends BaseRegionData {
+  type: RegionDataType.Midi;
+  midiData: MidiData[];
+}
+
+export type RegionData = AudioRegionData | MidiRegionData;
 
 /**
  * The interface of a region towards the Engine.
@@ -36,6 +60,11 @@ export interface RegionInterface extends NamedObject, ColoredObject, MutableObje
    * Is this region looped?
    */
   looping: boolean;
+
+  /**
+   * The data contained in this region.
+   */
+  data: RegionData;
 }
 
 export abstract class AbstractRegion implements RegionInterface {
@@ -61,4 +90,6 @@ export abstract class AbstractRegion implements RegionInterface {
   set name(value: string) {
     throw new Error('Region name cannot be changed.');
   }
+
+  abstract get data(): RegionData;
 }
