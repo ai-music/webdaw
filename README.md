@@ -57,6 +57,6 @@ application on your own, please follow [these instructions to configure GitHub P
 
 ### `npm run docs`
 
-Creates HTML _develper_ documentation for the project in the `./docs` directory using the typedoc tool. The `typedoc.json` file serves as configuration file for this process.
+Creates HTML _developer_ documentation for the project in the `./docs` directory using the typedoc tool. The `typedoc.json` file serves as configuration file for this process.
 
 __Note:__ End-user documentation is maintained in the [webdaw-doc](https://github.com/ai-music/webdaw-doc) repository and served from the corresponding [GitHub Pages](https://ai-music.github.io/webdaw-doc).
