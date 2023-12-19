@@ -66,10 +66,22 @@ export class Project implements NamedObject, ToJson, AudioFileResolver {
    *
    * @param context Load all audio files that are referenced by this project.
    *
-   * @param callback Completion callback function.
+   * @param onComplete Completion callback function.
    */
-  public async loadFiles(context: AudioContext, callback: (project: Project) => void) {
+  public async loadFiles(
+    context: AudioContext,
+    onComplete: (project: Project) => void,
+    onProgress: (project: Project, progress: number) => void = (project, progress) => {},
+  ) {
     var remaining = this.audioFiles.length;
+
+    if (remaining === 0) {
+      onComplete(this);
+      return;
+    }
+
+    const total = remaining;
+    onProgress(this, 0);
 
     this.audioFiles.forEach((file) => {
       if (!file.ready) {
@@ -77,7 +89,9 @@ export class Project implements NamedObject, ToJson, AudioFileResolver {
           --remaining;
 
           if (remaining === 0) {
-            callback(this);
+            onComplete(this);
+          } else {
+            onProgress(this, (total - remaining) / total);
           }
         });
       }

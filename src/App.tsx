@@ -9,6 +9,7 @@ import {
   MenuItem,
   Navbar,
   Popover,
+  ProgressBar,
 } from '@blueprintjs/core';
 import { Project } from './ui/Project';
 import { Project as ProjectObj } from './core/Project';
@@ -35,6 +36,7 @@ function App() {
     new Engine(audioContext, { bufferSize: BUFFER_SIZE, sampleRate: SAMPLE_RATE }),
   );
   const [loading, setLoading] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0); // [0, 1]
   const [showDisclaimer, setShowDisclaimer] = useState(true);
 
   useEffect(() => {
@@ -68,6 +70,12 @@ function App() {
             <Button intent="danger" text="I Acknowledge" onClick={() => setShowDisclaimer(false)} />
           }
         />
+      </Dialog>
+      <Dialog title="Loading" icon="cloud-download" isOpen={loading}>
+        <DialogBody>
+          <p>Please wait while the project is being loaded...</p>
+          <ProgressBar value={loadingProgress} />
+        </DialogBody>
       </Dialog>
       <Navbar>
         <Navbar.Group align={Alignment.LEFT}>
