@@ -21,3 +21,7 @@
 ## MIDI
 
 - [Web MIDI Sequencer](https://www.youtube.com/watch?v=_g6DgWcF5Vs)
+
+## Rendering
+
+= [Offscreen Canvas](https://web.dev/articles/offscreen-canvas)
