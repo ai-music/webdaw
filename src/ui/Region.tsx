@@ -76,15 +76,17 @@ export const Region: FunctionComponent<RegionProps> = (props: RegionProps) => {
   };
 
   const renderData = useRef<string>('');
-  if (props.region.data.type === RegionDataType.Audio) {
+  if (renderData.current === '' && props.region.data.type === RegionDataType.Audio) {
+    console.log('rendering audio');
     renderData.current = audioToImage(props.region.data.audioBuffer, width * 16, 0, duration);
   }
 
   useEffect(() => {
     if (props.region.data.type === RegionDataType.Audio) {
+      console.log('re-rendering audio');
       renderData.current = audioToImage(props.region.data.audioBuffer, width * 16, 0, duration);
     }
-  }, [props.region.data, props.scale, props.region.length]);
+  }, [props.scale, props.region.length]);
 
   function toggleSelection() {
     setSelected(!selected);
