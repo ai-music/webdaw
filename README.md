@@ -22,6 +22,16 @@ Here is a list of similar projects that I have come across. This list is likely 
 - [WebDAW](https://www.webdaw.net/)
 - [WebDAW modules](https://github.com/abudaan/webdaw-modules)
 - [Wam-openstudio](https://github.com/TER-M1/wam-openstudio)
+- [Efflux Tracker](https://github.com/igorski/efflux-tracker)
+- [TuneFlow](https://github.com/tuneflow/tuneflow)
+- [EchoInMirror](https://github.com/EchoInMirror/EIM)
+- [beets](https://github.com/brandongregoryscott/beets)
+- [butterDAWg](https://github.com/Jaybee18/butterDAWg)
+- [dawesome](https://github.com/nbennett320/dawesome)
+- [REAW](https://github.com/notakamihe/REAW)
+
+
+
 
 ## For Developers
 
