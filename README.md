@@ -13,6 +13,8 @@ To invoke the application, simply navigate to [https://ai-music.github.io/webdaw
 
 End-user documentation is accesible from the _Help_ menu inside the application.
 
+![WebDAW Screenshot](./notes/images/screenshot.png)
+
 ## Similar Projects
 
 Here is a list of similar projects that I have come across. This list is likely incomplete.
