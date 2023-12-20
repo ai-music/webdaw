@@ -39,6 +39,67 @@
       "audioEffects": []
     },
     {
+      "type": "audio",
+      "name": "Drums",
+      "color": "#0000ff",
+      "muted": false,
+      "regions": [
+        {
+          "name": "Drum Solo 1",
+          "color": "#0000ff",
+          "muted": false,
+          "soloed": false,
+          "looping": false,
+          "audioFile": "library/samples/sample-pi/drums/loops/loop_mika.flac",
+          "startTime": 0,
+          "endTime": 0,
+          "position": [1, 1, 1],
+          "size": [4, 0, 0],
+          "length": [4, 0, 0]
+        },
+        {
+          "name": "Drum Solo 2",
+          "color": "#0000ff",
+          "muted": false,
+          "soloed": false,
+          "looping": false,
+          "audioFile": "library/samples/sample-pi/drums/loops/loop_mika.flac",
+          "startTime": 0,
+          "endTime": 0,
+          "position": [5, 1, 1],
+          "size": [4, 0, 0],
+          "length": [4, 0, 0]
+        },
+        {
+          "name": "Drum Solo 3",
+          "color": "#0000ff",
+          "muted": false,
+          "soloed": false,
+          "looping": false,
+          "audioFile": "library/samples/sample-pi/drums/loops/loop_mika.flac",
+          "startTime": 0,
+          "endTime": 0,
+          "position": [9, 1, 1],
+          "size": [4, 0, 0],
+          "length": [4, 0, 0]
+        },
+        {
+          "name": "Drum Solo 4",
+          "color": "#0000ff",
+          "muted": false,
+          "soloed": false,
+          "looping": false,
+          "audioFile": "library/samples/sample-pi/drums/loops/loop_mika.flac",
+          "startTime": 0,
+          "endTime": 0,
+          "position": [13, 1, 1],
+          "size": [4, 0, 0],
+          "length": [4, 0, 0]
+        }
+      ],
+      "audioEffects": []
+    },
+    {
       "type": "instrument",
       "name": "Bass",
       "color": "#00ff00",
@@ -50,6 +111,10 @@
     {
       "name": "Haunted Hum",
       "url": "library/samples/sample-pi/ambient/ambi_haunted_hum.flac"
+    },
+    {
+      "name": "Drum Solo",
+      "url": "library/samples/sample-pi/drums/loops/loop_mika.flac"
     }
   ]
 }
