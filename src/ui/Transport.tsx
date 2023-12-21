@@ -88,40 +88,51 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
 
   function onBegin() {
     console.log('To beginning');
+    // if the current position is before the loop start, go to the loop start
+    // else go to the beginning
   }
 
   function onEnd() {
     console.log('To end');
+    // if the current position is before the loop end, go to the loop end
+    // else go to the end
   }
 
   function onForward() {
     console.log('Advance...');
+    // advance the current position by one bar
   }
 
   function onBackward() {
     console.log('Go back...');
+    // go back the current position by one bar
   }
 
   function play() {
     console.log('Play');
+    // should chnage the behavior to play from the current position
     setPlayback(PlaybackState.Playing);
     props.engine.start();
   }
 
   function pause() {
     console.log('Pause');
+    // needs to be changed such that the audio generation stops more or less immediately
     setPlayback(PlaybackState.Stopped);
     props.engine.stop();
   }
 
   function record() {
     console.log('Record');
+    // should change the behavior to record from the current position
+    // ultimately, this will require a count-in prior to the recording starting
     setPlayback(PlaybackState.Recording);
     props.engine.start();
   }
 
   function repeat() {
     console.log('Repeat');
+    // add loop support to the playback process
     setLoop(!loop);
   }
 

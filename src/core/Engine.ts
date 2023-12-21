@@ -129,6 +129,13 @@ export class Engine {
   private _timeOffset = 0;
 
   /**
+   * Is the engine currently playing?
+   */
+  public get isPlaying(): boolean {
+    return this._playing;
+  }
+
+  /**
    * Start playback of audio and MIDI by the rendering engine.
    */
   public start(): void {

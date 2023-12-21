@@ -15,7 +15,7 @@ import { Project } from './ui/Project';
 import { Project as ProjectObj } from './core/Project';
 import { createProject, loadProject, saveAsProject, saveProject } from './controller/Projects';
 import { copy, cut, doDelete, paste, redo, undo } from './controller/Edit';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Engine } from './core/Engine';
 import { BUFFER_SIZE, SAMPLE_RATE } from './core/Config';
 
@@ -38,6 +38,9 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0); // [0, 1]
   const [showDisclaimer, setShowDisclaimer] = useState(true);
+  const [confirmStopAudio, setConfirmStopAudio] = useState(false);
+
+  const continueChangeProject = useRef<() => void>();
 
   function loadFiles(project: ProjectObj) {
     setLoading(true);
@@ -46,6 +49,15 @@ function App() {
       setProject(project);
       setLoading(false);
     });
+  }
+
+  function changeProject(action: () => void) {
+    continueChangeProject.current = action;
+    if (engine.isPlaying) {
+      setConfirmStopAudio(true);
+    } else {
+      action();
+    }
   }
 
   return (
@@ -78,6 +90,26 @@ function App() {
           <ProgressBar value={loadingProgress} />
         </DialogBody>
       </Dialog>
+      <Dialog title="Stop Audio" icon="warning-sign" isOpen={confirmStopAudio}>
+        <DialogBody>
+          <p>Proceeding with this action will stop all audio. Are you sure you want to continue?</p>
+        </DialogBody>
+        <DialogFooter
+          actions={
+            <>
+              <Button
+                intent="danger"
+                text="Yes"
+                onClick={() => {
+                  setConfirmStopAudio(false);
+                  continueChangeProject.current?.();
+                }}
+              />
+              <Button intent="primary" text="No" onClick={() => setConfirmStopAudio(false)} />
+            </>
+          }
+        />
+      </Dialog>
       <Navbar>
         <Navbar.Group align={Alignment.LEFT}>
           <Navbar.Heading>WebDAW</Navbar.Heading>
@@ -89,10 +121,22 @@ function App() {
                   icon="new-object"
                   text="New Project"
                   onClick={() => {
-                    createProject(loadFiles);
+                    changeProject(() => {
+                      engine.stop();
+                      createProject(loadFiles);
+                    });
                   }}
                 />
-                <MenuItem icon="cloud-download" text="Load..." onClick={loadProject} />
+                <MenuItem
+                  icon="cloud-download"
+                  text="Load..."
+                  onClick={() => {
+                    changeProject(() => {
+                      engine.stop();
+                      loadProject();
+                    });
+                  }}
+                />
                 <MenuItem icon="cloud-upload" text="Save" onClick={saveProject} />
                 <MenuItem icon="duplicate" text="Save As..." onClick={saveAsProject} />
               </Menu>
