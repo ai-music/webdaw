@@ -25,9 +25,9 @@ export const Location: FunctionComponent<Props> = (props) => {
               new LocationObj(parseInt(value), props.location.beat, props.location.tick),
             )
           }
-          maxLength={3}
+          maxLength={4}
         />
-        :
+        <b>:</b>
         <EditableText
           className={styles.beat}
           value={props.location.beat.toString().padStart(1, '0')}
@@ -36,9 +36,9 @@ export const Location: FunctionComponent<Props> = (props) => {
               new LocationObj(props.location.bar, parseInt(value), props.location.tick),
             )
           }
-          maxLength={1}
+          maxLength={2}
         />
-        :
+        <b>:</b>
         <EditableText
           className={styles.tick}
           value={props.location.tick.toString().padStart(3, '0')}
@@ -47,7 +47,7 @@ export const Location: FunctionComponent<Props> = (props) => {
               new LocationObj(props.location.bar, props.location.beat, parseInt(value)),
             )
           }
-          maxLength={3}
+          maxLength={4}
         />
       </div>
     </span>
