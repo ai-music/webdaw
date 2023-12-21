@@ -1,3 +1,4 @@
+import { Location, LocationToTime } from './Common';
 import { RegionInterface } from './Region';
 import { TrackInterface } from './Track';
 
@@ -169,9 +170,19 @@ export enum TransportEventType {
   BpmChanged,
 
   /**
-   * The playback loop locator positions have been changed.
+   * The playback loop start locator position has been changed.
    */
-  LoopLocatorChanged,
+  LoopStartLocatorChanged,
+
+  /**
+   * The playback loop end locator position has been changed.
+   */
+  LoopEndLocatorChanged,
+
+  /**
+   * The playback end locator position has been changed.
+   */
+  PlaybackEndLocatorChanged,
 
   /**
    * The playback loop mode has been changed.
@@ -210,6 +221,7 @@ export class TransportEvent {
   constructor(
     public readonly type: TransportEventType,
     public readonly position?: number,
+    public readonly location?: Location,
     public readonly bpm?: number,
     public readonly loop?: boolean,
   ) {
@@ -223,7 +235,10 @@ export class TransportEvent {
  * thew necessary precision for scheduling audio and MIDI events.
  */
 export class PlaybackPositionEvent {
-  constructor(public readonly timestamp: number) {
+  constructor(
+    public readonly location: Location,
+    public readonly timestamp: number,
+  ) {
     /* ... */
   }
 }

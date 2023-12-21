@@ -33,6 +33,9 @@ export class Project implements NamedObject, ToJson, AudioFileResolver {
     public name: string = 'Untitled Project',
     public bpm: number = 120,
     public timeSignature: TimeSignature = new TimeSignature(4, 4),
+    public loopStart: Location = new Location(1, 1, 1),
+    public loopEnd: Location = new Location(5, 1, 1),
+    public end: Location = new Location(5, 1, 1),
     tracks: AbstractTrack[] = [],
     audioFiles: AudioFile[] = [],
   ) {
@@ -103,6 +106,9 @@ export class Project implements NamedObject, ToJson, AudioFileResolver {
       name: this.name,
       bpm: this.bpm,
       timeSignature: this.timeSignature.toJson(),
+      loopStart: this.loopStart.toJson(),
+      loopEnd: this.loopEnd.toJson(),
+      end: this.end.toJson(),
       audioFiles: this.audioFiles.map((file) => file.toJson()),
       tracks: this.tracks.map((track) => track.toJson()),
     };
@@ -114,6 +120,9 @@ export class Project implements NamedObject, ToJson, AudioFileResolver {
       const name = dict['name'] as string;
       const bpm = dict['bpm'] as number;
       const timeSignature = TimeSignature.fromJson(dict['timeSignature']);
+      const loopStart = Location.fromJson(dict['loopStart']);
+      const loopEnd = Location.fromJson(dict['loopEnd']);
+      const end = Location.fromJson(dict['end']);
       const filesJson = dict['audioFiles'] as Array<JSONValue>;
 
       if (!Array.isArray(filesJson)) {
@@ -135,7 +144,7 @@ export class Project implements NamedObject, ToJson, AudioFileResolver {
 
       const tracks = tracksJson.map((track) => AbstractTrack.fromJson(track, resolver));
 
-      return new Project(name, bpm, timeSignature, tracks, audioFiles);
+      return new Project(name, bpm, timeSignature, loopStart, loopEnd, end, tracks, audioFiles);
     } else {
       throw Error('Expected a JSON object as argument');
     }
@@ -164,8 +173,18 @@ export class Project implements NamedObject, ToJson, AudioFileResolver {
       (location.beat - 1) * factor.beats +
       (location.tick - 1) * factor.ticks;
 
+    let timeToLocation = (time: number) => {
+      let bar = Math.floor(time / factor.bars) + 1;
+      time -= (bar - 1) * factor.bars;
+      let beat = Math.floor(time / factor.beats) + 1;
+      time -= (beat - 1) * factor.beats;
+      let tick = Math.floor(time / factor.ticks) + 1;
+      return new Location(bar, beat, tick);
+    };
+
     return {
       convertLocation: locationToTime,
+      convertTime: timeToLocation,
       convertDurationAtLocation: (duration: Duration, location: Location) =>
         locationToTime(location.add(duration, timeSignature)) - locationToTime(location),
     };

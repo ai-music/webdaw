@@ -389,6 +389,14 @@ export interface LocationToTime {
   convertLocation: (location: Location) => number;
 
   /**
+   * Convert a time value to an arrangement location.
+   *
+   * @param time      the time value to convert
+   * @returns         the location within the arrangement
+   */
+  convertTime: (time: number) => Location;
+
+  /**
    * Convert a duration starting at a given location within the arrangement to a time value.
    * @param duration  the duration to convert
    * @param location  the location at which the duration starts

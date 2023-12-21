@@ -71,7 +71,12 @@ export class Engine {
   /**
    * The duration of the playback loop.
    * */
-  public loopLength: Duration = new Duration();
+  public loopEnd: Location = new Location();
+
+  /**
+   * The end locator of the project.
+   */
+  public end: Location = new Location();
 
   /**
    * The current playback position in seconds.
@@ -187,6 +192,8 @@ export class Engine {
       return;
     }
 
+    const locationToTime = this._project.locationToTime;
+
     // Get the current time of the audio system.
     const callbackTime = this.context.currentTime;
     console.log(`callbackTime: ${callbackTime}`);
@@ -223,7 +230,7 @@ export class Engine {
           this._timeOffset,
           lastScheduledAudioTime,
           scheduleAheadTime,
-          this._project.locationToTime,
+          locationToTime,
         );
       });
 
@@ -239,7 +246,10 @@ export class Engine {
 
     // Notify listeners of the current playback head position.
     if (this.playbackPositionEventHandlers.length > 0) {
-      const event = new PlaybackPositionEvent(arrangementTime);
+      const event = new PlaybackPositionEvent(
+        locationToTime.convertTime(arrangementTime),
+        arrangementTime,
+      );
       this.playbackPositionEventHandlers.forEach((handler) => {
         handler(event);
       });
@@ -259,7 +269,13 @@ export class Engine {
       case TransportEventType.BpmChanged:
         // TODO
         break;
-      case TransportEventType.LoopLocatorChanged:
+      case TransportEventType.LoopStartLocatorChanged:
+        // TODO
+        break;
+      case TransportEventType.LoopEndLocatorChanged:
+        // TODO
+        break;
+      case TransportEventType.PlaybackEndLocatorChanged:
         // TODO
         break;
       case TransportEventType.LoopChanged:

@@ -5,7 +5,7 @@ import { Button, ButtonGroup, EditableText, Intent, Popover, Switch } from '@blu
 import { Location as LocationValue } from '../core/Common';
 import { Project as ProjectObj } from '../core/Project';
 import { Engine } from '../core/Engine';
-import { PlaybackPositionEvent } from '../core/Events';
+import { PlaybackPositionEvent, TransportEventType } from '../core/Events';
 
 import styles from './Transport.module.css';
 import { auto } from '@popperjs/core';
@@ -64,10 +64,10 @@ export type TransportProps = {
 export const Transport: FunctionComponent<TransportProps> = (props: TransportProps) => {
   const [playback, setPlayback] = useState(PlaybackState.Stopped);
   const [loop, setLoop] = useState(false);
-  const [loopStart, setLoopStart] = useState(new LocationValue(1, 1, 1));
-  const [loopEnd, setLoopEnd] = useState(new LocationValue(5, 1, 1));
+  const [loopStart, setLoopStart] = useState(props.project.loopStart);
+  const [loopEnd, setLoopEnd] = useState(props.project.loopEnd);
   const [current, setCurrent] = useState(new LocationValue(5, 1, 1));
-  const [end, setEnd] = useState(new LocationValue(5, 1, 1));
+  const [end, setEnd] = useState(props.project.end);
   const [bpm, setBpm] = useState(120);
   const [numerator, setNumerator] = useState(4);
   const [denominator, setDenominator] = useState(4);
@@ -75,7 +75,35 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
 
   const [showZoom, setShowZoom] = useState(false);
 
+  const changeLoopStart = (location: LocationValue) => {
+    setLoopStart(location);
+    props.project.loopStart = location;
+    props.engine.handleTransportEvent({
+      type: TransportEventType.LoopStartLocatorChanged,
+      location: location,
+    });
+  };
+
+  const changeLoopEnd = (location: LocationValue) => {
+    setLoopEnd(location);
+    props.project.loopEnd = location;
+    props.engine.handleTransportEvent({
+      type: TransportEventType.LoopEndLocatorChanged,
+      location: location,
+    });
+  };
+
+  const changeEnd = (location: LocationValue) => {
+    setEnd(location);
+    props.project.end = location;
+    props.engine.handleTransportEvent({
+      type: TransportEventType.PlaybackEndLocatorChanged,
+      location: location,
+    });
+  };
+
   const positionEventHandler = (event: PlaybackPositionEvent) => {
+    setCurrent(event.location);
     setTimestamp(event.timestamp);
   };
 
@@ -84,7 +112,7 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
     return () => {
       props.engine.unregisterPlaybackPositionEventHandler(positionEventHandler);
     };
-  }, []);
+  }, [props.engine]);
 
   function onBegin() {
     console.log('To beginning');
@@ -215,10 +243,10 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
         </div>
       </div>
       <Time label="Time" timestamp={timestamp} />
-      <Location label="Current" />
-      <Location label="Loop Start" />
-      <Location label="Loop End" />
-      <Location label="End" />
+      <Location label="Current" location={current} setLocation={setCurrent} />
+      <Location label="Loop Start" location={loopStart} setLocation={changeLoopStart} />
+      <Location label="Loop End" location={loopEnd} setLocation={changeLoopEnd} />
+      <Location label="End" location={end} setLocation={changeEnd} />
       <div className={styles.spacer}>&nbsp;</div>
       <ButtonGroup className={styles.zoomButtons}>
         {/* <Popover
