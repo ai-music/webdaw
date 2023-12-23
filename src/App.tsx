@@ -10,6 +10,7 @@ import {
   Navbar,
   Popover,
   ProgressBar,
+  TextArea,
 } from '@blueprintjs/core';
 import { Project } from './ui/Project';
 import { Project as ProjectObj } from './core/Project';
@@ -20,6 +21,9 @@ import { Engine } from './core/Engine';
 import { BUFFER_SIZE, SAMPLE_RATE } from './core/Config';
 
 const audioContext = new AudioContext();
+
+const LICENSE =
+  'MIT License\n\nCopyright (c) 2023 Hans-Martin Will\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
 /**
  * Open the application documentation in a new window.
@@ -39,6 +43,7 @@ function App() {
   const [loadingProgress, setLoadingProgress] = useState(0); // [0, 1]
   const [showDisclaimer, setShowDisclaimer] = useState(true);
   const [confirmStopAudio, setConfirmStopAudio] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
 
   const continueChangeProject = useRef<() => void>();
 
@@ -62,6 +67,26 @@ function App() {
 
   return (
     <>
+      <Dialog title="About" icon="info-sign" isOpen={showAbout}>
+        <DialogBody>
+          <img src="logo-192.png" alt="WebDAW Logo" width="96" style={{ float: 'right' }} />
+          <p>Welcome to</p>
+          <h1>WebDAW</h1>
+          <p>Copyright &copy; 2023 Hans-Martin Will</p>
+          <p>
+            WebDAW is a digital audio workstation (DAW) that runs in the browser. It is built using
+            the <a href="https://reactjs.org/">React</a> framework and the{' '}
+            <a href="https://blueprintjs.com/">Blueprint</a> UI toolkit. It utilizes the Web Audio
+            API and the Web MIDI API, which is supported in modern browsers.
+          </p>
+          <TextArea fill={true} small={true} rows={6}>
+            {LICENSE}
+          </TextArea>
+        </DialogBody>
+        <DialogFooter
+          actions={<Button intent="primary" text="Close" onClick={() => setShowAbout(false)} />}
+        />
+      </Dialog>
       <Dialog title="Attention" icon="warning-sign" isOpen={showDisclaimer}>
         <DialogBody>
           <p>
@@ -178,6 +203,8 @@ function App() {
                   href="https://github.com/ai-music/webdaw/issues"
                   target="_blank"
                 />
+                <MenuDivider />
+                <MenuItem icon="info-sign" text="About" onClick={() => setShowAbout(true)} />
               </Menu>
             }
             placement="bottom"
