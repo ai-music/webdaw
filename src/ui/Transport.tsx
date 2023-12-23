@@ -1,15 +1,14 @@
 import { FunctionComponent, useEffect, useState } from 'react';
 import { Location } from './Location';
 import { Time } from './Time';
-import { Button, ButtonGroup, EditableText, Intent, Popover, Switch } from '@blueprintjs/core';
+import { Button, ButtonGroup, EditableText, Intent, Switch } from '@blueprintjs/core';
 import { Location as LocationValue } from '../core/Common';
 import { Project as ProjectObj } from '../core/Project';
 import { Engine } from '../core/Engine';
 import { PlaybackPositionEvent, TransportEventType } from '../core/Events';
+import { MAX_TIMELINE_SCALE, MIN_TIMELINE_SCALE } from './Timeline';
 
 import styles from './Transport.module.css';
-import { auto } from '@popperjs/core';
-import { MAX_TIMELINE_SCALE, MIN_TIMELINE_SCALE, Timeline } from './Timeline';
 
 /**
  * The different states of playback
@@ -106,6 +105,12 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
     setCurrent(event.location);
     setTimestamp(event.timestamp);
   };
+
+  useEffect(() => {
+    setLoopStart(props.project.loopStart);
+    setLoopEnd(props.project.loopEnd);
+    setEnd(props.project.end);
+  }, [props.project]);
 
   useEffect(() => {
     props.engine.registerPlaybackPositionEventHandler(positionEventHandler);

@@ -314,11 +314,11 @@ export class Location {
     const ticksPerBeat = (PPQN * 4) / beatNote;
 
     const [ticks, ticksCarry] =
-      other.tick < this.tick
+      other.tick >= this.tick
         ? [other.tick - this.tick, 0]
         : [other.tick - this.tick + ticksPerBeat, 1];
     const [beats, beatsCarry] =
-      other.beat + ticksCarry < this.beat
+      other.beat + ticksCarry >= this.beat
         ? [other.beat - this.beat - ticksCarry, 0]
         : [other.beat - this.beat - ticksCarry + beatsPerBar, 1];
     const bars = other.bar - this.bar - beatsCarry;

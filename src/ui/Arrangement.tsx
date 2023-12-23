@@ -26,14 +26,24 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props) => {
       <Timeline
         start={timelineStart}
         scale={props.timelineScale}
+        timeSignature={props.project.timeSignature}
         converter={props.project.locationToTime}
+        loopStart={props.project.loopStart}
+        loopEnd={props.project.loopEnd}
+        end={props.project.end}
+        looping={props.engine.looping}
       />
       <TrackList
         start={timelineStart}
         scale={props.timelineScale}
+        timeSignature={props.project.timeSignature}
         tracks={props.project.tracks}
         engine={props.engine}
         converter={props.project.locationToTime}
+        loopStart={props.project.loopStart}
+        loopEnd={props.project.loopEnd}
+        end={props.project.end}
+        looping={props.engine.looping}
       />
     </>
   );

@@ -3,11 +3,17 @@ import { FunctionComponent } from 'react';
 import styles from './Timeline.module.css';
 import { Duration, Location, LocationToTime, TimeSignature } from '../core/Common';
 import { PPQN } from '../core/Config';
+import { Icon } from '@blueprintjs/core';
 
 export interface TimelineProps {
   start: number;
   scale: number;
+  timeSignature: TimeSignature;
   converter: LocationToTime;
+  loopStart: Location;
+  loopEnd: Location;
+  end: Location;
+  looping: boolean;
 }
 
 class TimelineGenerator implements IterableIterator<Location> {
@@ -118,30 +124,79 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
   return (
     <div className={styles.timeline}>
       <div className={styles.timelineFront}>&nbsp;</div>
-      <div className={styles.timelineRuler}>
-        <div>
-          {Array.from(labelIterator).map((location) => {
-            return (
-              <div
-                className={styles.timelineMajorTick}
-                style={{ left: `${props.converter.convertLocation(location) * props.scale}rem` }}
-              >
-                <div className={styles.timelineTickLabel}>{settings.label(location)}</div>
-              </div>
-            );
-          })}
+      <div className={styles.timelineBack}>
+        <div className={styles.timelineLocators}>
+          <div
+            className={styles.loop}
+            style={{
+              left: `${props.converter.convertLocation(props.loopStart) * props.scale}rem`,
+              width: `${
+                props.converter.convertDurationAtLocation(
+                  props.loopStart.diff(props.loopEnd, props.timeSignature),
+                  props.loopStart,
+                ) * props.scale
+              }rem`,
+              backgroundColor: props.looping ? 'rgba(0, 0, 0, 0.25)' : undefined,
+            }}
+          >
+            <svg
+              style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)' }}
+              width="10"
+              height="10"
+              viewBox="0 0 10 10"
+            >
+              <polygon points="0,0 10,5 0,10" fill="black" />
+            </svg>
+            <svg
+              style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)' }}
+              width="10"
+              height="10"
+              viewBox="0 0 10 10"
+            >
+              <polygon points="0,5 10,0 10,10" fill="black" />
+            </svg>
+          </div>
+          <svg
+            style={{
+              position: 'absolute',
+              left: `${props.converter.convertLocation(props.end) * props.scale}rem`,
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              // border: '1px solid black',
+            }}
+            width="10"
+            height="10"
+            viewBox="0 0 10 10"
+          >
+            <line x1="0" y1="0" x2="10" y2="0" stroke="black" strokeWidth="2" />
+            <polygon points="0,2 10,2 5,10" fill="black" />
+          </svg>
         </div>
-        <div>
-          {Array.from(tickIterator).map((location) => {
-            return (
-              <div
-                className={styles.timelineTick}
-                style={{ left: `${props.converter.convertLocation(location) * props.scale}rem` }}
-              >
-                &nbsp;
-              </div>
-            );
-          })}
+        <div className={styles.timelineRuler}>
+          <div>
+            {Array.from(labelIterator).map((location) => {
+              return (
+                <div
+                  className={styles.timelineMajorTick}
+                  style={{ left: `${props.converter.convertLocation(location) * props.scale}rem` }}
+                >
+                  <div className={styles.timelineTickLabel}>{settings.label(location)}</div>
+                </div>
+              );
+            })}
+          </div>
+          <div>
+            {Array.from(tickIterator).map((location) => {
+              return (
+                <div
+                  className={styles.timelineTick}
+                  style={{ left: `${props.converter.convertLocation(location) * props.scale}rem` }}
+                >
+                  &nbsp;
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
