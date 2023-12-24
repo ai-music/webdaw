@@ -4,6 +4,7 @@ import styles from './Timeline.module.css';
 import { Duration, Location, LocationToTime, TimeSignature } from '../core/Common';
 import { PPQN } from '../core/Config';
 import { Icon } from '@blueprintjs/core';
+import { on } from 'events';
 
 export interface TimelineProps {
   start: number;
@@ -117,22 +118,28 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
   const dragStart = useRef(0);
   const dragStartValue = useRef(new Location());
   const dragStartValueTime = useRef(0);
-  const dragTarget = useRef<SVGSVGElement | null>(null);
+  const dragTarget = useRef<SVGSVGElement | HTMLDivElement | null>(null);
+  const loopDuration = useRef<Duration>(props.loopStart.diff(props.loopEnd, props.timeSignature));
 
   function onMouseDownEnd(event: React.PointerEvent<SVGSVGElement>) {
-    event.currentTarget.setPointerCapture(event.pointerId);
-    setIsDragging(true);
-    dragStart.current = event.clientX;
-    dragStartValue.current = props.end;
-    dragStartValueTime.current = props.converter.convertLocation(props.end);
-    dragTarget.current = event.currentTarget;
+    // Ensure the we don't attempt to handle multiple drag gestures in parallel
+    if (!isDragging && dragTarget.current === null) {
+      event.currentTarget.setPointerCapture(event.pointerId);
+      dragTarget.current = event.currentTarget;
+      setIsDragging(true);
+      dragStart.current = event.clientX;
+      dragStartValue.current = props.end;
+      dragStartValueTime.current = props.converter.convertLocation(props.end);
+    }
   }
 
   function onMouseMoveEnd(event: React.PointerEvent<SVGSVGElement>) {
     if (isDragging) {
       const delta = event.clientX - dragStart.current;
       const valueTime = dragStartValueTime.current + delta / props.scale / 16;
-      const newValue = props.converter.convertTime(valueTime);
+      const loopEndTime = props.converter.convertLocation(props.loopEnd);
+      const clippedTime = Math.max(valueTime, loopEndTime);
+      const newValue = props.converter.convertTime(clippedTime);
 
       if (newValue !== props.end) {
         props.setEnd(newValue);
@@ -147,10 +154,16 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
       const valueTime = dragStartValueTime.current + delta / props.scale / 16;
       const converter = props.converter;
 
-      // we simply find a location that is closest to the valueTime
+      // Find a snap location that is closest to the valueTime. We are using the
+      // resolution used to draw the limeline as grid. In order to handle extension
+      // of the timeline correctly, we are extending the range by one major step.
+      // TODO: Is there a way to convert the current linear search into a more
+      // efficient algorithm, even if we consider eventual introduction of automation
+      // of time signature and BPM, which will make the relationship between location
+      // and seconds non-linear?
       const tickIterator = new TimelineGenerator(
-        rangeStart,
-        rangeEnd.add(new Duration(1, 0, 0), signature),
+        props.loopEnd,
+        rangeEnd.add(settings.majorStep, signature),
         settings.minorStep,
         signature,
       );
@@ -165,6 +178,186 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
       if (newValue !== props.end) {
         props.setEnd(newValue);
       }
+
+      dragTarget.current = null;
+      setIsDragging(false);
+    }
+  }
+
+  // function onMouseDownLoopRegion(event: React.PointerEvent<HTMLDivElement>) {
+  //   // Ensure the we don't attempt to handle multiple drag gestures in parallel
+  //   if (!isDragging && dragTarget.current === null) {
+  //     event.currentTarget.setPointerCapture(event.pointerId);
+  //     dragTarget.current = event.currentTarget;
+  //     setIsDragging(true);
+  //     dragStart.current = event.clientX;
+  //     dragStartValue.current = props.loopStart;
+  //     dragStartValueTime.current = props.converter.convertLocation(props.loopStart);
+  //     loopDuration.current = props.loopStart.diff(props.loopEnd, props.timeSignature);
+  //   }
+  // }
+
+  // function onMouseMoveLoopRegion(event: React.PointerEvent<HTMLDivElement>) {
+  //   if (isDragging) {
+  //     const delta = event.clientX - dragStart.current;
+  //     const valueTime = dragStartValueTime.current + delta / props.scale / 16;
+  //     const newValue = props.converter.convertTime(valueTime);
+
+  //     if (newValue !== props.end) {
+  //       props.setLoopStart(newValue);
+  //       props.setLoopEnd(newValue.add(loopDuration.current, props.timeSignature));
+  //     }
+  //   }
+  // }
+
+  // function onMouseUpLoopRegion(event: React.PointerEvent<HTMLDivElement>) {
+  //   if (isDragging) {
+  //     event.currentTarget.releasePointerCapture(event.pointerId);
+  //     const delta = event.clientX - dragStart.current;
+  //     const valueTime = dragStartValueTime.current + delta / props.scale / 16;
+  //     const converter = props.converter;
+
+  //     // Find a snap location that is closest to the valueTime. We are using the
+  //     // resolution used to draw the limeline as grid. In order to handle extension
+  //     // of the timeline correctly, we are extending the range by one major step.
+  //     // TODO: Is there a way to convert the current linear search into a more
+  //     // efficient algorithm, even if we consider eventual introduction of automation
+  //     // of time signature and BPM, which will make the relationship between location
+  //     // and seconds non-linear?
+  //     const tickIterator = new TimelineGenerator(
+  //       rangeStart,
+  //       rangeEnd.add(settings.majorStep, signature),
+  //       settings.minorStep,
+  //       signature,
+  //     );
+
+  //     const newValue = Array.from(tickIterator).reduce((prev, curr) => {
+  //       return Math.abs(valueTime - converter.convertLocation(prev)) <
+  //         Math.abs(valueTime - converter.convertLocation(curr))
+  //         ? prev
+  //         : curr;
+  //     });
+
+  //     if (newValue !== props.end) {
+  //       props.setLoopStart(newValue);
+  //       props.setLoopEnd(newValue.add(loopDuration.current, props.timeSignature));
+  //     }
+
+  //     dragTarget.current = null;
+  //     setIsDragging(false);
+  //   }
+  // }
+
+  function onMouseDownLoopStart(event: React.PointerEvent<SVGSVGElement>) {
+    // Ensure the we don't attempt to handle multiple drag gestures in parallel
+    if (!isDragging && dragTarget.current === null) {
+      event.currentTarget.setPointerCapture(event.pointerId);
+      dragTarget.current = event.currentTarget;
+      setIsDragging(true);
+      dragStart.current = event.clientX;
+      dragStartValue.current = props.loopStart;
+      dragStartValueTime.current = props.converter.convertLocation(props.loopStart);
+    }
+  }
+
+  function onMouseMoveLoopStart(event: React.PointerEvent<SVGSVGElement>) {
+    if (isDragging) {
+      const delta = event.clientX - dragStart.current;
+      const valueTime = dragStartValueTime.current + delta / props.scale / 16;
+      const newValue = props.converter.convertTime(valueTime);
+
+      if (newValue !== props.loopStart) {
+        props.setLoopStart(newValue);
+      }
+    }
+  }
+
+  function onMouseUpLoopStart(event: React.PointerEvent<SVGSVGElement>) {
+    if (isDragging) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+      const delta = event.clientX - dragStart.current;
+      const valueTime = dragStartValueTime.current + delta / props.scale / 16;
+      const converter = props.converter;
+
+      // Find a snap location that is closest to the valueTime. We are using the
+      // resolution used to draw the limeline as grid. In order to handle extension
+      // of the timeline correctly, we are extending the range by one major step.
+      const tickIterator = new TimelineGenerator(
+        rangeStart,
+        props.loopEnd.sub(settings.minorStep, signature),
+        settings.minorStep,
+        signature,
+      );
+
+      const newValue = Array.from(tickIterator).reduce((prev, curr) => {
+        return Math.abs(valueTime - converter.convertLocation(prev)) <
+          Math.abs(valueTime - converter.convertLocation(curr))
+          ? prev
+          : curr;
+      });
+
+      if (newValue !== props.end) {
+        props.setLoopStart(newValue);
+      }
+
+      dragTarget.current = null;
+      setIsDragging(false);
+    }
+  }
+
+  function onMouseDownLoopEnd(event: React.PointerEvent<SVGSVGElement>) {
+    // Ensure the we don't attempt to handle multiple drag gestures in parallel
+    if (!isDragging && dragTarget.current === null) {
+      event.currentTarget.setPointerCapture(event.pointerId);
+      dragTarget.current = event.currentTarget;
+      setIsDragging(true);
+      dragStart.current = event.clientX;
+      dragStartValue.current = props.loopEnd;
+      dragStartValueTime.current = props.converter.convertLocation(props.loopEnd);
+    }
+  }
+
+  function onMouseMoveLoopEnd(event: React.PointerEvent<SVGSVGElement>) {
+    if (isDragging) {
+      const delta = event.clientX - dragStart.current;
+      const valueTime = dragStartValueTime.current + delta / props.scale / 16;
+      const newValue = props.converter.convertTime(valueTime);
+
+      if (newValue !== props.loopEnd) {
+        props.setLoopEnd(newValue);
+      }
+    }
+  }
+
+  function onMouseUpLoopEnd(event: React.PointerEvent<SVGSVGElement>) {
+    if (isDragging) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+      const delta = event.clientX - dragStart.current;
+      const valueTime = dragStartValueTime.current + delta / props.scale / 16;
+      const converter = props.converter;
+
+      // Find a snap location that is closest to the valueTime. We are using the
+      // resolution used to draw the limeline as grid. In order to handle extension
+      // of the timeline correctly, we are extending the range by one major step.
+      const tickIterator = new TimelineGenerator(
+        props.loopStart.add(settings.minorStep, signature),
+        rangeEnd,
+        settings.minorStep,
+        signature,
+      );
+
+      const newValue = Array.from(tickIterator).reduce((prev, curr) => {
+        return Math.abs(valueTime - converter.convertLocation(prev)) <
+          Math.abs(valueTime - converter.convertLocation(curr))
+          ? prev
+          : curr;
+      });
+
+      if (newValue !== props.end) {
+        props.setLoopEnd(newValue);
+      }
+
+      dragTarget.current = null;
       setIsDragging(false);
     }
   }
@@ -187,12 +380,31 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
               backgroundColor: props.looping ? 'rgba(0, 0, 0, 0.25)' : undefined,
             }}
           >
+            {/* <div
+              className={styles.dragHandle}
+              style={{
+                // width: '100%',
+                height: '100%',
+                // border: '1px solid red',
+                marginLeft: '0.7rem',
+                marginRight: '0.7rem',
+                // marginTop: '0.15rem',
+                // marginBottom: '0.15rem',
+                backgroundColor: 'lightskyblue',
+              }}
+              onPointerDown={onMouseDownLoopRegion}
+              onPointerMove={onMouseMoveLoopRegion}
+              onPointerUp={onMouseUpLoopRegion}
+            ></div> */}
             <svg
               className={styles.locator}
               style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)' }}
               width="10"
               height="10"
               viewBox="0 0 10 10"
+              onPointerDown={onMouseDownLoopStart}
+              onPointerMove={onMouseMoveLoopStart}
+              onPointerUp={onMouseUpLoopStart}
             >
               <polygon points="0,0 10,5 0,10" fill="black" />
             </svg>
@@ -202,6 +414,9 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
               width="10"
               height="10"
               viewBox="0 0 10 10"
+              onPointerDown={onMouseDownLoopEnd}
+              onPointerMove={onMouseMoveLoopEnd}
+              onPointerUp={onMouseUpLoopEnd}
             >
               <polygon points="0,5 10,0 10,10" fill="black" />
             </svg>

@@ -63,7 +63,21 @@
   border: 2px solid black;
 }
 
-.loop:hover {
+/* .loop:hover {
+  background-color: rgba(0, 0, 0, 0.25);
+  cursor: grab;
+} */
+
+/* .dragHandle {
+  height: '100%';
+  width: '100%';
+  margin-left: '0.7rem';
+  margin-right: '0.7rem';
+  background-color: 'darkskyblue';
+  border: '2px solid red';
+} */
+
+.dragHandle:hover {
   background-color: rgba(0, 0, 0, 0.25);
   cursor: grab;
 }
