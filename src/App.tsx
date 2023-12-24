@@ -44,6 +44,7 @@ function App() {
   const [showDisclaimer, setShowDisclaimer] = useState(true);
   const [confirmStopAudio, setConfirmStopAudio] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [mixerVisible, setMixerVisible] = useState(false);
 
   const continueChangeProject = useRef<() => void>();
 
@@ -190,6 +191,16 @@ function App() {
           <Popover
             content={
               <Menu>
+                <MenuItem icon="settings" text="Mixer" onClick={() => setMixerVisible(true)} />
+              </Menu>
+            }
+            placement="bottom"
+          >
+            <Button className="bp5-minimal" icon="control" text="View" />
+          </Popover>
+          <Popover
+            content={
+              <Menu>
                 <MenuItem icon="manual" text="Documentation" href="#" onClick={openDocumentation} />
                 <MenuItem
                   icon="git-repo"
@@ -213,7 +224,12 @@ function App() {
           </Popover>
         </Navbar.Group>
       </Navbar>
-      <Project engine={engine} project={project} />
+      <Project
+        engine={engine}
+        project={project}
+        mixerVisible={mixerVisible}
+        setMixerVisible={setMixerVisible}
+      />
     </>
   );
 }

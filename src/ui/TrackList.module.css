@@ -8,6 +8,7 @@
   position: relative;
   grid-column: 2 / span 1;
   /* border: 1px solid goldenrod; */
+  z-index: -1;
 }
 
 .marker {
@@ -16,5 +17,5 @@
   width: 1px;
   border: 1px solid gray;
   top: 0;
-  z-index: 1000000
+  /* z-index: 1000000 */
 }

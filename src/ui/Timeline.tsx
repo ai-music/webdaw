@@ -1,4 +1,4 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useRef, useState } from 'react';
 
 import styles from './Timeline.module.css';
 import { Duration, Location, LocationToTime, TimeSignature } from '../core/Common';
@@ -10,8 +10,11 @@ export interface TimelineProps {
   scale: number;
   timeSignature: TimeSignature;
   converter: LocationToTime;
+  setLoopStart: (loopStart: Location) => void;
   loopStart: Location;
+  setLoopEnd: (loopEnd: Location) => void;
   loopEnd: Location;
+  setEnd: (end: Location) => void;
   end: Location;
   looping: boolean;
 }
@@ -74,8 +77,8 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
   }
 
   const rangeStart = new Location(1, 1, 1);
-  const rangeEnd = new Location(16, 1, 1);
-  const signature = new TimeSignature(4, 4);
+  const rangeEnd = props.end;
+  const signature = props.timeSignature;
 
   type Settings = {
     majorStep: Duration;
@@ -107,19 +110,51 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
 
   const settings = calculateSettings(props.scale);
 
-  const labelIterator = new TimelineGenerator(
-    rangeStart,
-    rangeEnd,
-    settings.majorStep,
-    new TimeSignature(4, 4),
-  );
+  const labelIterator = new TimelineGenerator(rangeStart, rangeEnd, settings.majorStep, signature);
+  const tickIterator = new TimelineGenerator(rangeStart, rangeEnd, settings.minorStep, signature);
 
-  const tickIterator = new TimelineGenerator(
-    rangeStart,
-    rangeEnd,
-    settings.minorStep,
-    new TimeSignature(4, 4),
-  );
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStart = useRef(0);
+  const dragStartValue = useRef(new Location());
+  const dragStartValueTime = useRef(0);
+  const dragTarget = useRef<SVGSVGElement | null>(null);
+
+  function onMouseDownEnd(event: React.PointerEvent<SVGSVGElement>) {
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setIsDragging(true);
+    dragStart.current = event.clientX;
+    dragStartValue.current = props.end;
+    dragStartValueTime.current = props.converter.convertLocation(props.end);
+    dragTarget.current = event.currentTarget;
+  }
+
+  function onMouseMoveEnd(event: React.PointerEvent<SVGSVGElement>) {
+    if (isDragging) {
+      const delta = event.clientX - dragStart.current;
+      const valueTime = dragStartValueTime.current + delta / props.scale / 16;
+      const newValue = props.converter.convertTime(valueTime);
+
+      if (newValue !== props.end) {
+        props.setEnd(newValue);
+      }
+    }
+  }
+
+  function onMouseUpEnd(event: React.PointerEvent<SVGSVGElement>) {
+    if (isDragging) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+      const delta = event.clientX - dragStart.current;
+      const valueTime = dragStartValueTime.current + delta / props.scale / 16;
+      const newValue = props.converter.convertTime(valueTime);
+
+      // TODO: implement snap to settings.minorStep duration
+
+      if (newValue !== props.end) {
+        props.setEnd(newValue);
+      }
+      setIsDragging(false);
+    }
+  }
 
   return (
     <div className={styles.timeline}>
@@ -140,6 +175,7 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
             }}
           >
             <svg
+              className={styles.locator}
               style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)' }}
               width="10"
               height="10"
@@ -148,6 +184,7 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
               <polygon points="0,0 10,5 0,10" fill="black" />
             </svg>
             <svg
+              className={styles.locator}
               style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)' }}
               width="10"
               height="10"
@@ -157,6 +194,7 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
             </svg>
           </div>
           <svg
+            className={styles.locator}
             style={{
               position: 'absolute',
               left: `${props.converter.convertLocation(props.end) * props.scale}rem`,
@@ -167,6 +205,9 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
             width="10"
             height="10"
             viewBox="0 0 10 10"
+            onPointerDown={onMouseDownEnd}
+            onPointerMove={onMouseMoveEnd}
+            onPointerUp={onMouseUpEnd}
           >
             <line x1="0" y1="0" x2="10" y2="0" stroke="black" strokeWidth="2" />
             <polygon points="0,2 10,2 5,10" fill="black" />
