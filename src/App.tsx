@@ -75,10 +75,31 @@ function App() {
           <h1>WebDAW</h1>
           <p>Copyright &copy; 2023 Hans-Martin Will</p>
           <p>
-            WebDAW is a digital audio workstation (DAW) that runs in the browser. It is built using
-            the <a href="https://reactjs.org/">React</a> framework and the{' '}
-            <a href="https://blueprintjs.com/">Blueprint</a> UI toolkit. It utilizes the Web Audio
-            API and the Web MIDI API, which is supported in modern browsers.
+            WebDAW is a digital audio workstation (DAW) that runs in the browser. It utilizes the{' '}
+            <a href="https://www.w3.org/TR/webaudio/" target="_blank" rel="noreferrer">
+              Web Audio API
+            </a>{' '}
+            for audio processing and the{' '}
+            <a href="https://www.w3.org/TR/webmidi/" target="_blank" rel="noreferrer">
+              Web MIDI API
+            </a>{' '}
+            for integration with MIDI instruments, which are supported in modern browsers (
+            <a
+              href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API#browser_compatibility"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Audio
+            </a>
+            ,{' '}
+            <a
+              href="https://developer.mozilla.org/en-US/docs/Web/API/Web_MIDI_API#browser_compatibility"
+              target="_blank"
+              rel="noreferrer"
+            >
+              MIDI
+            </a>
+            ).
           </p>
           <TextArea fill={true} small={true} rows={6}>
             {LICENSE}
