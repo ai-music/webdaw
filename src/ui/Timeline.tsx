@@ -145,9 +145,22 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
       event.currentTarget.releasePointerCapture(event.pointerId);
       const delta = event.clientX - dragStart.current;
       const valueTime = dragStartValueTime.current + delta / props.scale / 16;
-      const newValue = props.converter.convertTime(valueTime);
+      const converter = props.converter;
 
-      // TODO: implement snap to settings.minorStep duration
+      // we simply find a location that is closest to the valueTime
+      const tickIterator = new TimelineGenerator(
+        rangeStart,
+        rangeEnd.add(new Duration(1, 0, 0), signature),
+        settings.minorStep,
+        signature,
+      );
+
+      const newValue = Array.from(tickIterator).reduce((prev, curr) => {
+        return Math.abs(valueTime - converter.convertLocation(prev)) <
+          Math.abs(valueTime - converter.convertLocation(curr))
+          ? prev
+          : curr;
+      });
 
       if (newValue !== props.end) {
         props.setEnd(newValue);
