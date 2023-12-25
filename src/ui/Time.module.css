@@ -1,18 +1,18 @@
 .hours {
-  max-width: 1.0rem;
-  width: 1.0rem;
+  max-width: 1.5rem;
+  width: 1.5rem;
   text-align: center;
 }
 
 .minutes {
-  max-width: 1.0rem;
-  width: 1.0rem;
+  max-width: 1.5rem;
+  width: 1.5rem;
   text-align: center;
 }
 
 .seconds {
-  max-width: 1.0rem;
-  width: 1.0rem;
+  max-width: 1.5rem;
+  width: 1.5rem;
   text-align: center;
 }
 
