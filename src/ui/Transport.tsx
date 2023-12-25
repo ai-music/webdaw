@@ -2,7 +2,7 @@ import { FunctionComponent, useEffect, useState } from 'react';
 import { Location } from './Location';
 import { Time } from './Time';
 import { Button, ButtonGroup, EditableText, Intent, Switch } from '@blueprintjs/core';
-import { Location as LocationValue } from '../core/Common';
+import { Duration, Location as LocationValue } from '../core/Common';
 import { Project as ProjectObj } from '../core/Project';
 import { Engine } from '../core/Engine';
 import { PlaybackPositionEvent, TransportEventType } from '../core/Events';
@@ -37,19 +37,15 @@ export type TransportProps = {
   setEnd: (end: LocationValue) => void;
   end: LocationValue;
 
+  looping: boolean;
+  setLooping: (looping: boolean) => void;
+
   // setBpm: (bpm: number) => void;
   // bpm: number;
   // setNumerator: (numerator: number) => void;
   // numerator: number;
   // setDenominator: (denominator: number) => void;
   // denominator: number;
-  // setLoop: (loop: boolean) => void;
-  // loop: boolean;
-
-  // toBeginning: () => void;
-  // toEnd: () => void;
-  // advance: () => void;
-  // goBack: () => void;
 
   // setPlayback: (playback: PlaybackState) => void;
   // playback: PlaybackState;
@@ -64,33 +60,59 @@ export type TransportProps = {
 
 export const Transport: FunctionComponent<TransportProps> = (props: TransportProps) => {
   const [playback, setPlayback] = useState(PlaybackState.Stopped);
-  const [loop, setLoop] = useState(false);
   const [bpm, setBpm] = useState(120);
   const [numerator, setNumerator] = useState(4);
   const [denominator, setDenominator] = useState(4);
 
   const [showZoom, setShowZoom] = useState(false);
 
+  const timeSignature = props.project.timeSignature;
+
   function onBegin() {
     console.log('To beginning');
     // if the current position is before the loop start, go to the loop start
     // else go to the beginning
+    if (props.current.compare(props.loopStart) > 0) {
+      props.setCurrent(props.loopStart);
+    } else {
+      props.setCurrent(new LocationValue(1, 1, 1));
+    }
   }
 
   function onEnd() {
     console.log('To end');
     // if the current position is before the loop end, go to the loop end
     // else go to the end
+    if (props.current.compare(props.loopEnd) < 0) {
+      props.setCurrent(props.loopEnd);
+    } else {
+      props.setCurrent(props.end);
+    }
   }
 
   function onForward() {
     console.log('Advance...');
     // advance the current position by one bar
+    if (props.end.compare(new LocationValue(2, 1, 1)) <= 0) {
+      // project end is less than or equal to one bar; just go to end
+      props.setCurrent(props.end);
+    } else if (
+      props.current.compare(props.end.sub(new Duration(1, 0, 0), props.project.timeSignature)) < 0
+    ) {
+      // step forward by one bar
+      props.setCurrent(props.current.add(new Duration(1, 0, 0), props.project.timeSignature));
+    } else {
+      // we are less than one bar away from the end, so go to the end
+      props.setCurrent(props.end);
+    }
   }
 
   function onBackward() {
     console.log('Go back...');
     // go back the current position by one bar
+    if (props.current.compare(new LocationValue(2, 1, 1)) > 0) {
+      props.setCurrent(props.current.sub(new Duration(1, 0, 0), props.project.timeSignature));
+    }
   }
 
   function play() {
@@ -116,9 +138,9 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
   }
 
   function repeat() {
-    console.log('Repeat');
+    console.log('Toggle Loop');
     // add loop support to the playback process
-    setLoop(!loop);
+    props.setLooping(!props.looping);
   }
 
   function zoomIn() {
@@ -158,8 +180,8 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
         <Button
           icon="repeat"
           onClick={repeat}
-          active={loop}
-          intent={loop ? Intent.PRIMARY : Intent.NONE}
+          active={props.looping}
+          intent={props.looping ? Intent.PRIMARY : Intent.NONE}
         />
       </ButtonGroup>
       <div>
@@ -199,11 +221,31 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
           />
         </div>
       </div>
-      <Time label="Time" timestamp={props.timestamp} />
-      <Location label="Current" location={props.current} setLocation={props.setCurrent} />
-      <Location label="Loop Start" location={props.loopStart} setLocation={props.setLoopStart} />
-      <Location label="Loop End" location={props.loopEnd} setLocation={props.setLoopEnd} />
-      <Location label="End" location={props.end} setLocation={props.setEnd} />
+      <Time label="Time" timestamp={props.timestamp} setTimestamp={props.setTimestamp} />
+      <Location
+        label="Current"
+        location={props.current}
+        setLocation={props.setCurrent}
+        timeSignature={timeSignature}
+      />
+      <Location
+        label="Loop Start"
+        location={props.loopStart}
+        setLocation={props.setLoopStart}
+        timeSignature={timeSignature}
+      />
+      <Location
+        label="Loop End"
+        location={props.loopEnd}
+        setLocation={props.setLoopEnd}
+        timeSignature={timeSignature}
+      />
+      <Location
+        label="End"
+        location={props.end}
+        setLocation={props.setEnd}
+        timeSignature={timeSignature}
+      />
       <div className={styles.spacer}>&nbsp;</div>
       <ButtonGroup className={styles.zoomButtons}>
         {/* <Popover

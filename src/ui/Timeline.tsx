@@ -17,7 +17,12 @@ export interface TimelineProps {
   loopEnd: Location;
   setEnd: (end: Location) => void;
   end: Location;
+  current: Location;
+  setCurrent: (current: Location) => void;
+  timestamp: number;
+  setTimestamp: (timestamp: number) => void;
   looping: boolean;
+  setLooping: (looping: boolean) => void;
 }
 
 class TimelineGenerator implements IterableIterator<Location> {

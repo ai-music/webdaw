@@ -105,8 +105,10 @@ export class TimeSignature {
      * The note value that represents a beat
      */
     public beatNote: number = 4,
-  ) {
-    /* ... */
+  ) {}
+
+  public get ticksPerBeat(): number {
+    return (PPQN * 4) / this.beatNote;
   }
 
   public static fromJson(file: JSONValue): TimeSignature {

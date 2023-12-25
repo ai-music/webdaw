@@ -4,6 +4,7 @@ import {
   Dialog,
   DialogBody,
   DialogFooter,
+  Drawer,
   Menu,
   MenuDivider,
   MenuItem,
@@ -45,6 +46,8 @@ function App() {
   const [confirmStopAudio, setConfirmStopAudio] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [mixerVisible, setMixerVisible] = useState(false);
+  const [libraryVisible, setLibraryVisible] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const continueChangeProject = useRef<() => void>();
 
@@ -212,7 +215,9 @@ function App() {
           <Popover
             content={
               <Menu>
+                <MenuItem icon="cloud" text="Library" onClick={() => setLibraryVisible(true)} />
                 <MenuItem icon="settings" text="Mixer" onClick={() => setMixerVisible(true)} />
+                <MenuItem icon="cog" text="Settings" onClick={() => setShowSettings(true)} />
               </Menu>
             }
             placement="bottom"
@@ -251,6 +256,13 @@ function App() {
         mixerVisible={mixerVisible}
         setMixerVisible={setMixerVisible}
       />
+      <Drawer
+        isOpen={showSettings}
+        position="right"
+        icon="cog"
+        title="Settings"
+        onClose={() => setShowSettings(false)}
+      ></Drawer>
     </>
   );
 }

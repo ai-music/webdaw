@@ -1,10 +1,11 @@
-import { FunctionComponent } from 'react';
-import { Location as LocationObj } from '../core/Common';
+import { FunctionComponent, useState } from 'react';
+import { Location as LocationObj, TimeSignature } from '../core/Common';
 import { EditableText } from '@blueprintjs/core';
 
 import styles from './Location.module.css';
 
 export type Props = {
+  timeSignature: TimeSignature;
   label: string;
   location: LocationObj;
   setLocation: (location: LocationObj) => void;
@@ -19,34 +20,46 @@ export const Location: FunctionComponent<Props> = (props) => {
       <div>
         <EditableText
           className={styles.bar}
-          value={props.location.bar.toString().padStart(3, '0')}
-          onChange={(value) =>
-            props.setLocation(
-              new LocationObj(parseInt(value), props.location.beat, props.location.tick),
-            )
-          }
-          maxLength={4}
+          minWidth={32}
+          confirmOnEnterKey={true}
+          value={props.location.bar.toString()}
+          onChange={(value) => {
+            const newBars = parseInt(value);
+            if (!isNaN(newBars) && newBars >= 1 && newBars <= 999) {
+              props.setLocation(new LocationObj(newBars, props.location.beat, props.location.tick));
+            }
+          }}
+          selectAllOnFocus={true}
+          maxLength={3}
         />
         <b>:</b>
         <EditableText
           className={styles.beat}
-          value={props.location.beat.toString().padStart(1, '0')}
-          onChange={(value) =>
-            props.setLocation(
-              new LocationObj(props.location.bar, parseInt(value), props.location.tick),
-            )
-          }
+          minWidth={16}
+          confirmOnEnterKey={true}
+          value={props.location.beat.toString()}
+          onChange={(value) => {
+            const newBeats = parseInt(value);
+            if (!isNaN(newBeats) && newBeats >= 1 && newBeats <= props.timeSignature.beatsPerBar) {
+              props.setLocation(new LocationObj(props.location.bar, newBeats, props.location.tick));
+            }
+          }}
+          selectAllOnFocus={true}
           maxLength={2}
         />
         <b>:</b>
         <EditableText
           className={styles.tick}
-          value={props.location.tick.toString().padStart(3, '0')}
-          onChange={(value) =>
-            props.setLocation(
-              new LocationObj(props.location.bar, props.location.beat, parseInt(value)),
-            )
-          }
+          minWidth={32}
+          confirmOnEnterKey={true}
+          value={props.location.tick.toString()}
+          onChange={(value) => {
+            const newTicks = parseInt(value);
+            if (!isNaN(newTicks) && newTicks >= 1 && newTicks <= props.timeSignature.ticksPerBeat) {
+              props.setLocation(new LocationObj(props.location.bar, props.location.beat, newTicks));
+            }
+          }}
+          selectAllOnFocus={true}
           maxLength={4}
         />
       </div>

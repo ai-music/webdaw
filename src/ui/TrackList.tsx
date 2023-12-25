@@ -15,20 +15,13 @@ interface Properties extends TimelineProps {
   engine: Engine;
 }
 
-export const TrackList: FunctionComponent<Properties> = ({ start, scale, tracks, engine }) => {
-  const [timestamp, setTimestamp] = useState(0); // [hh, mm, ss, uuuu]
-
-  const positionEventHandler = (event: PlaybackPositionEvent) => {
-    setTimestamp(event.timestamp);
-  };
-
-  useEffect(() => {
-    engine.registerPlaybackPositionEventHandler(positionEventHandler);
-    return () => {
-      engine.unregisterPlaybackPositionEventHandler(positionEventHandler);
-    };
-  }, []);
-
+export const TrackList: FunctionComponent<Properties> = ({
+  start,
+  scale,
+  tracks,
+  engine,
+  timestamp,
+}) => {
   return (
     <div className={styles.trackList}>
       {tracks.map((track, index) => (

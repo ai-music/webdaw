@@ -278,7 +278,7 @@ export class Engine {
       case TransportEventType.PlaybackEndLocatorChanged:
         // TODO
         break;
-      case TransportEventType.LoopChanged:
+      case TransportEventType.LoopingChanged:
         // TODO
         break;
       case TransportEventType.Started:

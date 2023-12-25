@@ -28,8 +28,30 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
   const [loopEnd, setLoopEnd] = useState(props.project.loopEnd);
   const [end, setEnd] = useState(props.project.end);
 
+  const [looping, setLooping] = useState(props.engine.looping);
+
+  const changeLooping = (looping: boolean) => {
+    setLooping(looping);
+    props.engine.handleTransportEvent({
+      type: TransportEventType.LoopingChanged,
+      looping: looping,
+    });
+  };
+
+  const changeTimestamp = (timestamp: number) => {
+    const position = props.project.locationToTime.convertTime(timestamp);
+    setCurrent(position);
+    setTimestamp(timestamp);
+    props.engine.handleTransportEvent({
+      type: TransportEventType.PositionChanged,
+      location: position,
+    });
+  };
+
   const changeCurrent = (location: LocationValue) => {
+    const timestamp = props.project.locationToTime.convertLocation(location);
     setCurrent(location);
+    setTimestamp(timestamp);
     props.engine.handleTransportEvent({
       type: TransportEventType.PositionChanged,
       location: location,
@@ -94,7 +116,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
         timelineScale={timelineScale}
         setTimelineScale={setTimelineScale}
         timestamp={timestamp}
-        setTimestamp={setTimestamp}
+        setTimestamp={changeTimestamp}
         current={current}
         setCurrent={changeCurrent}
         loopStart={loopStart}
@@ -103,6 +125,8 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
         setLoopEnd={changeLoopEnd}
         end={end}
         setEnd={changeEnd}
+        looping={looping}
+        setLooping={changeLooping}
       />
       <div>
         <Timeline
@@ -110,13 +134,18 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
           scale={timelineScale}
           timeSignature={props.project.timeSignature}
           converter={props.project.locationToTime}
+          timestamp={timestamp}
+          setTimestamp={changeTimestamp}
+          current={current}
+          setCurrent={changeCurrent}
           loopStart={loopStart}
           setLoopStart={changeLoopStart}
           loopEnd={loopEnd}
           setLoopEnd={changeLoopEnd}
           end={end}
           setEnd={changeEnd}
-          looping={props.engine.looping}
+          looping={looping}
+          setLooping={changeLooping}
         />
         <TrackList
           start={timelineStart}
@@ -125,13 +154,18 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
           tracks={props.project.tracks}
           engine={props.engine}
           converter={props.project.locationToTime}
+          timestamp={timestamp}
+          setTimestamp={changeTimestamp}
+          current={current}
+          setCurrent={changeCurrent}
           loopStart={loopStart}
           setLoopStart={changeLoopStart}
           loopEnd={loopEnd}
           setLoopEnd={changeLoopEnd}
           end={end}
           setEnd={changeEnd}
-          looping={props.engine.looping}
+          looping={looping}
+          setLooping={changeLooping}
         />
         <Drawer
           isOpen={props.mixerVisible}

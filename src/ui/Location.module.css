@@ -1,11 +1,17 @@
 .bar {
+  max-width: 2rem;
   width: 2rem;
+  text-align: center;
 }
 
 .beat {
-  width: 1rem;
+  max-width: 1.0rem;
+  width: 1.0rem;
+  text-align: center;
 }
 
 .tick {
+  max-width: 2rem;
   width: 2rem;
+  text-align: center;
 }

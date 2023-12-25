@@ -187,7 +187,7 @@ export enum TransportEventType {
   /**
    * The playback loop mode has been changed.
    */
-  LoopChanged,
+  LoopingChanged,
 
   /**
    * The playback has been started.
@@ -223,7 +223,7 @@ export class TransportEvent {
     public readonly position?: number,
     public readonly location?: Location,
     public readonly bpm?: number,
-    public readonly loop?: boolean,
+    public readonly looping?: boolean,
   ) {
     /* ... */
   }
