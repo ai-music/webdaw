@@ -33,9 +33,11 @@ export class Project implements NamedObject, ToJson, AudioFileResolver {
     public name: string = 'Untitled Project',
     public bpm: number = 120,
     public timeSignature: TimeSignature = new TimeSignature(4, 4),
+    public current: Location = new Location(1, 1, 1),
     public loopStart: Location = new Location(1, 1, 1),
     public loopEnd: Location = new Location(5, 1, 1),
     public end: Location = new Location(5, 1, 1),
+    public looping: boolean = false,
     tracks: AbstractTrack[] = [],
     audioFiles: AudioFile[] = [],
   ) {
@@ -106,8 +108,10 @@ export class Project implements NamedObject, ToJson, AudioFileResolver {
       name: this.name,
       bpm: this.bpm,
       timeSignature: this.timeSignature.toJson(),
+      current: this.current.toJson(),
       loopStart: this.loopStart.toJson(),
       loopEnd: this.loopEnd.toJson(),
+      looping: this.looping,
       end: this.end.toJson(),
       audioFiles: this.audioFiles.map((file) => file.toJson()),
       tracks: this.tracks.map((track) => track.toJson()),
@@ -120,8 +124,10 @@ export class Project implements NamedObject, ToJson, AudioFileResolver {
       const name = dict['name'] as string;
       const bpm = dict['bpm'] as number;
       const timeSignature = TimeSignature.fromJson(dict['timeSignature']);
+      const current = Location.fromJson(dict['current']);
       const loopStart = Location.fromJson(dict['loopStart']);
       const loopEnd = Location.fromJson(dict['loopEnd']);
+      const looping = dict['looping'] as boolean;
       const end = Location.fromJson(dict['end']);
       const filesJson = dict['audioFiles'] as Array<JSONValue>;
 
@@ -144,7 +150,18 @@ export class Project implements NamedObject, ToJson, AudioFileResolver {
 
       const tracks = tracksJson.map((track) => AbstractTrack.fromJson(track, resolver));
 
-      return new Project(name, bpm, timeSignature, loopStart, loopEnd, end, tracks, audioFiles);
+      return new Project(
+        name,
+        bpm,
+        timeSignature,
+        current,
+        loopStart,
+        loopEnd,
+        end,
+        looping,
+        tracks,
+        audioFiles,
+      );
     } else {
       throw Error('Expected a JSON object as argument');
     }

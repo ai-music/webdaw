@@ -188,11 +188,18 @@ export enum TransportEventType {
    * The playback loop mode has been changed.
    */
   LoopingChanged,
+}
 
+export enum PlaybackEventType {
   /**
    * The playback has been started.
    */
   Started,
+
+  /**
+   * Recording has been started.
+   */
+  RecordingStarted,
 
   /**
    * The playback has been stopped.
@@ -220,7 +227,6 @@ export enum TransportEventType {
 export class TransportEvent {
   constructor(
     public readonly type: TransportEventType,
-    public readonly position?: number,
     public readonly location?: Location,
     public readonly bpm?: number,
     public readonly looping?: boolean,
@@ -244,3 +250,19 @@ export class PlaybackPositionEvent {
 }
 
 export type PlaybackPositionEventHandler = (event: PlaybackPositionEvent) => void;
+
+/**
+ * A PlaybackEvent is an event that is related to the playback of the project.
+ *
+ * It is raised by the engine when the playback is started, stopped, or paused.
+ */
+export class PlaybackEvent {
+  constructor(
+    public readonly type: PlaybackEventType,
+    public readonly location?: Location,
+  ) {
+    /* ... */
+  }
+}
+
+export type PlaybackEventHandler = (event: PlaybackEvent) => void;

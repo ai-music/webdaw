@@ -113,6 +113,8 @@ export class InstrumentTrack extends AbstractTrack {
     startTime: number,
     endTime: number,
     converter: LocationToTime,
+    continuationTime?: number,
+    discontinuationTime?: number,
   ): void {
     //throw new Error('Method not implemented.');
   }
@@ -122,6 +124,8 @@ export class InstrumentTrack extends AbstractTrack {
     startTime: number,
     endTime: number,
     converter: LocationToTime,
+    continuationTime?: number,
+    discontinuationTime?: number,
   ): void {
     //throw new Error('Method not implemented.');
   }

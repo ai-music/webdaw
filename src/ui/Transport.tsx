@@ -5,7 +5,12 @@ import { Button, ButtonGroup, EditableText, Intent, Switch } from '@blueprintjs/
 import { Duration, Location as LocationValue } from '../core/Common';
 import { Project as ProjectObj } from '../core/Project';
 import { Engine } from '../core/Engine';
-import { PlaybackPositionEvent, TransportEventType } from '../core/Events';
+import {
+  PlaybackEvent,
+  PlaybackEventType,
+  PlaybackPositionEvent,
+  TransportEventType,
+} from '../core/Events';
 import { MAX_TIMELINE_SCALE, MIN_TIMELINE_SCALE } from './Timeline';
 
 import styles from './Transport.module.css';
@@ -67,6 +72,28 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
   const [showZoom, setShowZoom] = useState(false);
 
   const timeSignature = props.project.timeSignature;
+
+  function onPlaybackEvent(event: PlaybackEvent) {
+    switch (event.type) {
+      case PlaybackEventType.Started:
+        setPlayback(PlaybackState.Playing);
+        break;
+      case PlaybackEventType.Stopped:
+      case PlaybackEventType.Paused:
+        setPlayback(PlaybackState.Stopped);
+        break;
+      case PlaybackEventType.RecordingStarted:
+        setPlayback(PlaybackState.Recording);
+        break;
+    }
+  }
+
+  useEffect(() => {
+    props.engine.registerPlaybackEventHandler(onPlaybackEvent);
+    return () => {
+      props.engine.unregisterPlaybackEventHandler(onPlaybackEvent);
+    };
+  }, [props.engine]);
 
   function onBegin() {
     console.log('To beginning');

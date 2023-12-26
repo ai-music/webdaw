@@ -41,6 +41,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
   const changeTimestamp = (timestamp: number) => {
     const position = props.project.locationToTime.convertTime(timestamp);
     setCurrent(position);
+    props.project.current = position;
     setTimestamp(timestamp);
     props.engine.handleTransportEvent({
       type: TransportEventType.PositionChanged,
@@ -51,6 +52,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
   const changeCurrent = (location: LocationValue) => {
     const timestamp = props.project.locationToTime.convertLocation(location);
     setCurrent(location);
+    props.project.current = location;
     setTimestamp(timestamp);
     props.engine.handleTransportEvent({
       type: TransportEventType.PositionChanged,

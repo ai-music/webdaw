@@ -63,6 +63,8 @@ export class MidiTrack extends AbstractTrack {
     startTime: number,
     endTime: number,
     converter: LocationToTime,
+    continuationTime?: number,
+    discontinuationTime?: number,
   ): void {
     /* No audio events on pure MIDI tracks */
   }
@@ -72,6 +74,8 @@ export class MidiTrack extends AbstractTrack {
     startTime: number,
     endTime: number,
     converter: LocationToTime,
+    continuationTime?: number,
+    discontinuationTime?: number,
   ): void {
     throw new Error('Method not implemented.');
   }

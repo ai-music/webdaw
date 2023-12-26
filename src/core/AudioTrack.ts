@@ -110,17 +110,47 @@ export class AudioTrack extends AbstractTrack {
     startTime: number,
     endTime: number,
     converter: LocationToTime,
+    continuationTime?: number,
+    discontinuationTime?: number,
   ): void {
-    // In the simplest case, find an audio region that overlaps the time range and schedule it.
-    //
-    // TODO: There are a lot of things missing here for proper playback of regions, including
-    // limiting the audible part of the region to the time range, and handling looping.
-    // In this simplistic form, it is also not possible to cancel playback while it is in the
-    // process of being rendered.
     this.regions.forEach((region) => {
+      // TODO: The current code will handle looping at the arrangement level, but not looping of
+      // individual audio regions. This will be added later.
       const startPosition = converter.convertLocation(region.position);
+      var endPosition =
+        startPosition + converter.convertDurationAtLocation(region.length, region.position);
+
+      if (discontinuationTime !== undefined && endPosition > discontinuationTime) {
+        endPosition = discontinuationTime;
+      }
+
       console.log(`Region ${region.name} starts at ${startPosition}`);
-      if (startPosition > startTime && startPosition <= endTime) {
+
+      if (
+        continuationTime !== undefined &&
+        startPosition < continuationTime &&
+        endPosition >= continuationTime
+      ) {
+        // Here we have a region that intersects a playback start or a loop start upon loop iteration.
+        console.log(`Scheduling straddling audio region ${region.name} at ${continuationTime}`);
+        const state = this.audioState!;
+        const context = state.panner.context;
+        const source = context.createBufferSource();
+        const buffer = region.audioFile.buffer;
+        console.log(`Buffer duration: ${buffer.duration}`);
+        source.buffer = buffer;
+        source.connect(state.panner);
+        const duration = Math.min(buffer.duration, endPosition - continuationTime);
+        const offset = continuationTime - startPosition;
+        source.start(timeOffset + continuationTime, offset, duration);
+
+        // trim playback if needed
+        if (discontinuationTime !== undefined && endPosition >= discontinuationTime) {
+          console.log(`Scheduling stop of audio region ${region.name} at ${discontinuationTime}`);
+          source.stop(timeOffset + discontinuationTime);
+        }
+      } else if (startPosition > startTime && startPosition <= endTime) {
+        // Here we have a regular region that is scheduled to play back.
         console.log(`Scheduling audio region ${region.name} at ${startPosition}`);
         const state = this.audioState!;
         const context = state.panner.context;
@@ -129,9 +159,14 @@ export class AudioTrack extends AbstractTrack {
         console.log(`Buffer duration: ${buffer.duration}`);
         source.buffer = buffer;
         source.connect(state.panner);
-        const bufferDuration = converter.convertDurationAtLocation(region.length, region.position);
-        const duration = Math.min(buffer.duration, bufferDuration);
+        const duration = Math.min(buffer.duration, endPosition - startPosition);
         source.start(timeOffset + startPosition, 0, duration);
+
+        // trim playback if needed
+        if (discontinuationTime !== undefined && endPosition >= discontinuationTime) {
+          console.log(`Scheduling stop of audio region ${region.name} at ${discontinuationTime}`);
+          source.stop(timeOffset + discontinuationTime);
+        }
       }
     });
   }
@@ -141,6 +176,8 @@ export class AudioTrack extends AbstractTrack {
     startTime: number,
     endTime: number,
     converter: LocationToTime,
+    continuationTime?: number,
+    discontinuationTime?: number,
   ): void {
     /* No MIDI events on pure audio tracks */
   }

@@ -58,12 +58,17 @@ export interface TrackInterface
    * @param startTime the start time of the time range for which AudioParam changes should be scheduled (exclusive).
    * @param endTime the end time of the time range for which AudioParam changes should be scheduled (inclusive).
    * @param converter an object that converts a location within the arrangement to a time within the audio context.
+   * @param continuationTime if provided, any audio that started prior to the schedulinging interval but continues
+   *  to play at this time will be scheduled as well.
+   * @param discontinuationTime if provided, any audio signal that is being scheduled should be stopped at this time.
    */
   scheduleAudioEvents(
     timeOffset: number,
     startTime: number,
     endTime: number,
     converter: LocationToTime,
+    continuationTime?: number,
+    discontinuationTime?: number,
   ): void;
 
   /**
@@ -77,12 +82,17 @@ export interface TrackInterface
    * @param startTime the start time of the time range for which MIDI events should be scheduled (exclusive).
    * @param endTime the end time of the time range for which MIDI events should be scheduled (inclusive).
    * @param converter an object that converts a location within the arrangement to a time within the audio context.
+   * @param continuationTime if provided, any audio that started prior to the schedulinging interval but continues
+   *  to play at this time will be scheduled as well.
+   * @param discontinuationTime if provided, any audio signal that is being scheduled should be stopped at this time.
    */
   scheduleMidiEvents(
     currentTime: number,
     startTime: number,
     endTime: number,
     converter: LocationToTime,
+    continuationTime?: number,
+    discontinuationTime?: number,
   ): void;
 
   /**
@@ -139,12 +149,16 @@ export abstract class AbstractTrack implements TrackInterface, ToJson {
     startTime: number,
     endTime: number,
     converter: LocationToTime,
+    continuationTime?: number,
+    discontinuationTime?: number,
   ): void;
   abstract scheduleMidiEvents(
     currentTime: number,
     startTime: number,
     endTime: number,
     converter: LocationToTime,
+    continuationTime?: number,
+    discontinuationTime?: number,
   ): void;
 
   /**
