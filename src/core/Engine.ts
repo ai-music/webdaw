@@ -210,9 +210,6 @@ export class Engine {
       this._playing = true;
       this._stopRequested = false;
 
-      // Run the first callback.
-      this.scheduler(true);
-
       // Notify listeners of the playback start.
       if (this.playbackEventHandlers.length > 0) {
         const event = new PlaybackEvent(PlaybackEventType.Started, this.current);
@@ -220,6 +217,9 @@ export class Engine {
           handler(event);
         });
       }
+
+      // Run the first callback.
+      this.scheduler(true);
     }
   }
 
@@ -347,6 +347,8 @@ export class Engine {
     }
 
     // Notify listeners of the current playback head position.
+    this._project.current = locationToTime.convertTime(arrangementTime);
+
     if (this.playbackPositionEventHandlers.length > 0) {
       const event = new PlaybackPositionEvent(
         locationToTime.convertTime(arrangementTime),
@@ -362,6 +364,8 @@ export class Engine {
       setTimeout(() => this.scheduler(), (this.scheduleInterval - clockDrift) * 1000);
     } else {
       this._playing = false;
+
+      this._project.current = locationToTime.convertTime(stopTime);
 
       // Notify listeners of the playback start.
       if (this.playbackEventHandlers.length > 0) {
