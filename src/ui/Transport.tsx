@@ -81,6 +81,7 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
       case PlaybackEventType.Stopped:
       case PlaybackEventType.Paused:
         setPlayback(PlaybackState.Stopped);
+        props.setCurrent(event.location!);
         break;
       case PlaybackEventType.RecordingStarted:
         setPlayback(PlaybackState.Recording);

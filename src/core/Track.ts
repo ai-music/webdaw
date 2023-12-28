@@ -3,7 +3,6 @@ import {
   ColoredObject,
   JSONObject,
   JSONValue,
-  Location,
   LocationToTime,
   MutableObject,
   NamedObject,
@@ -96,6 +95,19 @@ export interface TrackInterface
   ): void;
 
   /**
+   * Perform any housekeeping tasks that need to be done on a regular basis.
+   * This method is called by the engine at regular intervals.
+   *
+   * @param currentTime The current time of the performance as exposed by {@link BaseAudioContext.currentTime}.
+   */
+  housekeeping(currentTime: number): void;
+
+  /**
+   * Stop any playback immediately.
+   */
+  stop(): void;
+
+  /**
    * Accessor to regions on this track.
    */
   regions: RegionInterface[];
@@ -153,13 +165,15 @@ export abstract class AbstractTrack implements TrackInterface, ToJson {
     discontinuationTime?: number,
   ): void;
   abstract scheduleMidiEvents(
-    currentTime: number,
+    timeOffset: number,
     startTime: number,
     endTime: number,
     converter: LocationToTime,
     continuationTime?: number,
     discontinuationTime?: number,
   ): void;
+  abstract housekeeping(currentTime: number): void;
+  abstract stop(): void;
 
   /**
    * Concrete sub-classes implement this type tag property used for conversion to JSON.

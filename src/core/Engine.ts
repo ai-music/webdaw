@@ -69,8 +69,6 @@ export class Engine {
     this.loopStart = this._project.loopStart;
     this.loopEnd = this._project.loopEnd;
     this.end = this._project.end;
-
-    this.currentTime = this._project.locationToTime.convertLocation(this.current);
   }
 
   /**
@@ -128,7 +126,7 @@ export class Engine {
 
   // What was the high-precision time (relative to audio system time) of the last AUDIO event that was scheduled?
   // As measured from the beginning of the arrangement.
-  private lastScheduledAudioTime = 0;
+  private lastScheduledArrangementTime = 0;
 
   // What was the high-precision time (relative to MIDI system time) of the last MIDI event that was scheduled?
   // As measured from the beginning of the arrangement.
@@ -145,9 +143,6 @@ export class Engine {
 
   // Has a stop been requested?
   private _stopRequested = false;
-
-  // Is this the initial calback into the rendering loop?
-  private _isFirstCallback = true;
 
   // The last callback time into the rendering loop as measured by the audio system clock.
   private _lastCallbackTime = 0;
@@ -172,6 +167,9 @@ export class Engine {
         this.context.resume();
       }
 
+      // Stop any playback that is currently happening; it's no-op when nothing is playing
+      this.silenceTracks();
+
       // Bind tracks to audio destination; this is a no-op when those bindings already exist
       this._project.tracks.forEach((track) => {
         track.initializeAudio(this.context);
@@ -183,6 +181,7 @@ export class Engine {
       // sync locators from project
       this.syncLocatorsFromProject();
 
+      // Convert the locators to arrangement time
       this._loopStartTime = converter.convertLocation(this.loopStart);
       this._loopEndTime = converter.convertLocation(
         this.loopEnd.sub(new Duration(0, 0, 1), this.project.timeSignature),
@@ -190,26 +189,33 @@ export class Engine {
       this._endTime = converter.convertLocation(
         this.end.sub(new Duration(0, 0, 1), this.project.timeSignature),
       );
-
-      const startLocation = this.current;
+      this.currentTime = converter.convertLocation(this.current);
 
       // Reset the last callback time and the time offset from audio to arrangement time
       const audioTime = this.context.currentTime;
       this._lastCallbackTime = audioTime - this.scheduleInterval;
-      this.lastScheduledAudioTime = this.currentTime;
       this._timeOffset = audioTime - this.currentTime;
+
+      if (this.currentTime <= 0) {
+        // At the very beginning, just move a minimum amount earlier
+        this.lastScheduledArrangementTime = -Number.EPSILON;
+      } else {
+        // Anywhere beyond the beginning, move by one tick earlier
+        this.lastScheduledArrangementTime = this.project.locationToTime.convertLocation(
+          this.current.sub(new Duration(0, 0, 1), this.project.timeSignature),
+        );
+      }
 
       // Update the state variables that guide the behavior of the scheduler
       this._playing = true;
       this._stopRequested = false;
-      this._isFirstCallback = true;
 
       // Run the first callback.
-      this.scheduler();
+      this.scheduler(true);
 
       // Notify listeners of the playback start.
       if (this.playbackEventHandlers.length > 0) {
-        const event = new PlaybackEvent(PlaybackEventType.Started, startLocation);
+        const event = new PlaybackEvent(PlaybackEventType.Started, this.current);
         this.playbackEventHandlers.forEach((handler) => {
           handler(event);
         });
@@ -220,14 +226,15 @@ export class Engine {
   /**
    * Stop playback of audio and MIDI by the rendering engine.
    */
-  public stop(): void {
+  public stop(immediately: boolean = false): void {
     this._stopRequested = true;
+    this.silenceTracks();
   }
 
   /**
    * The scheduler is the main loop of the rendering engine.
    */
-  scheduler(): void {
+  scheduler(isFirstCallback: boolean = false): void {
     if (this.context.state === 'suspended') {
       this.context.resume().then(() => {
         this.scheduler();
@@ -236,7 +243,7 @@ export class Engine {
     }
 
     const locationToTime = this._project.locationToTime;
-    var continuationTime: number | undefined = undefined;
+    var continuationTime: number | undefined = isFirstCallback ? this.currentTime : undefined;
 
     // Get the current time of the audio system.
     const callbackTime = this.context.currentTime;
@@ -253,42 +260,23 @@ export class Engine {
     const clockDrift = deltaTime - this.scheduleInterval;
 
     // Logical time within the arrangement
-
-    // TODO: What is the correct way to restart the playback from a given location?
-    // This has two parts:
-    // - determining the right lastScheduledAudioTime for continuing playback
-    // - scheduling any audio that is still playing at the current position, but
-    //   possibly adjusting its start to match the current position
     const arrangementTime = callbackTime - this._timeOffset;
 
-    var lastScheduledAudioTime = this.lastScheduledAudioTime;
+    var lastScheduledArrangementTime = this.lastScheduledArrangementTime;
 
-    if (this._isFirstCallback) {
-      // TODO: We should provide a bit of scheduling headroom when starting playback
-      // to avoid glitches. This is especially important when starting playback
-      // at the beginning of the arrangement, because we are likely to schedule
-      // a lot of audio events at once. Ideally that is captured by adjusting the
-      // time offset between audio system time and arrangement time.
+    // trigger housekeeping on all tracks
+    this._project.tracks.forEach((track) => {
+      track.housekeeping(callbackTime);
+    });
 
-      if (this.lastScheduledAudioTime <= 0) {
-        // At the very beginning, just move a minimum amount earlier
-        lastScheduledAudioTime = -Number.EPSILON;
-      } else {
-        // Anywhere beyond the beginning, move by one tick earlier
-        lastScheduledAudioTime = this.project.locationToTime.convertLocation(
-          this.current.sub(new Duration(0, 0, 1), this.project.timeSignature),
-        );
-        continuationTime = this.currentTime;
-      }
-
-      this._isFirstCallback = false;
-    }
-
-    // Ensure that we do not schedule beyond the end of the arrangement
+    // Ensure that we do not schedule beyond the end of the arrangement. In particular,
+    // if the user requested stopping the performance, don't schedule anything beyond.
     const scheduleAheadTime = Math.min(
-      Math.min(lastScheduledAudioTime, arrangementTime) + this.scheduleAhead,
-      this._endTime,
+      Math.min(lastScheduledArrangementTime, arrangementTime) + this.scheduleAhead,
+      this._stopRequested ? lastScheduledArrangementTime : this._endTime,
     );
+
+    var stopTime = this._stopRequested ? lastScheduledArrangementTime : this._endTime;
 
     // if we are not looing and will schedule to the end, then request a stop at the end of this
     // scheduling interval
@@ -297,24 +285,25 @@ export class Engine {
     }
 
     console.log(`arrangementTime: ${arrangementTime}`);
-    console.log(`lastScheduledAudioTime: ${this.lastScheduledAudioTime}`);
+    console.log(`lastScheduledAudioTime: ${this.lastScheduledArrangementTime}`);
     console.log(`scheduleAheadTime: ${scheduleAheadTime}`);
 
     // If we are playing, then schedule audio and MIDI events.
     if (this._playing) {
       const crossingLoopEnd =
-        this.lastScheduledAudioTime < this._loopEndTime && scheduleAheadTime >= this._loopEndTime;
+        this.lastScheduledArrangementTime < this._loopEndTime &&
+        scheduleAheadTime >= this._loopEndTime;
 
       if (!this.looping || !crossingLoopEnd) {
         var discontinuationTime = this._endTime;
-        if (this.looping && lastScheduledAudioTime < this._loopEndTime) {
+        if (this.looping && lastScheduledArrangementTime < this._loopEndTime) {
           discontinuationTime = this._loopEndTime;
         }
 
         this._project.tracks.forEach((track) => {
           track.scheduleAudioEvents(
             this._timeOffset,
-            lastScheduledAudioTime,
+            lastScheduledArrangementTime,
             scheduleAheadTime,
             locationToTime,
             continuationTime,
@@ -322,12 +311,12 @@ export class Engine {
           );
         });
 
-        this.lastScheduledAudioTime = scheduleAheadTime;
+        this.lastScheduledArrangementTime = scheduleAheadTime;
       } else {
         this._project.tracks.forEach((track) => {
           track.scheduleAudioEvents(
             this._timeOffset,
-            lastScheduledAudioTime,
+            lastScheduledArrangementTime,
             this._loopEndTime,
             locationToTime,
             continuationTime,
@@ -353,8 +342,19 @@ export class Engine {
           );
         });
 
-        this.lastScheduledAudioTime = remainder;
+        this.lastScheduledArrangementTime = remainder;
       }
+    }
+
+    // Notify listeners of the current playback head position.
+    if (this.playbackPositionEventHandlers.length > 0) {
+      const event = new PlaybackPositionEvent(
+        locationToTime.convertTime(arrangementTime),
+        arrangementTime,
+      );
+      this.playbackPositionEventHandlers.forEach((handler) => {
+        handler(event);
+      });
     }
 
     // If we are playing and not stopped, then schedule the next callback.
@@ -367,27 +367,12 @@ export class Engine {
       if (this.playbackEventHandlers.length > 0) {
         const event = new PlaybackEvent(
           PlaybackEventType.Stopped,
-          locationToTime.convertTime(lastScheduledAudioTime),
+          locationToTime.convertTime(stopTime),
         );
         this.playbackEventHandlers.forEach((handler) => {
           handler(event);
         });
       }
-    }
-
-    // TODO: Need to revisit the logic for when we update the visual playback position.
-    // For example, if we triggered a stop, then the current position should be
-    // exactly at the end of the playback, and not proceeding from then on.
-
-    // Notify listeners of the current playback head position.
-    if (this.playbackPositionEventHandlers.length > 0) {
-      const event = new PlaybackPositionEvent(
-        locationToTime.convertTime(arrangementTime),
-        arrangementTime,
-      );
-      this.playbackPositionEventHandlers.forEach((handler) => {
-        handler(event);
-      });
     }
   }
 
@@ -542,5 +527,14 @@ export class Engine {
    */
   public unregisterPlaybackEventHandler(handler: PlaybackEventHandler): void {
     this.playbackEventHandlers = this.playbackEventHandlers.filter((h) => h !== handler);
+  }
+
+  /**
+   * Stop rendering of all audio and MIDI.
+   */
+  private silenceTracks(): void {
+    this._project.tracks.forEach((track) => {
+      track.stop();
+    });
   }
 }

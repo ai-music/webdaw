@@ -1,3 +1,4 @@
+import { start } from 'repl';
 import { Registry } from '../effects/Default';
 import { AudioEffect } from './AudioEffect';
 import { AudioFileResolver } from './AudioFile';
@@ -9,6 +10,20 @@ type AudioState = {
   panner: StereoPannerNode;
   gain: GainNode;
 };
+
+/**
+ * A record type to keep track of the audio nodes that are currently active in the audio context.
+ */
+type ActiveAudioState = {
+  // Refrence to the audio node that is currently playing back
+  node: AudioScheduledSourceNode;
+
+  // The time at which the audio node will be done generating audio
+  activeUntil: number;
+};
+
+// Additional time we are applying to the end of the audio region to ensure that it is completely played back
+const housekeepingSlack = 0.1;
 
 /**
  * An AudioTrack is a track that contains audio regions, which represent fragments of audio
@@ -32,6 +47,12 @@ export class AudioTrack extends AbstractTrack {
    * used for rendering within an audio context.
    */
   audioState: AudioState | null = null;
+
+  /**
+   * The audio state of this track. This is used to keep track of the audio nodes that are
+   * currently active in the audio context.
+   */
+  activeAudioStates: ActiveAudioState[] = [];
 
   constructor(
     regions: AudioRegion[],
@@ -148,6 +169,15 @@ export class AudioTrack extends AbstractTrack {
         if (discontinuationTime !== undefined && endPosition >= discontinuationTime) {
           console.log(`Scheduling stop of audio region ${region.name} at ${discontinuationTime}`);
           source.stop(timeOffset + discontinuationTime);
+          this.activeAudioStates.push({
+            node: source,
+            activeUntil: timeOffset + discontinuationTime,
+          });
+        } else {
+          this.activeAudioStates.push({
+            node: source,
+            activeUntil: timeOffset + endPosition,
+          });
         }
       } else if (startPosition > startTime && startPosition <= endTime) {
         // Here we have a regular region that is scheduled to play back.
@@ -166,6 +196,15 @@ export class AudioTrack extends AbstractTrack {
         if (discontinuationTime !== undefined && endPosition >= discontinuationTime) {
           console.log(`Scheduling stop of audio region ${region.name} at ${discontinuationTime}`);
           source.stop(timeOffset + discontinuationTime);
+          this.activeAudioStates.push({
+            node: source,
+            activeUntil: timeOffset + discontinuationTime,
+          });
+        } else {
+          this.activeAudioStates.push({
+            node: source,
+            activeUntil: timeOffset + startPosition + duration,
+          });
         }
       }
     });
@@ -180,5 +219,25 @@ export class AudioTrack extends AbstractTrack {
     discontinuationTime?: number,
   ): void {
     /* No MIDI events on pure audio tracks */
+  }
+
+  housekeeping(currentTime: number): void {
+    // Remove any audio states that are no longer active
+    this.activeAudioStates = this.activeAudioStates.filter((state) => {
+      if (state.activeUntil < currentTime + housekeepingSlack) {
+        // Strictly speaking, the node should have stopped already, but we'll be nice and stop it again.
+        state.node.stop();
+        return false;
+      } else {
+        return true;
+      }
+    });
+  }
+
+  stop(): void {
+    this.activeAudioStates.forEach((state) => {
+      state.node.stop();
+    });
+    this.activeAudioStates = [];
   }
 }

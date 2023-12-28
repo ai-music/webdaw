@@ -90,6 +90,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
   const positionEventHandler = (event: PlaybackPositionEvent) => {
     setCurrent(event.location);
     setTimestamp(event.timestamp);
+    props.project.current = event.location;
   };
 
   useEffect(() => {

@@ -79,4 +79,7 @@ export class MidiTrack extends AbstractTrack {
   ): void {
     throw new Error('Method not implemented.');
   }
+
+  housekeeping(currentTime: number): void {}
+  stop(): void {}
 }
