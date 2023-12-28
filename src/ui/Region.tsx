@@ -2,7 +2,7 @@ import { FunctionComponent, useEffect, useRef, useState } from 'react';
 
 import styles from './Region.module.css';
 import { RegionDataType, RegionInterface } from '../core/Region';
-import { Location, LocationToTime } from '../core/Common';
+import { LocationToTime } from '../core/Common';
 
 export interface RegionProps {
   region: RegionInterface;
@@ -86,7 +86,7 @@ export const Region: FunctionComponent<RegionProps> = (props: RegionProps) => {
       console.log('re-rendering audio');
       renderData.current = audioToImage(props.region.data.audioBuffer, width * 16, 0, duration);
     }
-  }, [props.scale, props.region.length]);
+  }, [duration, props.scale, props.region.length]);
 
   function toggleSelection() {
     setSelected(!selected);
