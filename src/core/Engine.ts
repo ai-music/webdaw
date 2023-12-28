@@ -1,5 +1,4 @@
 import { Duration, Location } from './Common';
-import { PPQN } from './Config';
 import {
   PlaybackEvent,
   PlaybackEventHandler,
@@ -9,7 +8,6 @@ import {
   RegionEvent,
   RegionEventType,
   TrackEvent,
-  TrackEventArgs,
   TrackEventType,
   TransportEvent,
   TransportEventType,
