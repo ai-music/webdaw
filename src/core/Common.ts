@@ -417,3 +417,13 @@ export interface LocationToTime {
    */
   timeSignatureAtLocation: (location: Location) => TimeSignature;
 }
+
+/**
+ * Assertion function that throws an error if the given condition is false.
+ *
+ * @param condition   the condition to check
+ * @param msg         the error message to throw if the condition is false
+ */
+export function assert(condition: unknown, msg?: string): asserts condition {
+  if (condition === false) throw new Error(msg);
+}

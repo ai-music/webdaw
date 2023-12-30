@@ -1,5 +1,5 @@
 import { AudioFile } from './AudioFile';
-import { Location, LocationToTime, MutableObject, NamedObject, PUBLIC_URL } from './Common';
+import { Location, LocationToTime, MutableObject, NamedObject, PUBLIC_URL, assert } from './Common';
 import { PlaybackScheduling } from './Track';
 
 type AudioState = {
@@ -43,8 +43,11 @@ export class Metronome implements PlaybackScheduling, NamedObject, MutableObject
       const gain = context.createGain();
       gain.connect(context.destination);
       this._audioState = { gain };
-    } else if (this._audioState.gain.context !== context) {
-      throw new Error('Audio nodes already initialized with a different audio context');
+    } else {
+      assert(
+        this._audioState.gain.context === context,
+        'Audio nodes already initialized with a different audio context',
+      );
     }
   }
 

@@ -1,11 +1,9 @@
-import { start } from 'repl';
 import { Registry } from '../effects/Default';
 import { AudioEffect } from './AudioEffect';
 import { AudioFileResolver } from './AudioFile';
 import { AudioRegion } from './AudioRegion';
-import { JSONObject, JSONValue, Location, LocationToTime } from './Common';
+import { JSONObject, JSONValue, Location, LocationToTime, assert } from './Common';
 import { AbstractTrack } from './Track';
-import { time } from 'console';
 
 type AudioState = {
   panner: StereoPannerNode;
@@ -85,8 +83,11 @@ export class AudioTrack extends AbstractTrack {
       panner.connect(gain);
       gain.connect(context.destination);
       this.audioState = { gain, panner };
-    } else if (this.audioState.gain.context !== context) {
-      throw new Error('Audio nodes already initialized with a different audio context');
+    } else {
+      assert(
+        this.audioState.gain.context === context,
+        'Audio nodes already initialized with a different audio context',
+      );
     }
   }
 
