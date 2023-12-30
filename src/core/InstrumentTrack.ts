@@ -113,6 +113,7 @@ export class InstrumentTrack extends AbstractTrack {
     startTime: number,
     endTime: number,
     converter: LocationToTime,
+    loopIteration: number,
     continuationTime?: number,
     discontinuationTime?: number,
   ): void {
@@ -124,11 +125,20 @@ export class InstrumentTrack extends AbstractTrack {
     startTime: number,
     endTime: number,
     converter: LocationToTime,
+    loopIteration: number,
     continuationTime?: number,
     discontinuationTime?: number,
   ): void {
     //throw new Error('Method not implemented.');
   }
+
+  adjustDiscontinuationTime(
+    timeOffset: number,
+    oldDiscontinuationTime: number,
+    newDiscontinuationTime: number,
+    converter: LocationToTime,
+    loopIteration: number,
+  ): void {}
 
   housekeeping(currentTime: number): void {}
   stop(): void {}

@@ -57,6 +57,7 @@ export interface TrackInterface
    * @param startTime the start time of the time range for which AudioParam changes should be scheduled (exclusive).
    * @param endTime the end time of the time range for which AudioParam changes should be scheduled (inclusive).
    * @param converter an object that converts a location within the arrangement to a time within the audio context.
+   * @param loopIteration the current loop iteration
    * @param continuationTime if provided, any audio that started prior to the schedulinging interval but continues
    *  to play at this time will be scheduled as well.
    * @param discontinuationTime if provided, any audio signal that is being scheduled should be stopped at this time.
@@ -66,6 +67,7 @@ export interface TrackInterface
     startTime: number,
     endTime: number,
     converter: LocationToTime,
+    loopIteration: number,
     continuationTime?: number,
     discontinuationTime?: number,
   ): void;
@@ -77,21 +79,42 @@ export interface TrackInterface
    * Please see description of {@link TrackInterface#scheduleAudioEvents} for an explanation of the
    * semantics of the first parameter.
    *
-   * @param currentTime the current time of the performance within the arrangement
+   * @param timeOffset the offset value to add to arrangement times when scheduling events in the audio context.
    * @param startTime the start time of the time range for which MIDI events should be scheduled (exclusive).
    * @param endTime the end time of the time range for which MIDI events should be scheduled (inclusive).
    * @param converter an object that converts a location within the arrangement to a time within the audio context.
+   * @param loopIteration the current loop iteration
    * @param continuationTime if provided, any audio that started prior to the schedulinging interval but continues
    *  to play at this time will be scheduled as well.
    * @param discontinuationTime if provided, any audio signal that is being scheduled should be stopped at this time.
    */
   scheduleMidiEvents(
-    currentTime: number,
+    timeOffset: number,
     startTime: number,
     endTime: number,
     converter: LocationToTime,
+    loopIteration: number,
     continuationTime?: number,
     discontinuationTime?: number,
+  ): void;
+
+  /**
+   * Adjust the the discontinuationTime for regions that are currently playing back. This is used when
+   * the playback end locator or the arrangement end locator is moved during playback.
+   *
+   * Only regions playback for the current loop iteration are being adjusted.
+   *
+   * @param oldDicontinuationTime the old continuation time
+   * @param newDiscontinuationTime the new continuation time
+   * @param converter an object that converts a location within the arrangement to a time (relative to arrangement start).
+   * @param loopIteration the current loop iteration
+   */
+  adjustDiscontinuationTime(
+    timeOffset: number,
+    oldDiscontinuationTime: number,
+    newDiscontinuationTime: number,
+    converter: LocationToTime,
+    loopIteration: number,
   ): void;
 
   /**
@@ -161,6 +184,7 @@ export abstract class AbstractTrack implements TrackInterface, ToJson {
     startTime: number,
     endTime: number,
     converter: LocationToTime,
+    loopIteration: number,
     continuationTime?: number,
     discontinuationTime?: number,
   ): void;
@@ -169,8 +193,16 @@ export abstract class AbstractTrack implements TrackInterface, ToJson {
     startTime: number,
     endTime: number,
     converter: LocationToTime,
+    loopIteration: number,
     continuationTime?: number,
     discontinuationTime?: number,
+  ): void;
+  abstract adjustDiscontinuationTime(
+    timeOffset: number,
+    oldDiscontinuationTime: number,
+    newDiscontinuationTime: number,
+    converter: LocationToTime,
+    loopIteration: number,
   ): void;
   abstract housekeeping(currentTime: number): void;
   abstract stop(): void;

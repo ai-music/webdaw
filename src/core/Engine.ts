@@ -149,6 +149,10 @@ export class Engine {
   // the audio system time at playback start minus the performance time at playback start.
   private _timeOffset = 0;
 
+  // Loop iteration counter; it is reset to 0 when playback starts and incremented by 1
+  // when playback jumps to the beginning of the loop.
+  private _loopIteration = 0;
+
   /**
    * Is the engine currently playing?
    */
@@ -207,6 +211,7 @@ export class Engine {
       // Update the state variables that guide the behavior of the scheduler
       this._playing = true;
       this._stopRequested = false;
+      this._loopIteration = 0;
 
       // Notify listeners of the playback start.
       if (this.playbackEventHandlers.length > 0) {
@@ -245,8 +250,8 @@ export class Engine {
 
     // Get the current time of the audio system.
     const callbackTime = this.context.currentTime;
-    console.log(`callbackTime: ${callbackTime}`);
-    console.log(`context.state: ${this.context.state}`);
+    // console.log(`callbackTime: ${callbackTime}`);
+    // console.log(`context.state: ${this.context.state}`);
 
     // How much time has passed since the last callback?
     const deltaTime = callbackTime - this._lastCallbackTime;
@@ -282,9 +287,9 @@ export class Engine {
       this._stopRequested = true;
     }
 
-    console.log(`arrangementTime: ${arrangementTime}`);
-    console.log(`lastScheduledAudioTime: ${this.lastScheduledArrangementTime}`);
-    console.log(`scheduleAheadTime: ${scheduleAheadTime}`);
+    // console.log(`arrangementTime: ${arrangementTime}`);
+    // console.log(`lastScheduledAudioTime: ${this.lastScheduledArrangementTime}`);
+    // console.log(`scheduleAheadTime: ${scheduleAheadTime}`);
 
     // If we are playing, then schedule audio and MIDI events.
     if (this._playing) {
@@ -304,6 +309,7 @@ export class Engine {
             lastScheduledArrangementTime,
             scheduleAheadTime,
             locationToTime,
+            this._loopIteration,
             continuationTime,
             discontinuationTime,
           );
@@ -317,6 +323,7 @@ export class Engine {
             lastScheduledArrangementTime,
             this._loopEndTime,
             locationToTime,
+            this._loopIteration,
             continuationTime,
             this._loopEndTime,
           );
@@ -326,6 +333,8 @@ export class Engine {
 
         // increase the scheduling offset to convert from audio system time to arrangement time
         this._timeOffset += this._loopEndTime - this._loopStartTime;
+        this._loopIteration += 1;
+        console.log(`loop iteration: ${this._loopIteration}`);
 
         this._project.tracks.forEach((track) => {
           track.scheduleAudioEvents(
@@ -335,6 +344,7 @@ export class Engine {
             ),
             remainder,
             locationToTime,
+            this._loopIteration,
             this._loopStartTime,
             this._loopEndTime,
           );
@@ -378,56 +388,141 @@ export class Engine {
     }
   }
 
+  private adjustPosition(location: Location): void {
+    this.current = location;
+    this.currentTime = this.project.locationToTime.convertLocation(location);
+
+    // TODO: When playing, behavior is to continue playing until we reach the beats and ticks of the new position.
+    // Add that point, we should silence the current playback and effectively schedule a
+    // restart at the new position.
+  }
+
+  private adjustLoopStart(location: Location): void {
+    this.loopStart = location;
+    this._loopStartTime = this.project.locationToTime.convertLocation(location);
+  }
+
+  private adjustLoopEnd(location: Location): void {
+    this.loopEnd = location;
+    const oldLoopEndTime = this._loopEndTime;
+    const newLoopEndTime = this.project.locationToTime.convertLocation(location);
+    this._loopEndTime = newLoopEndTime;
+
+    if (this._project.looping && oldLoopEndTime !== newLoopEndTime) {
+      this._project.tracks.forEach((track) => {
+        // If playback is inside the loop, we need to adjust playback for any audio regions
+        // that are playing back and that have been clipped by the previous loop end time.
+        // There is a perceivable race condition were playback of a region that is clipped by the
+        // loop end time is scheduled to stop right before we are able to adjust the playback time
+        // using the new loop end. However, if we are that close to the loop end, then the scheduler
+        // has already processed jumping of playback to the beginning of the loop. So this is not
+        // a problem.
+        // However, the contrary scenario can be problematic. Loop end is moved to a later time,
+        // when the jump to the start of the loop has already been scheduled. In this case, we
+        // do not want to adjust the plaback time of any audio regions that are still playing
+        // their tail end from the previous loop iteration. To address this, we include a loop
+        // iteration counter within the engine, which can be associated with the active playback
+        // state of each audio region.
+        track.adjustDiscontinuationTime(
+          this._timeOffset,
+          oldLoopEndTime,
+          newLoopEndTime,
+          this.project.locationToTime,
+          this._loopIteration,
+        );
+      });
+    }
+  }
+
+  private adjustEnd(location: Location): void {
+    this.end = location;
+    const oldEndTime = this._endTime;
+    const newEndTime = this.project.locationToTime.convertLocation(location);
+    this._endTime = newEndTime;
+
+    // Similar consideration for updating the playbck duration for regions that are currently
+    // playing back. The playback state will have been updated by the scheduler to no longer
+    // be playing once the end locator has been processed. Therefore, in this branch we are
+    // playing back, regions playback can be safely adjusted.
+    if (oldEndTime !== newEndTime) {
+      this._project.tracks.forEach((track) => {
+        track.adjustDiscontinuationTime(
+          this._timeOffset,
+          oldEndTime,
+          newEndTime,
+          this.project.locationToTime,
+          this._loopIteration,
+        );
+      });
+    }
+  }
+
+  private adjustLooping(looping: boolean): void {
+    if (this.looping === looping) {
+      return;
+    }
+
+    if (this._endTime !== this._loopEndTime) {
+      if (looping) {
+        // looping is turned on: we need to trim the playback time of any audio regions that are
+        // currently playing back and that are crossing the loop end time.
+        this._project.tracks.forEach((track) => {
+          track.adjustDiscontinuationTime(
+            this._timeOffset,
+            this._endTime,
+            this._loopEndTime,
+            this.project.locationToTime,
+            this._loopIteration,
+          );
+        });
+      } else {
+        // looping is turned off: we need to expand the playback time of any audio regions that are
+        // currently playing back and that are trimmed at the loop end time.
+        this._project.tracks.forEach((track) => {
+          track.adjustDiscontinuationTime(
+            this._timeOffset,
+            this._loopEndTime,
+            this._endTime,
+            this.project.locationToTime,
+            this._loopIteration,
+          );
+        });
+      }
+    }
+
+    this.looping = looping;
+  }
+
+  private adjustBpm(bpm: number): never {
+    // Not implemented yet
+    throw new Error('Method not implemented.');
+  }
+
   /**
    * Event handler that is listening to transport events.
    *
    * @param event The transport event to handle.
    */
   public handleTransportEvent(event: TransportEvent): void {
-    if (!this._playing) {
-      switch (event.type) {
-        case TransportEventType.PositionChanged:
-          this.current = event.location!;
-          this.currentTime = this.project.locationToTime.convertLocation(event.location!);
-          break;
-        case TransportEventType.LoopStartLocatorChanged:
-          this.loopStart = event.location!;
-          break;
-        case TransportEventType.LoopEndLocatorChanged:
-          this.loopEnd = event.location!;
-          break;
-        case TransportEventType.PlaybackEndLocatorChanged:
-          this.end = event.location!;
-          break;
-        case TransportEventType.LoopingChanged:
-          this.looping = event.looping!;
-          console.log(`looping: ${this.looping}`);
-          break;
-        case TransportEventType.BpmChanged:
-          // TODO
-          break;
-      }
-    } else {
-      switch (event.type) {
-        case TransportEventType.PositionChanged:
-          // TODO
-          break;
-        case TransportEventType.LoopStartLocatorChanged:
-          // TODO
-          break;
-        case TransportEventType.LoopEndLocatorChanged:
-          // TODO
-          break;
-        case TransportEventType.PlaybackEndLocatorChanged:
-          // TODO
-          break;
-        case TransportEventType.LoopingChanged:
-          // TODO
-          break;
-        case TransportEventType.BpmChanged:
-          // TODO
-          break;
-      }
+    switch (event.type) {
+      case TransportEventType.PositionChanged:
+        this.adjustPosition(event.location!);
+        break;
+      case TransportEventType.LoopStartLocatorChanged:
+        this.adjustLoopStart(event.location!);
+        break;
+      case TransportEventType.LoopEndLocatorChanged:
+        this.adjustLoopEnd(event.location!);
+        break;
+      case TransportEventType.PlaybackEndLocatorChanged:
+        this.adjustEnd(event.location!);
+        break;
+      case TransportEventType.LoopingChanged:
+        this.adjustLooping(event.looping!);
+        break;
+      case TransportEventType.BpmChanged:
+        this.adjustBpm(event.bpm!);
+        break;
     }
   }
 

@@ -5,6 +5,7 @@ import { AudioFileResolver } from './AudioFile';
 import { AudioRegion } from './AudioRegion';
 import { JSONObject, JSONValue, Location, LocationToTime } from './Common';
 import { AbstractTrack } from './Track';
+import { time } from 'console';
 
 type AudioState = {
   panner: StereoPannerNode;
@@ -20,6 +21,15 @@ type ActiveAudioState = {
 
   // The time at which the audio node will be done generating audio
   activeUntil: number;
+
+  // The associated audio region
+  region: AudioRegion;
+
+  // The unclipped playback time of the audio region, relative to arrangement start
+  unclippedTime: number;
+
+  // The loop iteration that this audio state was created for
+  loopIteration: number;
 };
 
 // Additional time we are applying to the end of the audio region to ensure that it is completely played back
@@ -131,6 +141,7 @@ export class AudioTrack extends AbstractTrack {
     startTime: number,
     endTime: number,
     converter: LocationToTime,
+    loopIteration: number,
     continuationTime?: number,
     discontinuationTime?: number,
   ): void {
@@ -140,12 +151,11 @@ export class AudioTrack extends AbstractTrack {
       const startPosition = converter.convertLocation(region.position);
       var endPosition =
         startPosition + converter.convertDurationAtLocation(region.length, region.position);
+      const unclippedTime = endPosition;
 
       if (discontinuationTime !== undefined && endPosition > discontinuationTime) {
         endPosition = discontinuationTime;
       }
-
-      console.log(`Region ${region.name} starts at ${startPosition}`);
 
       if (
         continuationTime !== undefined &&
@@ -163,7 +173,7 @@ export class AudioTrack extends AbstractTrack {
         source.connect(state.panner);
         const duration = Math.min(buffer.duration, endPosition - continuationTime);
         const offset = continuationTime - startPosition;
-        source.start(timeOffset + continuationTime, offset, duration);
+        source.start(timeOffset + continuationTime, offset /*, duration*/);
 
         // trim playback if needed
         if (discontinuationTime !== undefined && endPosition >= discontinuationTime) {
@@ -172,11 +182,19 @@ export class AudioTrack extends AbstractTrack {
           this.activeAudioStates.push({
             node: source,
             activeUntil: timeOffset + discontinuationTime,
+            region,
+            loopIteration,
+            unclippedTime,
           });
         } else {
+          console.log(`Scheduling stop of audio region ${region.name} at ${endPosition}`);
+          source.stop(timeOffset + endPosition);
           this.activeAudioStates.push({
             node: source,
             activeUntil: timeOffset + endPosition,
+            region,
+            loopIteration,
+            unclippedTime,
           });
         }
       } else if (startPosition > startTime && startPosition <= endTime) {
@@ -190,7 +208,7 @@ export class AudioTrack extends AbstractTrack {
         source.buffer = buffer;
         source.connect(state.panner);
         const duration = Math.min(buffer.duration, endPosition - startPosition);
-        source.start(timeOffset + startPosition, 0, duration);
+        source.start(timeOffset + startPosition, 0 /*, duration*/);
 
         // trim playback if needed
         if (discontinuationTime !== undefined && endPosition >= discontinuationTime) {
@@ -199,11 +217,21 @@ export class AudioTrack extends AbstractTrack {
           this.activeAudioStates.push({
             node: source,
             activeUntil: timeOffset + discontinuationTime,
+            region,
+            loopIteration,
+            unclippedTime,
           });
         } else {
+          console.log(
+            `Scheduling stop of audio region ${region.name} at ${startPosition + duration}`,
+          );
+          source.stop(timeOffset + startPosition + duration);
           this.activeAudioStates.push({
             node: source,
             activeUntil: timeOffset + startPosition + duration,
+            region,
+            loopIteration,
+            unclippedTime,
           });
         }
       }
@@ -215,18 +243,65 @@ export class AudioTrack extends AbstractTrack {
     startTime: number,
     endTime: number,
     converter: LocationToTime,
+    loopIteration: number,
     continuationTime?: number,
     discontinuationTime?: number,
   ): void {
     /* No MIDI events on pure audio tracks */
   }
 
+  adjustDiscontinuationTime(
+    timeOffset: number,
+    oldDiscontinuationTime: number,
+    newDiscontinuationTime: number,
+    converter: LocationToTime,
+    loopIteration: number,
+  ): void {
+    this.activeAudioStates.forEach((state) => {
+      if (state.loopIteration !== loopIteration) {
+        return;
+      }
+
+      // const changeIntervalMin = Math.min(oldDiscontinuationTime, newDiscontinuationTime);
+      // const changeIntervalMax = Math.max(oldDiscontinuationTime, newDiscontinuationTime);
+
+      // if (state.activeUntil < changeIntervalMin + timeOffset) {
+      //   // The audio state is not affected by the discontinuation time change
+      //   return;
+      // }
+
+      // if (state.activeUntil > changeIntervalMax + timeOffset) {
+      //   // The audio state is not affected by the discontinuation time change
+      //   // Is this actually a valid case at all?
+      //   return;
+      // }
+
+      const unclippedTime = state.unclippedTime;
+
+      console.log(
+        `Audio System Time: ${state.node.context.currentTime}, timeOffset: ${timeOffset}`,
+      );
+      console.log(`Adjusting audio state ${state.region.name} length ${unclippedTime}`);
+      console.log(`Stop time: ${state.activeUntil - timeOffset}`);
+      console.log(`Old discontinuation time: ${oldDiscontinuationTime}`);
+      console.log(`New discontinuation time: ${newDiscontinuationTime}`);
+
+      if (unclippedTime > newDiscontinuationTime) {
+        console.log(`Stopping audio state ${state.region.name} at ${newDiscontinuationTime}`);
+        state.node.stop(timeOffset + newDiscontinuationTime);
+        state.activeUntil = timeOffset + newDiscontinuationTime;
+      } else {
+        console.log(`Stopping audio state ${state.region.name} at ${unclippedTime}`);
+        state.node.stop(timeOffset + unclippedTime);
+        state.activeUntil = timeOffset + unclippedTime;
+      }
+    });
+  }
+
   housekeeping(currentTime: number): void {
     // Remove any audio states that are no longer active
     this.activeAudioStates = this.activeAudioStates.filter((state) => {
       if (state.activeUntil < currentTime + housekeepingSlack) {
-        // Strictly speaking, the node should have stopped already, but we'll be nice and stop it again.
-        state.node.stop();
         return false;
       } else {
         return true;
