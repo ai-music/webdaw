@@ -5,12 +5,7 @@ import { Button, ButtonGroup, EditableText, Intent, Switch } from '@blueprintjs/
 import { Duration, Location as LocationValue } from '../core/Common';
 import { Project as ProjectObj } from '../core/Project';
 import { Engine } from '../core/Engine';
-import {
-  PlaybackEvent,
-  PlaybackEventType,
-  PlaybackPositionEvent,
-  TransportEventType,
-} from '../core/Events';
+import { PlaybackEvent, PlaybackEventType } from '../core/Events';
 import { MAX_TIMELINE_SCALE, MIN_TIMELINE_SCALE } from './Timeline';
 
 import styles from './Transport.module.css';
@@ -238,6 +233,7 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
           onChange={(value) => setBpm(parseInt(value))}
           maxLength={3}
           className={styles.bpm}
+          disabled={playback !== PlaybackState.Stopped}
         />
       </div>
       <div>
@@ -250,6 +246,7 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
             onChange={(value) => setDenominator(parseInt(value))}
             maxLength={3}
             className={styles.denominator}
+            disabled={playback !== PlaybackState.Stopped}
           />
           /
           <EditableText
@@ -257,6 +254,7 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
             onChange={(value) => setNumerator(parseInt(value))}
             maxLength={3}
             className={styles.numerator}
+            disabled={playback !== PlaybackState.Stopped}
           />
         </div>
       </div>
