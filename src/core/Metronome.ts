@@ -99,22 +99,10 @@ export class Metronome implements PlaybackScheduling, NamedObject, MutableObject
     let startLocation = converter.convertTime(startTime);
     let timeSignature = converter.timeSignatureAtLocation(startLocation);
 
-    if (startLocation.beat === 1 && startLocation.tick === 1) {
-      // Schedule a bar click at the beginning of the measure
-      this.scheduleClick(timeOffset + startTime, true);
-      return;
-    }
-
-    if (startLocation.tick === 1) {
-      // Schedule a beat click at the beginning of the beat
-      this.scheduleClick(timeOffset + startTime, false);
-      return;
-    }
-
     let nextBar = new Location(startLocation.bar + 1, 1, 1);
     let nextBarTime = converter.convertLocation(nextBar);
 
-    if (nextBarTime < endTime) {
+    if (nextBarTime <= endTime) {
       // Schedule a bar click at the beginning of the next measure
       this.scheduleClick(timeOffset + nextBarTime, true);
       return;
@@ -125,7 +113,7 @@ export class Metronome implements PlaybackScheduling, NamedObject, MutableObject
     );
     let nextBeatTime = converter.convertLocation(nextBeat);
 
-    if (nextBeatTime < endTime) {
+    if (nextBeatTime <= endTime) {
       // Schedule a beat click at the beginning of the next beat
       this.scheduleClick(timeOffset + nextBeatTime, false);
       return;
