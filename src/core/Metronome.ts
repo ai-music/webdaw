@@ -61,7 +61,7 @@ export class Metronome implements PlaybackScheduling, NamedObject, MutableObject
     return this._audioState !== null;
   }
 
-  private scheduleClick(clickTime: number): void {
+  private scheduleClick(clickTime: number, bar: boolean): void {
     if (this._audioState === null) {
       throw new Error('Audio nodes not initialized');
     }
@@ -70,6 +70,7 @@ export class Metronome implements PlaybackScheduling, NamedObject, MutableObject
 
     const buffer = this._audioFile.buffer;
     const node = context.createBufferSource();
+    node.detune.value = bar ? 700 : 0;
     node.buffer = buffer;
     node.connect(this._audioState.gain);
     node.start(clickTime);
@@ -100,13 +101,13 @@ export class Metronome implements PlaybackScheduling, NamedObject, MutableObject
 
     if (startLocation.beat === 1 && startLocation.tick === 1) {
       // Schedule a bar click at the beginning of the measure
-      this.scheduleClick(timeOffset + startTime);
+      this.scheduleClick(timeOffset + startTime, true);
       return;
     }
 
     if (startLocation.tick === 1) {
       // Schedule a beat click at the beginning of the beat
-      this.scheduleClick(timeOffset + startTime);
+      this.scheduleClick(timeOffset + startTime, false);
       return;
     }
 
@@ -115,7 +116,7 @@ export class Metronome implements PlaybackScheduling, NamedObject, MutableObject
 
     if (nextBarTime < endTime) {
       // Schedule a bar click at the beginning of the next measure
-      this.scheduleClick(timeOffset + nextBarTime);
+      this.scheduleClick(timeOffset + nextBarTime, true);
       return;
     }
 
@@ -126,7 +127,7 @@ export class Metronome implements PlaybackScheduling, NamedObject, MutableObject
 
     if (nextBeatTime < endTime) {
       // Schedule a beat click at the beginning of the next beat
-      this.scheduleClick(timeOffset + nextBeatTime);
+      this.scheduleClick(timeOffset + nextBeatTime, false);
       return;
     }
   }
