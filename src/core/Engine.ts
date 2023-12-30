@@ -1,3 +1,4 @@
+import { AudioFile } from './AudioFile';
 import { Duration, Location } from './Common';
 import {
   PlaybackEvent,
@@ -12,7 +13,9 @@ import {
   TransportEvent,
   TransportEventType,
 } from './Events';
+import { DEFAULT_METRONOME_AUDIO_FILE, Metronome } from './Metronome';
 import { Project } from './Project';
+import { PlaybackScheduling } from './Track';
 
 /**
  * This class encapsulates the rendering engine for audio and MIDI playback.
@@ -24,19 +27,22 @@ export class Engine {
    * @param options The options to use for rendering.
    * @param options.bufferSize The buffer size to use for rendering.
    * @param options.sampleRate The sample rate to use for rendering.
+   * @param project The initial project to load into the engine.
    */
   constructor(
     public readonly context: AudioContext,
     public readonly options: { bufferSize: number; sampleRate: number },
+    project: Project,
   ) {
     console.log(`Engine: ${context.sampleRate} ${context.currentTime}`);
     console.log(`AudioContext state: ${context.state}`);
+    this._project = project;
   }
 
   /**
    * The project that is currently loaded into the engine.
    */
-  private _project: Project = new Project();
+  private _project: Project;
 
   public get project(): Project {
     return this._project;
@@ -45,7 +51,7 @@ export class Engine {
   public set project(value: Project) {
     if (this._project !== value) {
       // Unbind tracks from audio destination
-      this._project.tracks.forEach((track) => {
+      this.forAllSchedulables((track) => {
         track.deinitializeAudio();
       });
 
@@ -53,13 +59,22 @@ export class Engine {
       this._project = value;
 
       // Bind tracks to audio destination
-      this._project.tracks.forEach((track) => {
+      this.forAllSchedulables((track) => {
         track.initializeAudio(this.context);
       });
 
       // Sync locators from project
       this.syncLocatorsFromProject();
     }
+  }
+
+  /**
+   * Initialize the engine.
+   *
+   * @param onComplete Completion callback function.
+   */
+  public async initialize(onComplete: () => void) {
+    this._metronome.prepareInContext(this.context, onComplete);
   }
 
   private syncLocatorsFromProject(): void {
@@ -105,7 +120,13 @@ export class Engine {
   /**
    * Do we have a metronome playing?
    */
-  public metronome: boolean = false;
+  public get metronome(): boolean {
+    return !this._metronome.muted;
+  }
+
+  public set metronome(value: boolean) {
+    this._metronome.muted = !value;
+  }
 
   /**
    * The interval at which the rendering thread is scheduled.
@@ -153,6 +174,11 @@ export class Engine {
   // when playback jumps to the beginning of the loop.
   private _loopIteration = 0;
 
+  // The metronome sound generator
+  private _metronome: Metronome = new Metronome(
+    AudioFile.create(new URL(DEFAULT_METRONOME_AUDIO_FILE)),
+  );
+
   /**
    * Is the engine currently playing?
    */
@@ -173,7 +199,7 @@ export class Engine {
       this.silenceTracks();
 
       // Bind tracks to audio destination; this is a no-op when those bindings already exist
-      this._project.tracks.forEach((track) => {
+      this.forAllSchedulables((track) => {
         track.initializeAudio(this.context);
       });
 
@@ -268,7 +294,7 @@ export class Engine {
     var lastScheduledArrangementTime = this.lastScheduledArrangementTime;
 
     // trigger housekeeping on all tracks
-    this._project.tracks.forEach((track) => {
+    this.forAllSchedulables((track) => {
       track.housekeeping(callbackTime);
     });
 
@@ -303,7 +329,7 @@ export class Engine {
           discontinuationTime = this._loopEndTime;
         }
 
-        this._project.tracks.forEach((track) => {
+        this.forAllSchedulables((track) => {
           track.scheduleAudioEvents(
             this._timeOffset,
             lastScheduledArrangementTime,
@@ -317,7 +343,7 @@ export class Engine {
 
         this.lastScheduledArrangementTime = scheduleAheadTime;
       } else {
-        this._project.tracks.forEach((track) => {
+        this.forAllSchedulables((track) => {
           track.scheduleAudioEvents(
             this._timeOffset,
             lastScheduledArrangementTime,
@@ -336,7 +362,7 @@ export class Engine {
         this._loopIteration += 1;
         console.log(`loop iteration: ${this._loopIteration}`);
 
-        this._project.tracks.forEach((track) => {
+        this.forAllSchedulables((track) => {
           track.scheduleAudioEvents(
             this._timeOffset,
             locationToTime.convertLocation(
@@ -388,6 +414,23 @@ export class Engine {
     }
   }
 
+  /**
+   * Iterates over all schedulables and invokes the given callback for each.
+   *
+   * In addition to the regular tracks of the project, this includes special sound generators,
+   * such as the metronome.
+   *
+   * @param callback The callback to invoke.
+   */
+  private forAllSchedulables(callback: (schedulable: PlaybackScheduling) => void): void {
+    this._project.tracks.forEach((track) => {
+      callback(track);
+    });
+
+    // Also include the metronome in scheduling operations
+    callback(this._metronome);
+  }
+
   private adjustPosition(location: Location): void {
     this.current = location;
     this.currentTime = this.project.locationToTime.convertLocation(location);
@@ -409,7 +452,7 @@ export class Engine {
     this._loopEndTime = newLoopEndTime;
 
     if (this._project.looping && oldLoopEndTime !== newLoopEndTime) {
-      this._project.tracks.forEach((track) => {
+      this.forAllSchedulables((track) => {
         // If playback is inside the loop, we need to adjust playback for any audio regions
         // that are playing back and that have been clipped by the previous loop end time.
         // There is a perceivable race condition were playback of a region that is clipped by the
@@ -445,7 +488,7 @@ export class Engine {
     // be playing once the end locator has been processed. Therefore, in this branch we are
     // playing back, regions playback can be safely adjusted.
     if (oldEndTime !== newEndTime) {
-      this._project.tracks.forEach((track) => {
+      this.forAllSchedulables((track) => {
         track.adjustDiscontinuationTime(
           this._timeOffset,
           oldEndTime,
@@ -466,7 +509,7 @@ export class Engine {
       if (looping) {
         // looping is turned on: we need to trim the playback time of any audio regions that are
         // currently playing back and that are crossing the loop end time.
-        this._project.tracks.forEach((track) => {
+        this.forAllSchedulables((track) => {
           track.adjustDiscontinuationTime(
             this._timeOffset,
             this._endTime,
@@ -478,7 +521,7 @@ export class Engine {
       } else {
         // looping is turned off: we need to expand the playback time of any audio regions that are
         // currently playing back and that are trimmed at the loop end time.
-        this._project.tracks.forEach((track) => {
+        this.forAllSchedulables((track) => {
           track.adjustDiscontinuationTime(
             this._timeOffset,
             this._loopEndTime,
@@ -630,7 +673,7 @@ export class Engine {
    * Stop rendering of all audio and MIDI.
    */
   private silenceTracks(): void {
-    this._project.tracks.forEach((track) => {
+    this.forAllSchedulables((track) => {
       track.stop();
     });
   }

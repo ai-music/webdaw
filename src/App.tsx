@@ -36,9 +36,11 @@ function openDocumentation() {
 }
 
 function App() {
-  const [project, setProject] = useState(new ProjectObj());
+  const initialProject = new ProjectObj();
+
+  const [project, setProject] = useState(initialProject);
   const [engine, setEngine] = useState(
-    new Engine(audioContext, { bufferSize: BUFFER_SIZE, sampleRate: SAMPLE_RATE }),
+    new Engine(audioContext, { bufferSize: BUFFER_SIZE, sampleRate: SAMPLE_RATE }, initialProject),
   );
   const [loading, setLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0); // [0, 1]
@@ -50,6 +52,17 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
 
   const continueChangeProject = useRef<() => void>();
+
+  useEffect(() => {
+    initializeEngine(engine);
+  }, [engine]);
+
+  function initializeEngine(engine: Engine) {
+    setLoading(true);
+    engine.initialize(() => {
+      setLoading(false);
+    });
+  }
 
   function loadFiles(project: ProjectObj) {
     setLoading(true);

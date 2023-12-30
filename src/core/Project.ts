@@ -199,11 +199,16 @@ export class Project implements NamedObject, ToJson, AudioFileResolver {
       return new Location(bar, beat, tick);
     };
 
+    let timeSignatureAtLocation = (location: Location) => {
+      return timeSignature;
+    };
+
     return {
       convertLocation: locationToTime,
       convertTime: timeToLocation,
       convertDurationAtLocation: (duration: Duration, location: Location) =>
         locationToTime(location.add(duration, timeSignature)) - locationToTime(location),
+      timeSignatureAtLocation: timeSignatureAtLocation,
     };
   }
 }

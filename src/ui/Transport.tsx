@@ -68,6 +68,7 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
   const [bpm, setBpm] = useState(120);
   const [numerator, setNumerator] = useState(4);
   const [denominator, setDenominator] = useState(4);
+  const [metronome, setMetronome] = useState(false);
 
   const [showZoom, setShowZoom] = useState(false);
 
@@ -95,6 +96,11 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
       props.engine.unregisterPlaybackEventHandler(onPlaybackEvent);
     };
   }, [props.engine]);
+
+  function toggleMetronome() {
+    setMetronome(!metronome);
+    props.engine.metronome = !metronome;
+  }
 
   function onBegin() {
     console.log('To beginning');
@@ -216,7 +222,12 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
         <div className="bp5-text-small">
           <label>Metronome</label>
         </div>
-        <Switch inline style={{ maxHeight: '0.80rem' }} />
+        <Switch
+          inline
+          style={{ maxHeight: '0.80rem' }}
+          checked={metronome}
+          onChange={toggleMetronome}
+        />
       </div>
       <div>
         <div className="bp5-text-small">

@@ -12,15 +12,7 @@ import {
 } from './Common';
 import { RegionInterface } from './Region';
 
-/**
- * The interface of a track towards the Engine.
- */
-export interface TrackInterface
-  extends NamedObject,
-    ColoredObject,
-    MutableObject,
-    SoloableObject,
-    RecordableObject {
+export interface PlaybackScheduling {
   /**
    * Initialize audio for this track.
    *
@@ -129,7 +121,18 @@ export interface TrackInterface
    * Stop any playback immediately.
    */
   stop(): void;
+}
 
+/**
+ * The interface of a track towards the Engine.
+ */
+export interface TrackInterface
+  extends NamedObject,
+    ColoredObject,
+    MutableObject,
+    SoloableObject,
+    RecordableObject,
+    PlaybackScheduling {
   /**
    * Accessor to regions on this track.
    */

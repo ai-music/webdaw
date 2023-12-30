@@ -405,4 +405,15 @@ export interface LocationToTime {
    * @returns         the time value measued in seconds
    */
   convertDurationAtLocation: (duration: Duration, location: Location) => number;
+
+  /**
+   * Retrieve the time signature at a given location within the arrangement.
+   *
+   * TIme signatures can change only at the beginning of a bar, therefore, it is
+   * primarily the bar number that is used to determine the time signature.
+   *
+   * @param location the location within the arrangement
+   * @returns
+   */
+  timeSignatureAtLocation: (location: Location) => TimeSignature;
 }
