@@ -87,6 +87,9 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props: Arrangem
             className={styles.timelineArea}
             style={{
               width: `${props.totalWidth}px`,
+              minWidth: `${props.totalWidth}px`,
+              maxWidth: `${props.totalWidth}px`,
+              overflow: 'hidden',
             }}
           >
             <Timeline {...props} />
@@ -99,6 +102,8 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props: Arrangem
             <div
               style={{
                 height: `${props.totalHeight}px`,
+                minHeight: `${props.totalHeight}px`,
+                maxHeight: `${props.totalHeight}px`,
               }}
             >
               {tracks.map((track, index) => (
@@ -112,8 +117,13 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props: Arrangem
           <div
             style={{
               height: `${props.totalHeight}px`,
+              minHeight: `${props.totalHeight}px`,
+              maxHeight: `${props.totalHeight}px`,
               width: `${props.totalWidth}px`,
+              minWidth: `${props.totalWidth}px`,
+              maxWidth: `${props.totalWidth}px`,
               position: 'relative',
+              overflow: 'hidden',
             }}
           >
             {tracks.map((track, index) =>
