@@ -22,6 +22,7 @@ export enum PlaybackState {
 export type TransportProps = {
   project: ProjectObj;
   engine: Engine;
+  totalWidth: number;
   timelineScale: number;
   setTimelineScale: (scale: number) => void;
 
@@ -184,6 +185,28 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
 
   function zoomToFit() {
     console.log('Zoom to fit');
+    const timelineScroll = document.getElementById('timelineScroll')!;
+    const timelineWidth = timelineScroll.clientWidth;
+    var scale = props.timelineScale;
+    var totalWidth = props.totalWidth;
+
+    console.log(`timelineWidth: ${timelineWidth}`);
+    console.log(`totalWidth: ${totalWidth}`);
+    console.log(`scale: ${scale}`);
+
+    if (timelineWidth < totalWidth) {
+      while (timelineWidth < totalWidth && scale > MIN_TIMELINE_SCALE) {
+        scale *= 0.5;
+        totalWidth *= 0.5;
+      }
+    } else {
+      while (timelineWidth > totalWidth * 2 && scale < MAX_TIMELINE_SCALE) {
+        scale *= 2;
+        totalWidth *= 2;
+      }
+    }
+
+    props.setTimelineScale(Math.min(Math.max(scale, MIN_TIMELINE_SCALE), MAX_TIMELINE_SCALE));
   }
 
   return (

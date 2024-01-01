@@ -105,6 +105,9 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
   }, [props.engine]);
 
   const timelineRange = props.project.end.add(new Duration(1, 0, 0), props.project.timeSignature);
+  const totalWidth =
+    props.project.locationToTime.convertLocation(timelineRange) * timelineScale * 16;
+
   // const [infoPanelVisible, setInfoPanelVisible] = useState(false);
 
   // TODO: Need to add buttons to the toolbar to show/hide the Browser and InfoPanel
@@ -115,6 +118,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
       <Transport
         engine={props.engine}
         project={props.project}
+        totalWidth={totalWidth}
         timelineScale={timelineScale}
         setTimelineScale={setTimelineScale}
         timestamp={timestamp}
@@ -132,9 +136,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
       />
       <Arrangement
         tracks={props.project.tracks}
-        totalWidth={
-          props.project.locationToTime.convertLocation(timelineRange) * timelineScale * 16
-        }
+        totalWidth={totalWidth}
         totalHeight={props.project.tracks.length * 80}
         scale={timelineScale}
         timeSignature={props.project.timeSignature}

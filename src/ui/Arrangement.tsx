@@ -82,7 +82,12 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props: Arrangem
     <div className={styles.arrangement}>
       <div className={styles.timelineRow}>
         <div className={styles.placeholder} />
-        <div ref={timelineScroll} className={styles.timelineScroll} onScroll={onScrollTimeline}>
+        <div
+          id="timelineScroll"
+          ref={timelineScroll}
+          className={styles.timelineScroll}
+          onScroll={onScrollTimeline}
+        >
           <div
             className={styles.timelineArea}
             style={{
