@@ -8,6 +8,7 @@ import { Project as ProjectObj } from '../core/Project';
 import { Engine } from '../core/Engine';
 import { PlaybackPositionEvent, TransportEventType } from '../core/Events';
 import { Arrangement } from './Arrangement';
+import { TIMELINE_FACTOR_PX, TRACK_HEIGHT_PX } from './Config';
 
 export type ProjectProps = {
   project: ProjectObj;
@@ -106,7 +107,9 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
 
   const timelineRange = props.project.end.add(new Duration(1, 0, 0), props.project.timeSignature);
   const totalWidth =
-    props.project.locationToTime.convertLocation(timelineRange) * timelineScale * 16;
+    props.project.locationToTime.convertLocation(timelineRange) *
+    timelineScale *
+    TIMELINE_FACTOR_PX;
 
   // const [infoPanelVisible, setInfoPanelVisible] = useState(false);
 
@@ -137,7 +140,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
       <Arrangement
         tracks={props.project.tracks}
         totalWidth={totalWidth}
-        totalHeight={props.project.tracks.length * 80}
+        totalHeight={props.project.tracks.length * TRACK_HEIGHT_PX}
         scale={timelineScale}
         timeSignature={props.project.timeSignature}
         converter={props.project.locationToTime}

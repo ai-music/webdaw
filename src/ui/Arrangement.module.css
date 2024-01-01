@@ -51,12 +51,6 @@
   flex-direction: column;
 }
 
-.trackScrollSpacer {
-  height: 1rem;
-  /* border: 1px solid red; */
-}
-
-
 .trackScroll {
   width: 13.5rem;
   min-width: 13.5rem;

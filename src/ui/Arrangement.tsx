@@ -5,6 +5,7 @@ import { Timeline, TimelineProps } from './Timeline';
 import { TrackInterface } from '../core/Track';
 import { TrackInfo } from './TrackInfo';
 import { Region } from './Region';
+import { SCROLLBAR_DIMENSIONS_PX, TIMELINE_FACTOR_PX } from './Config';
 
 /**
  * Properties required to render the Arrangement component.
@@ -100,6 +101,9 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props: Arrangem
             <Timeline {...props} />
           </div>
         </div>
+        <div
+          style={{ width: SCROLLBAR_DIMENSIONS_PX, minWidth: SCROLLBAR_DIMENSIONS_PX, flex: 0 }}
+        />
       </div>
       <div className={styles.tracks}>
         <div className={styles.trackScrollOuter}>
@@ -116,7 +120,9 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props: Arrangem
               ))}
             </div>
           </div>
-          <div className={styles.trackScrollSpacer}></div>
+          <div
+            style={{ height: SCROLLBAR_DIMENSIONS_PX, minHeight: SCROLLBAR_DIMENSIONS_PX, flex: 0 }}
+          />
         </div>
         <div ref={regionScroll} className={styles.regionScroll} onScroll={onScrollRegions}>
           <div
@@ -143,7 +149,7 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props: Arrangem
             )}
             <div
               className={styles.marker}
-              style={{ left: `${props.timestamp * props.scale}rem` }}
+              style={{ left: `${props.timestamp * props.scale * TIMELINE_FACTOR_PX}px` }}
             ></div>
           </div>
         </div>

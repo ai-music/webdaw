@@ -3,6 +3,7 @@ import { FunctionComponent, useState } from 'react';
 
 import styles from './TrackInfo.module.css';
 import { Knob } from './Knob';
+import { TRACK_HEIGHT_PX } from './Config';
 
 function renderVolumeLabel(val: number, opts?: { isHandleTooltip: boolean }) {
   return val <= -102 ? `-\u2060inf\u00A0dB` : `${val.toFixed(1)}\u00A0dB`;
@@ -26,7 +27,10 @@ export const TrackInfo: FunctionComponent<TrackInfoProps> = (props: TrackInfoPro
   const [record, setRecord] = useState(false);
 
   return (
-    <div className={styles.trackinfo} style={{ gridRow: props.index + 1, gridColumn: 1 }}>
+    <div
+      className={styles.trackinfo}
+      style={{ gridRow: props.index + 1, gridColumn: 1, height: TRACK_HEIGHT_PX }}
+    >
       <div className={styles.controls}>
         <EditableText className={styles.name} value={name} onChange={(val) => setName(val)} />
         <ButtonGroup className={styles.control}>

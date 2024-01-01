@@ -5,6 +5,7 @@ import { Duration, Location, LocationToTime, TimeSignature } from '../core/Commo
 import { PPQN } from '../core/Config';
 import { Icon } from '@blueprintjs/core';
 import { on } from 'events';
+import { TIMELINE_FACTOR_PX } from './Config';
 
 export interface TimelineProps {
   scale: number;
@@ -140,7 +141,7 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
   function onMouseMoveEnd(event: React.PointerEvent<SVGSVGElement>) {
     if (isDragging) {
       const delta = event.clientX - dragStart.current;
-      const valueTime = dragStartValueTime.current + delta / props.scale / 16;
+      const valueTime = dragStartValueTime.current + delta / props.scale / TIMELINE_FACTOR_PX;
       const loopEndTime = props.converter.convertLocation(props.loopEnd);
       const clippedTime = Math.max(valueTime, loopEndTime);
       const newValue = props.converter.convertTime(clippedTime);
@@ -155,7 +156,7 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
     if (isDragging) {
       event.currentTarget.releasePointerCapture(event.pointerId);
       const delta = event.clientX - dragStart.current;
-      const valueTime = dragStartValueTime.current + delta / props.scale / 16;
+      const valueTime = dragStartValueTime.current + delta / props.scale / TIMELINE_FACTOR_PX;
       const converter = props.converter;
 
       // Find a snap location that is closest to the valueTime. We are using the
@@ -204,7 +205,7 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
   // function onMouseMoveLoopRegion(event: React.PointerEvent<HTMLDivElement>) {
   //   if (isDragging) {
   //     const delta = event.clientX - dragStart.current;
-  //     const valueTime = dragStartValueTime.current + delta / props.scale / 16;
+  //     const valueTime = dragStartValueTime.current + delta / props.scale / TIMELINE_FACTOR_PX;
   //     const newValue = props.converter.convertTime(valueTime);
 
   //     if (newValue !== props.end) {
@@ -218,7 +219,7 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
   //   if (isDragging) {
   //     event.currentTarget.releasePointerCapture(event.pointerId);
   //     const delta = event.clientX - dragStart.current;
-  //     const valueTime = dragStartValueTime.current + delta / props.scale / 16;
+  //     const valueTime = dragStartValueTime.current + delta / props.scale / TIMELINE_FACTOR_PX;
   //     const converter = props.converter;
 
   //     // Find a snap location that is closest to the valueTime. We are using the
@@ -267,7 +268,7 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
   function onMouseMoveLoopStart(event: React.PointerEvent<SVGSVGElement>) {
     if (isDragging) {
       const delta = event.clientX - dragStart.current;
-      const valueTime = dragStartValueTime.current + delta / props.scale / 16;
+      const valueTime = dragStartValueTime.current + delta / props.scale / TIMELINE_FACTOR_PX;
       const newValue = props.converter.convertTime(valueTime);
 
       if (newValue !== props.loopStart) {
@@ -280,7 +281,7 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
     if (isDragging) {
       event.currentTarget.releasePointerCapture(event.pointerId);
       const delta = event.clientX - dragStart.current;
-      const valueTime = dragStartValueTime.current + delta / props.scale / 16;
+      const valueTime = dragStartValueTime.current + delta / props.scale / TIMELINE_FACTOR_PX;
       const converter = props.converter;
 
       // Find a snap location that is closest to the valueTime. We are using the
@@ -324,7 +325,7 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
   function onMouseMoveLoopEnd(event: React.PointerEvent<SVGSVGElement>) {
     if (isDragging) {
       const delta = event.clientX - dragStart.current;
-      const valueTime = dragStartValueTime.current + delta / props.scale / 16;
+      const valueTime = dragStartValueTime.current + delta / props.scale / TIMELINE_FACTOR_PX;
       const newValue = props.converter.convertTime(valueTime);
 
       if (newValue !== props.loopEnd) {
@@ -337,7 +338,7 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
     if (isDragging) {
       event.currentTarget.releasePointerCapture(event.pointerId);
       const delta = event.clientX - dragStart.current;
-      const valueTime = dragStartValueTime.current + delta / props.scale / 16;
+      const valueTime = dragStartValueTime.current + delta / props.scale / TIMELINE_FACTOR_PX;
       const converter = props.converter;
 
       // Find a snap location that is closest to the valueTime. We are using the
@@ -373,13 +374,17 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
           <div
             className={styles.loop}
             style={{
-              left: `${props.converter.convertLocation(props.loopStart) * props.scale}rem`,
+              left: `${
+                props.converter.convertLocation(props.loopStart) * props.scale * TIMELINE_FACTOR_PX
+              }px`,
               width: `${
                 props.converter.convertDurationAtLocation(
                   props.loopStart.diff(props.loopEnd, props.timeSignature),
                   props.loopStart,
-                ) * props.scale
-              }rem`,
+                ) *
+                props.scale *
+                TIMELINE_FACTOR_PX
+              }px`,
               backgroundColor: props.looping ? 'rgba(0, 0, 0, 0.25)' : undefined,
             }}
           >
@@ -428,7 +433,9 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
             className={styles.locator}
             style={{
               position: 'absolute',
-              left: `${props.converter.convertLocation(props.end) * props.scale}rem`,
+              left: `${
+                props.converter.convertLocation(props.end) * props.scale * TIMELINE_FACTOR_PX
+              }px`,
               top: '50%',
               transform: 'translate(-50%, -50%)',
               // border: '1px solid black',
@@ -450,7 +457,11 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
               return (
                 <div
                   className={styles.timelineMajorTick}
-                  style={{ left: `${props.converter.convertLocation(location) * props.scale}rem` }}
+                  style={{
+                    left: `${
+                      props.converter.convertLocation(location) * props.scale * TIMELINE_FACTOR_PX
+                    }px`,
+                  }}
                 >
                   <div className={styles.timelineTickLabel}>{settings.label(location)}</div>
                 </div>
@@ -462,7 +473,11 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
               return (
                 <div
                   className={styles.timelineTick}
-                  style={{ left: `${props.converter.convertLocation(location) * props.scale}rem` }}
+                  style={{
+                    left: `${
+                      props.converter.convertLocation(location) * props.scale * TIMELINE_FACTOR_PX
+                    }px`,
+                  }}
                 >
                   &nbsp;
                 </div>
