@@ -89,3 +89,7 @@ This document is an outline of how WebDAW may evolve towards a usable music prod
 - [ ] Return tracks
 
 ## Milestone 9: Clip Launcher/Song Structure View
+
+## Milestone 10: Implement DAWproject
+
+Can WebDAW support Bitwig's [DAWproject](https://github.com/bitwig/dawproject) in a meaningful way?
