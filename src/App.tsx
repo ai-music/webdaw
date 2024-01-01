@@ -68,11 +68,17 @@ function App() {
 
   function loadFiles(project: ProjectObj) {
     setLoading(true);
-    project.loadFiles(engine.context, (project) => {
-      engine.project = project;
-      setProject(project);
-      setLoading(false);
-    });
+    project.loadFiles(
+      engine.context,
+      (project) => {
+        engine.project = project;
+        setProject(project);
+        setLoading(false);
+      },
+      (project, progress) => {
+        setLoadingProgress(progress);
+      },
+    );
   }
 
   function changeProject(action: () => void) {
