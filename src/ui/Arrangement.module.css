@@ -1,21 +1,22 @@
 .arrangement {
-  /* margin: 20px auto; */
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100%;
+  flex: 1;
 }
 
 .timelineRow {
   display: flex;
   height: 2rem;
+  min-height: 2rem;
   overflow-y: hidden;
   margin-bottom: 0.5rem;
+  flex: 0;
 }
 
 .placeholder {
-  width: 216px;
-  min-width: 216px;
+  width: 200px;
+  min-width: 200px;
 }
 
 .timelineScroll {
@@ -33,28 +34,42 @@
 
 .tracks {
   display: flex;
-  /* flex-grow: 0.9; */
+  flex-direction: row;
+  flex-basis: 1px;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-height: 80px;
 }
 
+.trackScrollOuter {
+  overflow-x: hidden;
+  width: 12.5rem;
+  min-width: 12.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.trackScrollSpacer {
+  height: 1rem;
+  /* border: 1px solid red; */
+}
+
+
 .trackScroll {
-  /* margin-top: 20px; */
-  /* background: #ccc; */
-  /* border: 1px solid black; */
   width: 13.5rem;
   min-width: 13.5rem;
-  height: 500px;
+  flex: 1;
   overflow-x: hidden;
   overflow-y: auto;
 }
 
 .regionScroll {
-  /* background: #ccc; */
-  /* margin-top: 20px; */
-  /* margin-left: 20px; */
   width: auto;
-  height: 500px;
-  overflow-y: auto;
-  overflow-x: auto;
+  height: auto;
+  overflow-y: scroll;
+  overflow-x: scroll;
+  flex: 1;
 }
 
 .marker {

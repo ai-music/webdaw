@@ -182,7 +182,7 @@ function App() {
         />
       </Dialog>
       <div className={styles.app}>
-        <Navbar>
+        <Navbar style={{ flex: 0 }}>
           <Navbar.Group align={Alignment.LEFT}>
             <Navbar.Heading>WebDAW</Navbar.Heading>
             <Navbar.Divider />

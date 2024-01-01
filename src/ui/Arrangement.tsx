@@ -86,9 +86,7 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props: Arrangem
           <div
             className={styles.timelineArea}
             style={{
-              width: props.totalWidth,
-              minWidth: props.totalWidth,
-              maxWidth: props.totalWidth,
+              width: `${props.totalWidth}px`,
             }}
           >
             <Timeline {...props} />
@@ -96,30 +94,26 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props: Arrangem
         </div>
       </div>
       <div className={styles.tracks}>
-        <div ref={trackScroll} className={styles.trackScroll} onScroll={onScrollTracks}>
-          <div
-            style={{
-              height: props.totalHeight,
-              minHeight: props.totalHeight,
-              maxHeight: props.totalHeight,
-            }}
-          >
-            {tracks.map((track, index) => (
-              <TrackInfo index={index} name={track.name} color={track.color} />
-            ))}
+        <div className={styles.trackScrollOuter}>
+          <div ref={trackScroll} className={styles.trackScroll} onScroll={onScrollTracks}>
+            <div
+              style={{
+                height: `${props.totalHeight}px`,
+              }}
+            >
+              {tracks.map((track, index) => (
+                <TrackInfo index={index} name={track.name} color={track.color} />
+              ))}
+            </div>
           </div>
+          <div className={styles.trackScrollSpacer}></div>
         </div>
         <div ref={regionScroll} className={styles.regionScroll} onScroll={onScrollRegions}>
           <div
             style={{
-              height: props.totalHeight,
-              minHeight: props.totalHeight,
-              maxHeight: props.totalHeight,
-              width: props.totalWidth,
-              minWidth: props.totalWidth,
-              maxWidth: props.totalWidth,
+              height: `${props.totalHeight}px`,
+              width: `${props.totalWidth}px`,
               position: 'relative',
-              // backgroundColor: 'lightgray',
             }}
           >
             {tracks.map((track, index) =>
