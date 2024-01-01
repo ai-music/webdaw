@@ -21,6 +21,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Engine } from './core/Engine';
 import { BUFFER_SIZE, SAMPLE_RATE } from './core/Config';
 
+import styles from './App.module.css';
+
 const audioContext = new AudioContext();
 
 const LICENSE =
@@ -173,102 +175,109 @@ function App() {
           }
         />
       </Dialog>
-      <Navbar>
-        <Navbar.Group align={Alignment.LEFT}>
-          <Navbar.Heading>WebDAW</Navbar.Heading>
-          <Navbar.Divider />
-          <Popover
-            content={
-              <Menu>
-                <MenuItem
-                  icon="new-object"
-                  text="New Project"
-                  onClick={() => {
-                    changeProject(() => {
-                      engine.stop();
-                      createProject(loadFiles);
-                    });
-                  }}
-                />
-                <MenuItem
-                  icon="cloud-download"
-                  text="Load..."
-                  onClick={() => {
-                    changeProject(() => {
-                      engine.stop();
-                      loadProject();
-                    });
-                  }}
-                />
-                <MenuItem icon="cloud-upload" text="Save" onClick={saveProject} />
-                <MenuItem icon="duplicate" text="Save As..." onClick={saveAsProject} />
-              </Menu>
-            }
-            placement="bottom"
-          >
-            <Button className="bp5-minimal" icon="projects" text="Project" />
-          </Popover>
-          <Popover
-            content={
-              <Menu>
-                <MenuItem icon="undo" text="Undo" onClick={undo} />
-                <MenuItem icon="redo" text="Redo" onClick={redo} />
-                <MenuDivider />
-                <MenuItem icon="cut" text="Cut" onClick={cut} />
-                <MenuItem icon="duplicate" text="Copy" onClick={copy} />
-                <MenuItem icon="insert" text="Paste" onClick={paste} />
-                <MenuItem icon="delete" text="Delete" onClick={doDelete} />
-              </Menu>
-            }
-            placement="bottom"
-          >
-            <Button className="bp5-minimal" icon="edit" text="Edit" />
-          </Popover>
-          <Button className="bp5-minimal" icon="build" text="Tools" />
-          <Popover
-            content={
-              <Menu>
-                <MenuItem icon="cloud" text="Library" onClick={() => setLibraryVisible(true)} />
-                <MenuItem icon="settings" text="Mixer" onClick={() => setMixerVisible(true)} />
-                <MenuItem icon="cog" text="Settings" onClick={() => setShowSettings(true)} />
-              </Menu>
-            }
-            placement="bottom"
-          >
-            <Button className="bp5-minimal" icon="control" text="View" />
-          </Popover>
-          <Popover
-            content={
-              <Menu>
-                <MenuItem icon="manual" text="Documentation" href="#" onClick={openDocumentation} />
-                <MenuItem
-                  icon="git-repo"
-                  text="Github"
-                  href="https://github.com/ai-music/webdaw"
-                  target="_blank"
-                />
-                <MenuItem
-                  icon="issue"
-                  text="Report an issue"
-                  href="https://github.com/ai-music/webdaw/issues"
-                  target="_blank"
-                />
-                <MenuDivider />
-                <MenuItem icon="info-sign" text="About" onClick={() => setShowAbout(true)} />
-              </Menu>
-            }
-            placement="bottom"
-          >
-            <Button className="bp5-minimal" icon="help" text="Help" />
-          </Popover>
-        </Navbar.Group>
-      </Navbar>
-      <Project
-        engine={engine}
-        project={project}
-        mixerVisible={mixerVisible}
-        setMixerVisible={setMixerVisible}
-      />
+      <div className={styles.app}>
+        <Navbar>
+          <Navbar.Group align={Alignment.LEFT}>
+            <Navbar.Heading>WebDAW</Navbar.Heading>
+            <Navbar.Divider />
+            <Popover
+              content={
+                <Menu>
+                  <MenuItem
+                    icon="new-object"
+                    text="New Project"
+                    onClick={() => {
+                      changeProject(() => {
+                        engine.stop();
+                        createProject(loadFiles);
+                      });
+                    }}
+                  />
+                  <MenuItem
+                    icon="cloud-download"
+                    text="Load..."
+                    onClick={() => {
+                      changeProject(() => {
+                        engine.stop();
+                        loadProject();
+                      });
+                    }}
+                  />
+                  <MenuItem icon="cloud-upload" text="Save" onClick={saveProject} />
+                  <MenuItem icon="duplicate" text="Save As..." onClick={saveAsProject} />
+                </Menu>
+              }
+              placement="bottom"
+            >
+              <Button className="bp5-minimal" icon="projects" text="Project" />
+            </Popover>
+            <Popover
+              content={
+                <Menu>
+                  <MenuItem icon="undo" text="Undo" onClick={undo} />
+                  <MenuItem icon="redo" text="Redo" onClick={redo} />
+                  <MenuDivider />
+                  <MenuItem icon="cut" text="Cut" onClick={cut} />
+                  <MenuItem icon="duplicate" text="Copy" onClick={copy} />
+                  <MenuItem icon="insert" text="Paste" onClick={paste} />
+                  <MenuItem icon="delete" text="Delete" onClick={doDelete} />
+                </Menu>
+              }
+              placement="bottom"
+            >
+              <Button className="bp5-minimal" icon="edit" text="Edit" />
+            </Popover>
+            <Button className="bp5-minimal" icon="build" text="Tools" />
+            <Popover
+              content={
+                <Menu>
+                  <MenuItem icon="cloud" text="Library" onClick={() => setLibraryVisible(true)} />
+                  <MenuItem icon="settings" text="Mixer" onClick={() => setMixerVisible(true)} />
+                  <MenuItem icon="cog" text="Settings" onClick={() => setShowSettings(true)} />
+                </Menu>
+              }
+              placement="bottom"
+            >
+              <Button className="bp5-minimal" icon="control" text="View" />
+            </Popover>
+            <Popover
+              content={
+                <Menu>
+                  <MenuItem
+                    icon="manual"
+                    text="Documentation"
+                    href="#"
+                    onClick={openDocumentation}
+                  />
+                  <MenuItem
+                    icon="git-repo"
+                    text="Github"
+                    href="https://github.com/ai-music/webdaw"
+                    target="_blank"
+                  />
+                  <MenuItem
+                    icon="issue"
+                    text="Report an issue"
+                    href="https://github.com/ai-music/webdaw/issues"
+                    target="_blank"
+                  />
+                  <MenuDivider />
+                  <MenuItem icon="info-sign" text="About" onClick={() => setShowAbout(true)} />
+                </Menu>
+              }
+              placement="bottom"
+            >
+              <Button className="bp5-minimal" icon="help" text="Help" />
+            </Popover>
+          </Navbar.Group>
+        </Navbar>
+        <Project
+          engine={engine}
+          project={project}
+          mixerVisible={mixerVisible}
+          setMixerVisible={setMixerVisible}
+        />
+      </div>
       <Drawer
         isOpen={showSettings}
         position="right"

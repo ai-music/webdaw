@@ -1,0 +1,67 @@
+.arrangement {
+  /* margin: 20px auto; */
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.timelineRow {
+  display: flex;
+  height: 2rem;
+  overflow-y: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.placeholder {
+  width: 216px;
+  min-width: 216px;
+}
+
+.timelineScroll {
+  height: 3rem;
+  min-height: 3rem;
+  width: auto;
+  /* background: #ccc; */
+  display: flex;
+  overflow-x: scroll;
+}
+
+.timelineArea {
+  flex-shrink: 0;
+}
+
+.tracks {
+  display: flex;
+  /* flex-grow: 0.9; */
+}
+
+.trackScroll {
+  /* margin-top: 20px; */
+  /* background: #ccc; */
+  /* border: 1px solid black; */
+  width: 13.5rem;
+  min-width: 13.5rem;
+  height: 500px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.regionScroll {
+  /* background: #ccc; */
+  /* margin-top: 20px; */
+  /* margin-left: 20px; */
+  width: auto;
+  height: 500px;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.marker {
+  position: relative;
+  height: 100%;
+  width: 1px;
+  border: 1px solid gray;
+  top: 0;
+  /* z-index: 1000000 */
+}

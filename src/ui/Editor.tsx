@@ -1,6 +1,5 @@
 import { FunctionComponent } from 'react';
 
-
 export const Editor: FunctionComponent = () => {
   // Tabbed panel of:
   // - Either PianoRoll, DrumGrid or AudioEditor based on type of track

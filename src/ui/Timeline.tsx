@@ -7,7 +7,6 @@ import { Icon } from '@blueprintjs/core';
 import { on } from 'events';
 
 export interface TimelineProps {
-  start: number;
   scale: number;
   timeSignature: TimeSignature;
   converter: LocationToTime;
@@ -369,7 +368,6 @@ export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps)
 
   return (
     <div className={styles.timeline}>
-      <div className={styles.timelineFront}>&nbsp;</div>
       <div className={styles.timelineBack}>
         <div className={styles.timelineLocators}>
           <div

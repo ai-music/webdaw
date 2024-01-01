@@ -2,13 +2,12 @@ import { FunctionComponent, useEffect, useState } from 'react';
 
 import { Transport } from './Transport';
 import { Mixer } from './Mixer';
-import { Location as LocationValue } from '../core/Common';
-import { Button, ButtonGroup, Drawer, Section, SectionCard } from '@blueprintjs/core';
+import { Duration, Location as LocationValue } from '../core/Common';
+import { Drawer } from '@blueprintjs/core';
 import { Project as ProjectObj } from '../core/Project';
 import { Engine } from '../core/Engine';
-import { TrackList } from './TrackList';
-import { Timeline } from './Timeline';
 import { PlaybackPositionEvent, TransportEventType } from '../core/Events';
+import { Arrangement } from './Arrangement';
 
 export type ProjectProps = {
   project: ProjectObj;
@@ -19,7 +18,6 @@ export type ProjectProps = {
 
 export const Project: FunctionComponent<ProjectProps> = (props) => {
   const [timelineScale, setTimelineScale] = useState(4);
-  const [timelineStart, setTimelineStart] = useState(0);
 
   const [timestamp, setTimestamp] = useState(0); // [hh, mm, ss, uuuu]
   const [current, setCurrent] = useState(new LocationValue(1, 1, 1));
@@ -106,6 +104,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
     };
   }, [props.engine]);
 
+  const timelineRange = props.project.end.add(new Duration(1, 0, 0), props.project.timeSignature);
   // const [infoPanelVisible, setInfoPanelVisible] = useState(false);
 
   // TODO: Need to add buttons to the toolbar to show/hide the Browser and InfoPanel
@@ -131,45 +130,29 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
         looping={looping}
         setLooping={changeLooping}
       />
+      <Arrangement
+        tracks={props.project.tracks}
+        totalWidth={
+          props.project.locationToTime.convertLocation(timelineRange) * timelineScale * 16
+        }
+        totalHeight={props.project.tracks.length * 80}
+        scale={timelineScale}
+        timeSignature={props.project.timeSignature}
+        converter={props.project.locationToTime}
+        timestamp={timestamp}
+        setTimestamp={changeTimestamp}
+        current={current}
+        setCurrent={changeCurrent}
+        loopStart={loopStart}
+        setLoopStart={changeLoopStart}
+        loopEnd={loopEnd}
+        setLoopEnd={changeLoopEnd}
+        end={end}
+        setEnd={changeEnd}
+        looping={looping}
+        setLooping={changeLooping}
+      />
       <div>
-        <Timeline
-          start={timelineStart}
-          scale={timelineScale}
-          timeSignature={props.project.timeSignature}
-          converter={props.project.locationToTime}
-          timestamp={timestamp}
-          setTimestamp={changeTimestamp}
-          current={current}
-          setCurrent={changeCurrent}
-          loopStart={loopStart}
-          setLoopStart={changeLoopStart}
-          loopEnd={loopEnd}
-          setLoopEnd={changeLoopEnd}
-          end={end}
-          setEnd={changeEnd}
-          looping={looping}
-          setLooping={changeLooping}
-        />
-        <TrackList
-          start={timelineStart}
-          scale={timelineScale}
-          timeSignature={props.project.timeSignature}
-          tracks={props.project.tracks}
-          engine={props.engine}
-          converter={props.project.locationToTime}
-          timestamp={timestamp}
-          setTimestamp={changeTimestamp}
-          current={current}
-          setCurrent={changeCurrent}
-          loopStart={loopStart}
-          setLoopStart={changeLoopStart}
-          loopEnd={loopEnd}
-          setLoopEnd={changeLoopEnd}
-          end={end}
-          setEnd={changeEnd}
-          looping={looping}
-          setLooping={changeLooping}
-        />
         <Drawer
           isOpen={props.mixerVisible}
           onClose={() => props.setMixerVisible(false)}

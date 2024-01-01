@@ -6,7 +6,7 @@ import { LocationToTime } from '../core/Common';
 
 export interface RegionProps {
   region: RegionInterface;
-  start: number;
+  trackIndex: number;
   scale: number;
   converter: LocationToTime;
 }
@@ -72,6 +72,7 @@ export const Region: FunctionComponent<RegionProps> = (props: RegionProps) => {
     borderColor: props.region.color,
     width: `${width}rem`,
     left: `${props.converter.convertLocation(props.region.position) * props.scale}rem`,
+    top: `${props.trackIndex * 5 * 16}px`,
     backgroundColor: selected ? props.region.color : 'transparent',
   };
 
