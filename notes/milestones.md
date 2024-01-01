@@ -5,7 +5,7 @@ This document is an outline of how WebDAW may evolve towards a usable music prod
 ## Milestone 1: Multi-Track Sample Player
 
 - [X] Arrangement view showing tracks over arrangement timeline
-- [ ] Ability to zoom and pan arrangement view
+- [X] Ability to zoom and pan arrangement view
 - [X] Ability to play back arrangement incl. looped playback
 - [ ] Static volume and panning for each track
 - [ ] Ability to control mute and solo for each track
