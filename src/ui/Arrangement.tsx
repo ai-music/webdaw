@@ -12,6 +12,7 @@ import { SCROLLBAR_DIMENSIONS_PX, TIMELINE_FACTOR_PX } from './Config';
  */
 export interface ArrangementProps extends TimelineProps {
   tracks: TrackInterface[];
+  updateTrackEnablement: () => void;
   totalWidth: number;
   totalHeight: number;
 }
@@ -116,7 +117,11 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props: Arrangem
               }}
             >
               {tracks.map((track, index) => (
-                <TrackInfo index={index} name={track.name} color={track.color} />
+                <TrackInfo
+                  index={index}
+                  track={track}
+                  updateTrackEnablement={props.updateTrackEnablement}
+                />
               ))}
             </div>
           </div>

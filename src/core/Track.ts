@@ -137,6 +137,25 @@ export interface TrackInterface
    * Accessor to regions on this track.
    */
   regions: RegionInterface[];
+
+  /**
+   * Track volume in dB.
+   *
+   * -108 corresponds to -inf dB. Maximum value is 6.
+   */
+  volume: number;
+
+  /**
+   * Track pan. -1 is left, 0 is center, 1 is right.
+   */
+  pan: number;
+
+  /**
+   * Is this track enabled?
+   *
+   * When a track is disabled, it is not scheduled for playback. It also won't emit sound through its output.
+   */
+  enabled: boolean;
 }
 
 /**
@@ -177,6 +196,18 @@ export abstract class AbstractTrack implements TrackInterface, ToJson {
   }
 
   abstract regions: RegionInterface[];
+
+  abstract enabled: boolean;
+  abstract volume: number;
+  abstract pan: number;
+
+  public get gainFromVolume(): number {
+    if (this.volume <= -108) {
+      return 0;
+    } else {
+      return Math.pow(2, this.volume / 6);
+    }
+  }
 
   abstract initializeAudio(context: AudioContext): void;
   abstract deinitializeAudio(): void;

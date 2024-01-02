@@ -3,10 +3,12 @@ import { FunctionComponent, useState } from 'react';
 
 import styles from './TrackInfo.module.css';
 import { Knob } from './Knob';
-import { TRACK_HEIGHT_PX } from './Config';
+import { TRACK_HEIGHT_PX, UX_PAN_SCALE } from './Config';
+import { TrackInterface } from '../core/Track';
+import { MAX_VOLUME_DB, MIN_VOLUME_DB } from '../core/Config';
 
 function renderVolumeLabel(val: number, opts?: { isHandleTooltip: boolean }) {
-  return val <= -102 ? `-\u2060inf\u00A0dB` : `${val.toFixed(1)}\u00A0dB`;
+  return val <= MIN_VOLUME_DB ? `-\u2060inf\u00A0dB` : `${val.toFixed(1)}\u00A0dB`;
 }
 
 function panRenderer(val: number, opts?: { isHandleTooltip: boolean }) {
@@ -15,16 +17,50 @@ function panRenderer(val: number, opts?: { isHandleTooltip: boolean }) {
 
 export interface TrackInfoProps {
   index: number;
-  name: string;
-  color: string;
+  track: TrackInterface;
+  updateTrackEnablement: () => void;
 }
 
 export const TrackInfo: FunctionComponent<TrackInfoProps> = (props: TrackInfoProps) => {
-  const [name, setName] = useState(props.name);
-  const [volume, setVolume] = useState(0);
-  const [mute, setMute] = useState(false);
-  const [solo, setSolo] = useState(false);
+  const [name, setName] = useState(props.track.name);
+  const [volume, setVolume] = useState(props.track.volume);
+  const [pan, setPan] = useState(props.track.pan * UX_PAN_SCALE); // [-50, 50]
+  const [mute, setMute] = useState(props.track.muted);
+  const [solo, setSolo] = useState(props.track.soloed);
   const [record, setRecord] = useState(false);
+  const [color, setColor] = useState(props.track.color);
+
+  function changeMute(mute: boolean) {
+    setMute(mute);
+    props.track.muted = mute;
+    props.updateTrackEnablement();
+  }
+
+  function changeSolo(solo: boolean) {
+    setSolo(solo);
+    props.track.soloed = solo;
+    props.updateTrackEnablement();
+  }
+
+  function changeVolume(volume: number) {
+    setVolume(volume);
+    props.track.volume = volume;
+  }
+
+  function changePan(pan: number) {
+    setPan(pan);
+    props.track.pan = pan / UX_PAN_SCALE;
+  }
+
+  function changeName(name: string) {
+    setName(name);
+    props.track.name = name;
+  }
+
+  function changeColor(color: string) {
+    setColor(color);
+    props.track.color = color;
+  }
 
   return (
     <div
@@ -39,7 +75,7 @@ export const TrackInfo: FunctionComponent<TrackInfoProps> = (props: TrackInfoPro
             small
             active={mute}
             onClick={() => {
-              setMute(!mute);
+              changeMute(!mute);
             }}
             intent={mute ? 'warning' : 'none'}
           />
@@ -48,7 +84,7 @@ export const TrackInfo: FunctionComponent<TrackInfoProps> = (props: TrackInfoPro
             small
             active={solo}
             onClick={() => {
-              setSolo(!solo);
+              changeSolo(!solo);
             }}
             intent={solo ? 'success' : 'none'}
           />
@@ -65,18 +101,22 @@ export const TrackInfo: FunctionComponent<TrackInfoProps> = (props: TrackInfoPro
         <div>
           <Knob
             label="Pan"
-            min={-50}
-            max={50}
+            min={-UX_PAN_SCALE}
+            max={UX_PAN_SCALE}
             labelRenderer={panRenderer}
             noLabels={true}
             size={30}
+            value={pan}
+            onChange={(val) => {
+              changePan(val);
+            }}
           />
         </div>
       </div>
       <div>
         <Slider
-          min={-102}
-          max={6}
+          min={MIN_VOLUME_DB}
+          max={MAX_VOLUME_DB}
           labelValues={[]}
           vertical={false}
           intent="primary"
@@ -84,10 +124,10 @@ export const TrackInfo: FunctionComponent<TrackInfoProps> = (props: TrackInfoPro
           className={styles.volume}
           value={volume}
           onChange={(val) => {
-            setVolume(val);
+            changeVolume(val);
           }}
           onRelease={(val) => {
-            setVolume(val);
+            changeVolume(val);
           }}
           showTrackFill={false}
         />

@@ -139,6 +139,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
       />
       <Arrangement
         tracks={props.project.tracks}
+        updateTrackEnablement={() => props.project.updateTrackEnablement()}
         totalWidth={totalWidth}
         totalHeight={props.project.tracks.length * TRACK_HEIGHT_PX}
         scale={timelineScale}

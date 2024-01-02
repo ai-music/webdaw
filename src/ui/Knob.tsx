@@ -8,12 +8,14 @@ export type Props = {
   max: number;
   labelRenderer?: (val: number) => string;
   defaultValue?: number;
+  value?: number;
   size?: number;
   noLabels?: boolean;
+  onChange?: (val: number) => void;
 };
 
 export const Knob: FunctionComponent<Props> = (props) => {
-  const [value, setValue] = useState(props.defaultValue ?? 0);
+  const [value, setValue] = useState(props.value ?? props.defaultValue ?? 0);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState(0);
   const [dragStartValue, setDragStartValue] = useState(0);
@@ -26,6 +28,15 @@ export const Knob: FunctionComponent<Props> = (props) => {
   //     else dragTarget.style.cursor = 'default';
   //   }
   // }, [isDragging, dragTarget]);
+
+  function onChange(val: number) {
+    if (props.onChange) props.onChange(val);
+  }
+
+  function changeValue(val: number) {
+    setValue(val);
+    onChange(val);
+  }
 
   const size = props.size ? props.size : 100;
   const center = size / 2;
@@ -54,7 +65,7 @@ export const Knob: FunctionComponent<Props> = (props) => {
       const newValue = Math.min(Math.max(props.min, dragStartValue + deltaValue), props.max);
 
       if (newValue !== value) {
-        setValue(newValue);
+        changeValue(newValue);
       }
     }
   }

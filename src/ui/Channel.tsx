@@ -3,6 +3,7 @@ import { FunctionComponent, useState } from 'react';
 import styles from './Channel.module.css';
 import { Button, ButtonGroup, EditableText, Slider } from '@blueprintjs/core';
 import { Knob } from './Knob';
+import { MAX_VOLUME_DB, MIN_VOLUME_DB } from '../core/Config';
 
 export interface Bus {
   name: string;
@@ -17,7 +18,7 @@ export interface ChannelProps {
 }
 
 function renderVolumeLabel(val: number, opts?: { isHandleTooltip: boolean }) {
-  return val <= -102 ? `-\u2060inf\u00A0dB` : `${val.toFixed(1)}\u00A0dB`;
+  return val <= MIN_VOLUME_DB ? `-\u2060inf\u00A0dB` : `${val.toFixed(1)}\u00A0dB`;
 }
 
 function panRenderer(val: number, opts?: { isHandleTooltip: boolean }) {
@@ -44,7 +45,13 @@ export const Channel: FunctionComponent<ChannelProps> = (props: ChannelProps) =>
   return (
     <div className={styles.channel}>
       {props.buses.map((bus) => (
-        <Knob label={bus.name} min={-102} max={6} labelRenderer={renderVolumeLabel} size={70} />
+        <Knob
+          label={bus.name}
+          min={MIN_VOLUME_DB}
+          max={MAX_VOLUME_DB}
+          labelRenderer={renderVolumeLabel}
+          size={70}
+        />
       ))}
       <Knob label="Pan" min={-50} max={50} labelRenderer={panRenderer} size={70} />
       <Slider

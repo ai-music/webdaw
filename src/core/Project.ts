@@ -43,6 +43,8 @@ export class Project implements NamedObject, ToJson, AudioFileResolver {
   ) {
     this.tracks = tracks;
     this.audioFiles = audioFiles;
+
+    this.updateTrackEnablement();
   }
 
   /**
@@ -210,5 +212,18 @@ export class Project implements NamedObject, ToJson, AudioFileResolver {
         locationToTime(location.add(duration, timeSignature)) - locationToTime(location),
       timeSignatureAtLocation: timeSignatureAtLocation,
     };
+  }
+
+  /**
+   * Using the solo and mute status of each track, determine the enablement status of each track.
+   */
+  public updateTrackEnablement(): void {
+    const soloedTracks = this.tracks.filter((track) => track.soloed);
+
+    if (soloedTracks.length > 0) {
+      this.tracks.forEach((track) => (track.enabled = track.soloed));
+    } else {
+      this.tracks.forEach((track) => (track.enabled = !track.muted));
+    }
   }
 }

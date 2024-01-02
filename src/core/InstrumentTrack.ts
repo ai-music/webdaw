@@ -51,6 +51,10 @@ export class InstrumentTrack extends AbstractTrack {
    */
   audioState: AudioState | null = null;
 
+  enabled: boolean = true;
+  volume: number = 0;
+  pan: number = 0;
+
   constructor(name: string, color: string, muted: boolean, instrument: Instrument) {
     super(name, color, muted);
     this.instrument = instrument;

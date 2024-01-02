@@ -21,8 +21,8 @@ logarithmic scale, there would be no way to fully silence a signal. Therefore, a
 to extend the volume scale at the bottom using a "minus infinity" dB value, at which a signal is being fully 
 supressed.
 
-For WebDAW, we are using a range of [-102, 6] for volume levels, where -102 is treated as special case
-corresponding to fully silencing the signal. With this convention, we have { -infinity } + (-102, 6] as
+For WebDAW, we are using a range of [-60, 6] for volume levels, where -60 is treated as special case
+corresponding to fully silencing the signal. With this convention, we have { -infinity } + (-60, 6] as
 the effective range for volume values.
 
 We implement volume control by mapping it to a [GainNode](https://webaudio.github.io/web-audio-api/#GainNode)

@@ -6,6 +6,7 @@ import { JSONObject, JSONValue, Location, LocationToTime, assert } from './Commo
 import { AbstractTrack } from './Track';
 
 type AudioState = {
+  channelStripInput: GainNode;
   panner: StereoPannerNode;
   gain: GainNode;
 };
@@ -62,6 +63,86 @@ export class AudioTrack extends AbstractTrack {
    */
   activeAudioStates: ActiveAudioState[] = [];
 
+  /**
+   * The volume of this track. This is a value between -102 (correspondng to -inf dB) and 6 (corresponding to 6 dB).
+   */
+  private _volume: number = 0;
+
+  set volume(value: number) {
+    if (value === undefined) {
+      return;
+    }
+
+    this._volume = value;
+    if (this.audioState !== null) {
+      this.audioState.gain.gain.value = this.gainFromVolume;
+    }
+  }
+
+  get volume(): number {
+    return this._volume;
+  }
+
+  /**
+   * The pan of this track. This is a value between -1 (corresponding to full left) and 1 (corresponding to full right).
+   */
+  private _pan: number = 0;
+
+  set pan(value: number) {
+    if (value === undefined) {
+      return;
+    }
+
+    this._pan = value;
+    if (this.audioState !== null) {
+      this.audioState.panner.pan.value = value;
+    }
+  }
+
+  get pan(): number {
+    return this._pan;
+  }
+
+  /**
+   * The sends of this track. This is an array of gain values between -102 (corresponding to -inf dB) and 6 (corresponding to 6 dB).
+   */
+  sends: number[] = [];
+
+  /**
+   * Whether this track is enabled or not. If it is disabled, it will not be rendered.
+   */
+  private _enabled: boolean = true;
+
+  /**
+   * Whether this track was reenabled after being disabled. This is used to determine whether
+   * we need to schedule audio playback that is continuing.
+   */
+  private _scheduleContinuation: boolean = false;
+
+  public get enabled(): boolean {
+    return this._enabled;
+  }
+
+  public set enabled(value: boolean) {
+    if (value === undefined || value === this._enabled) {
+      return;
+    }
+
+    this._enabled = value;
+
+    if (this.audioState !== null) {
+      this.audioState.channelStripInput.gain.value = value ? 1 : 0;
+
+      if (!value) {
+        this.stop();
+      }
+    }
+
+    if (value) {
+      this._scheduleContinuation = true;
+    }
+  }
+
   constructor(
     regions: AudioRegion[],
     effects: AudioEffect[],
@@ -78,11 +159,16 @@ export class AudioTrack extends AbstractTrack {
 
   initializeAudio(context: AudioContext): void {
     if (this.audioState === null) {
+      const channelStripInput = context.createGain();
       const gain = context.createGain();
       const panner = context.createStereoPanner();
+      channelStripInput.connect(panner);
+      channelStripInput.gain.value = this._enabled ? 1 : 0;
+      panner.pan.value = this.pan;
       panner.connect(gain);
       gain.connect(context.destination);
-      this.audioState = { gain, panner };
+      gain.gain.value = this.gainFromVolume;
+      this.audioState = { channelStripInput, gain, panner };
     } else {
       assert(
         this.audioState.gain.context === context,
@@ -95,6 +181,7 @@ export class AudioTrack extends AbstractTrack {
     if (this.audioState !== null) {
       this.audioState.gain.disconnect();
       this.audioState.panner.disconnect();
+      this.audioState.channelStripInput.disconnect();
       this.audioState = null;
     } else {
       throw new Error('Audio nodes not initialized');
@@ -146,6 +233,19 @@ export class AudioTrack extends AbstractTrack {
     continuationTime?: number,
     discontinuationTime?: number,
   ): void {
+    // Don't schedule anything if the track is disabled
+    if (!this._enabled) {
+      return;
+    }
+
+    // Check for need to schedule continuation
+    if (this._scheduleContinuation && continuationTime === undefined) {
+      continuationTime = startTime;
+    }
+
+    // Clear out any previous coninuation need
+    this._scheduleContinuation = false;
+
     this.regions.forEach((region) => {
       // TODO: The current code will handle looping at the arrangement level, but not looping of
       // individual audio regions. This will be added later.
@@ -171,7 +271,7 @@ export class AudioTrack extends AbstractTrack {
         const buffer = region.audioFile.buffer;
         console.log(`Buffer duration: ${buffer.duration}`);
         source.buffer = buffer;
-        source.connect(state.panner);
+        source.connect(state.channelStripInput);
         const duration = Math.min(buffer.duration, endPosition - continuationTime);
         const offset = continuationTime - startPosition;
         source.start(timeOffset + continuationTime, offset /*, duration*/);
@@ -207,7 +307,7 @@ export class AudioTrack extends AbstractTrack {
         const buffer = region.audioFile.buffer;
         console.log(`Buffer duration: ${buffer.duration}`);
         source.buffer = buffer;
-        source.connect(state.panner);
+        source.connect(state.channelStripInput);
         const duration = Math.min(buffer.duration, endPosition - startPosition);
         source.start(timeOffset + startPosition, 0 /*, duration*/);
 
@@ -313,7 +413,9 @@ export class AudioTrack extends AbstractTrack {
   stop(): void {
     this.activeAudioStates.forEach((state) => {
       state.node.stop();
+      state.node.disconnect();
     });
     this.activeAudioStates = [];
+    this._scheduleContinuation = false;
   }
 }

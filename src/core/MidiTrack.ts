@@ -25,6 +25,10 @@ export class MidiTrack extends AbstractTrack {
    */
   channel: number = 0;
 
+  enabled: boolean = true;
+  volume: number = 0;
+  pan: number = 0;
+
   // Support for JSON serialization/deserialization
   public static TYPE_TAG = 'midi';
 

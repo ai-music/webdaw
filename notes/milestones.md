@@ -7,8 +7,8 @@ This document is an outline of how WebDAW may evolve towards a usable music prod
 - [X] Arrangement view showing tracks over arrangement timeline
 - [X] Ability to zoom and pan arrangement view
 - [X] Ability to play back arrangement incl. looped playback
-- [ ] Static volume and panning for each track
-- [ ] Ability to control mute and solo for each track
+- [X] Static volume and panning for each track
+- [X] Ability to control mute and solo for each track
 - [ ] Ability to rename each track
 - [ ] Ability to add and remove audio tracks
 - [ ] Ability to change order of audio tracks (drag and drop)
