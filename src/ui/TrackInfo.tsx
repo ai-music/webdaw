@@ -138,7 +138,7 @@ export const TrackInfo: FunctionComponent<TrackInfoProps> = (props: TrackInfoPro
         <div className={styles.secondRow}>
           <Popover
             content={
-              <Card>
+              <Card compact>
                 <h3>Track Properties</h3>
                 <h4>Track Color</h4>
                 <Compact color={color} onChange={(val) => changeColor(val.hex)} />
