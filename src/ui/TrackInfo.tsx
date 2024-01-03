@@ -3,7 +3,8 @@ import {
   ButtonGroup,
   Card,
   EditableText,
-  Overlay,
+  H4,
+  H5,
   Popover,
   Slider,
 } from '@blueprintjs/core';
@@ -139,10 +140,10 @@ export const TrackInfo: FunctionComponent<TrackInfoProps> = (props: TrackInfoPro
           <Popover
             content={
               <Card compact>
-                <h3>Track Properties</h3>
-                <h4>Track Color</h4>
+                <H4>Track Properties</H4>
+                <H5>Track Color</H5>
                 <Compact color={color} onChange={(val) => changeColor(val.hex)} />
-                <h4>Danger Zone</h4>
+                <H5>Danger Zone</H5>
                 <Button intent="danger" onClick={() => props.delete()}>
                   Delete Track
                 </Button>
