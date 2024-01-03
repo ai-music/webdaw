@@ -29,6 +29,12 @@ export const Knob: FunctionComponent<Props> = (props) => {
   //   }
   // }, [isDragging, dragTarget]);
 
+  useEffect(() => {
+    if (props.value !== undefined) {
+      setValue(props.value);
+    }
+  }, [props.value]);
+
   function onChange(val: number) {
     if (props.onChange) props.onChange(val);
   }

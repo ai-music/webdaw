@@ -226,4 +226,32 @@ export class Project implements NamedObject, ToJson, AudioFileResolver {
       this.tracks.forEach((track) => (track.enabled = !track.muted));
     }
   }
+
+  public moveTrackToPosition(index: number, position: number) {
+    const track = this.tracks[index];
+
+    if (index < position) {
+      this.tracks = this.tracks
+        .slice(0, index)
+        .concat(this.tracks.slice(index + 1, position))
+        .concat(track)
+        .concat(this.tracks.slice(position));
+    } else if (index > position) {
+      this.tracks = this.tracks
+        .slice(0, position)
+        .concat(track)
+        .concat(this.tracks.slice(position, index))
+        .concat(this.tracks.slice(index + 1));
+    }
+  }
+
+  public deleteTrack(index: number) {
+    this.tracks = this.tracks.slice(0, index).concat(this.tracks.slice(index + 1));
+    this.updateTrackEnablement();
+  }
+
+  public appendTrack(track: AbstractTrack) {
+    this.tracks = this.tracks.concat(track);
+    this.updateTrackEnablement();
+  }
 }

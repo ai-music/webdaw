@@ -144,13 +144,13 @@ export class AudioTrack extends AbstractTrack {
   }
 
   constructor(
-    regions: AudioRegion[],
-    effects: AudioEffect[],
-    name: string,
-    color: string,
-    muted: boolean,
-    soloed: boolean,
-    recording: boolean,
+    regions: AudioRegion[] = [],
+    effects: AudioEffect[] = [],
+    name: string = 'Untitled Track',
+    color: string = '#aaaaaa',
+    muted: boolean = false,
+    soloed: boolean = false,
+    recording: boolean = false,
   ) {
     super(name, color, muted, soloed, recording);
     this.regions = regions;

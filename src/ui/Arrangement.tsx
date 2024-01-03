@@ -5,7 +5,8 @@ import { Timeline, TimelineProps } from './Timeline';
 import { TrackInterface } from '../core/Track';
 import { TrackInfo } from './TrackInfo';
 import { Region } from './Region';
-import { SCROLLBAR_DIMENSIONS_PX, TIMELINE_FACTOR_PX } from './Config';
+import { SCROLLBAR_DIMENSIONS_PX, TIMELINE_FACTOR_PX, TRACK_HEIGHT_PX } from './Config';
+import { Button, ButtonGroup } from '@blueprintjs/core';
 
 /**
  * Properties required to render the Arrangement component.
@@ -13,6 +14,9 @@ import { SCROLLBAR_DIMENSIONS_PX, TIMELINE_FACTOR_PX } from './Config';
 export interface ArrangementProps extends TimelineProps {
   tracks: TrackInterface[];
   updateTrackEnablement: () => void;
+  appendTrack: (trackType: string) => void;
+  moveTrackToPosition: (index: number, position: number) => void;
+  deleteTrack: (index: number) => void;
   totalWidth: number;
   totalHeight: number;
 }
@@ -78,7 +82,53 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props: Arrangem
     }
   };
 
-  const tracks = props.tracks;
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragBarIndex, setDragBarIndex] = useState(0);
+  const dragStart = useRef(0);
+  const dragStartIndex = useRef(0);
+  const dragTarget = useRef<HTMLElement | null>(null);
+
+  function onDragTrackStart(event: React.PointerEvent<HTMLElement>, index: number) {
+    if (!isDragging && dragTarget.current === null) {
+      event.currentTarget.setPointerCapture(event.pointerId);
+      dragTarget.current = event.currentTarget;
+      dragStart.current = event.clientY;
+      dragStartIndex.current = index;
+      setIsDragging(true);
+      setDragBarIndex(index);
+    }
+  }
+  function onDragTrack(event: React.PointerEvent<HTMLElement>, index: number) {
+    if (isDragging) {
+      const delta = event.clientY - dragStart.current;
+      const newIndex = Math.min(
+        Math.max(dragStartIndex.current + Math.round(delta / TRACK_HEIGHT_PX), 0),
+        props.tracks.length,
+      );
+
+      if (newIndex !== dragBarIndex) {
+        setDragBarIndex(newIndex);
+      }
+    }
+  }
+
+  function onDragTrackEnd(event: React.PointerEvent<HTMLElement>, index: number) {
+    if (isDragging) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+      const delta = event.clientY - dragStart.current;
+      const newIndex = Math.min(
+        Math.max(dragStartIndex.current + Math.round(delta / TRACK_HEIGHT_PX), 0),
+        props.tracks.length,
+      );
+
+      if (newIndex !== index || newIndex !== index + 1) {
+        props.moveTrackToPosition(index, newIndex);
+      }
+
+      dragTarget.current = null;
+      setIsDragging(false);
+    }
+  }
 
   return (
     <div className={styles.arrangement}>
@@ -111,18 +161,61 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props: Arrangem
           <div ref={trackScroll} className={styles.trackScroll} onScroll={onScrollTracks}>
             <div
               style={{
+                position: 'relative',
                 height: `${props.totalHeight}px`,
                 minHeight: `${props.totalHeight}px`,
                 maxHeight: `${props.totalHeight}px`,
               }}
             >
-              {tracks.map((track, index) => (
-                <TrackInfo
-                  index={index}
-                  track={track}
-                  updateTrackEnablement={props.updateTrackEnablement}
-                />
+              {props.tracks.map((track, index) => (
+                <div
+                  className={`${styles.trackInfoBox} ${
+                    isDragging && index === dragStartIndex.current ? styles.dragging : ''
+                  }`}
+                >
+                  <i
+                    className={styles.grip}
+                    style={{
+                      color: track.color,
+                      textShadow: `0px -4px 0px ${track.color}`,
+                    }}
+                    onPointerDown={(e) => onDragTrackStart(e, index)}
+                    onPointerMove={(e) => onDragTrack(e, index)}
+                    onPointerUp={(e) => onDragTrackEnd(e, index)}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      return false;
+                    }}
+                  ></i>
+                  <TrackInfo
+                    delete={() => props.deleteTrack(index)}
+                    index={index}
+                    track={track}
+                    updateTrackEnablement={props.updateTrackEnablement}
+                  />
+                </div>
               ))}
+              <div
+                className={styles.dragMarker}
+                style={{
+                  top: `${dragBarIndex * TRACK_HEIGHT_PX}px`,
+                  display: isDragging ? 'inherit' : 'none',
+                }}
+              />
+              <div
+                className={styles.trackInfoPlaceholder}
+                style={{ height: TRACK_HEIGHT_PX, lineHeight: `${TRACK_HEIGHT_PX}px` }}
+              >
+                <ButtonGroup>
+                  <Button
+                    icon="plus"
+                    small
+                    minimal
+                    outlined={false}
+                    onClick={() => props.appendTrack('audio')}
+                  />
+                </ButtonGroup>
+              </div>
             </div>
           </div>
           <div
@@ -142,7 +235,7 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props: Arrangem
               overflow: 'hidden',
             }}
           >
-            {tracks.map((track, index) =>
+            {props.tracks.map((track, index) =>
               track.regions.map((region) => (
                 <Region
                   trackIndex={index}
@@ -153,9 +246,19 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props: Arrangem
               )),
             )}
             <div
+              className={styles.trackPlaceholder}
+              style={{
+                height: TRACK_HEIGHT_PX,
+                top: props.tracks.length * TRACK_HEIGHT_PX,
+                lineHeight: `${TRACK_HEIGHT_PX}px`,
+              }}
+            >
+              Drag a region here to create a new track
+            </div>
+            <div
               className={styles.marker}
               style={{ left: `${props.timestamp * props.scale * TIMELINE_FACTOR_PX}px` }}
-            ></div>
+            />
           </div>
         </div>
       </div>

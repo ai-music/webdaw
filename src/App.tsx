@@ -41,6 +41,8 @@ function App() {
   const initialProject = new ProjectObj();
 
   const [project, setProject] = useState(initialProject);
+  const [tracks, setTracks] = useState(initialProject.tracks); // [TrackInterface]
+
   const [engine, setEngine] = useState(
     new Engine(audioContext, { bufferSize: BUFFER_SIZE, sampleRate: SAMPLE_RATE }, initialProject),
   );
@@ -73,6 +75,7 @@ function App() {
       (project) => {
         engine.project = project;
         setProject(project);
+        setTracks(project.tracks);
         setLoading(false);
       },
       (project, progress) => {
@@ -280,6 +283,8 @@ function App() {
         <Project
           engine={engine}
           project={project}
+          tracks={tracks}
+          setTracks={setTracks}
           mixerVisible={mixerVisible}
           setMixerVisible={setMixerVisible}
         />

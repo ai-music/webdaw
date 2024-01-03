@@ -192,7 +192,7 @@ export abstract class AbstractTrack implements TrackInterface, ToJson {
   }
 
   set name(value: string) {
-    throw new Error('Track name cannot be changed.');
+    this._name = value;
   }
 
   abstract regions: RegionInterface[];

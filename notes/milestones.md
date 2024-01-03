@@ -9,9 +9,9 @@ This document is an outline of how WebDAW may evolve towards a usable music prod
 - [X] Ability to play back arrangement incl. looped playback
 - [X] Static volume and panning for each track
 - [X] Ability to control mute and solo for each track
-- [ ] Ability to rename each track
-- [ ] Ability to add and remove audio tracks
-- [ ] Ability to change order of audio tracks (drag and drop)
+- [X] Ability to rename each track
+- [X] Ability to add and remove audio tracks
+- [X] Ability to change order of audio tracks (drag and drop)
 - [ ] Ability to place regions referencing audio files to a track
 - [ ] Ability to move regions within their containing track
 - [ ] Ability to move regions from one audio track to another

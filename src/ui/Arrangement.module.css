@@ -15,8 +15,8 @@
 }
 
 .placeholder {
-  width: 200px;
-  min-width: 200px;
+  width: 256px;
+  min-width: 256px;
 }
 
 .timelineScroll {
@@ -44,19 +44,50 @@
 
 .trackScrollOuter {
   overflow-x: hidden;
-  width: 12.5rem;
-  min-width: 12.5rem;
+  width: 16rem;
+  min-width: 16rem;
   height: 100%;
   display: flex;
   flex-direction: column;
 }
 
 .trackScroll {
-  width: 13.5rem;
-  min-width: 13.5rem;
+  width: 18rem;
+  min-width: 18rem;
   flex: 1;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: scroll;
+  /* border: 1px solid black ; */
+  scrollbar-gutter: 0px;
+}
+
+.trackInfoBox {
+  width: 16rem;
+  min-width: 16rem;
+  max-width: 16rem;
+  display: flex;
+  flex-direction: row;
+  /* box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15); */
+  transition: box-shadow 0.1s ease-in-out;
+}
+
+i.grip::after {
+  content: "..................";
+  min-width: 1rem;
+  max-width: 1rem;
+  width: 1rem;
+  display: inline-block;
+  /* color: #AAA; */
+  font-style: normal;
+  font-family: sans-serif;
+  font-size:15px;
+  font-weight: bold;
+  transform: rotate(90deg);
+  cursor:move;
+  margin-right:0.5rem;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  /* border: 1px solid black; */
 }
 
 .regionScroll {
@@ -74,4 +105,38 @@
   border: 1px solid gray;
   top: 0;
   /* z-index: 1000000 */
+}
+
+.trackInfoPlaceholder {
+  width: 15rem;
+  min-width: 15rem;
+  height: 100%;
+  flex: 0;
+  /* background-color: gainsboro; */
+  vertical-align: middle;
+  text-align: right;
+  /* line-height: 100px; */
+}
+
+.trackPlaceholder {
+  flex: 0;
+  background-color: gainsboro;
+  /* border: 1px solid black; */
+  position: absolute;
+  left: 0;
+  width: 100%;
+  vertical-align: middle;
+  padding-left: 2rem;
+}
+
+.dragMarker {
+  position: absolute;
+  height: 3px;
+  width: 100%;
+  border: 1px solid gray;
+  top: 0;
+}
+
+.dragging {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);  
 }

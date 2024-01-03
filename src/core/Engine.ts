@@ -577,10 +577,11 @@ export class Engine {
   public handleTrackEvent(event: TrackEvent): void {
     switch (event.type) {
       case TrackEventType.Added:
-        // TODO
+        event.track.initializeAudio(this.context);
         break;
       case TrackEventType.Removed:
-        // TODO
+        event.track.stop();
+        event.track.deinitializeAudio();
         break;
       case TrackEventType.Muted:
         // TODO

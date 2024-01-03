@@ -223,7 +223,8 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
         <Button icon="pause" disabled={playback === PlaybackState.Stopped} onClick={pause} />
         <Button
           icon="record"
-          disabled={playback !== PlaybackState.Stopped}
+          // disabled={playback !== PlaybackState.Stopped}
+          disabled={true} // until recording is supported
           intent={playback === PlaybackState.Recording ? Intent.DANGER : undefined}
           onClick={record}
         />

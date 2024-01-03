@@ -6,12 +6,16 @@ import { Duration, Location as LocationValue } from '../core/Common';
 import { Drawer } from '@blueprintjs/core';
 import { Project as ProjectObj } from '../core/Project';
 import { Engine } from '../core/Engine';
-import { PlaybackPositionEvent, TransportEventType } from '../core/Events';
+import { PlaybackPositionEvent, TrackEventType, TransportEventType } from '../core/Events';
 import { Arrangement } from './Arrangement';
 import { TIMELINE_FACTOR_PX, TRACK_HEIGHT_PX } from './Config';
+import { AudioTrack } from '../core/AudioTrack';
+import { AbstractTrack, TrackInterface } from '../core/Track';
 
 export type ProjectProps = {
   project: ProjectObj;
+  tracks: TrackInterface[];
+  setTracks: (tracks: AbstractTrack[]) => void;
   engine: Engine;
   mixerVisible: boolean;
   setMixerVisible: (visible: boolean) => void;
@@ -28,6 +32,35 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
   const [end, setEnd] = useState(props.project.end);
 
   const [looping, setLooping] = useState(props.engine.looping);
+
+  function moveTrackToPosition(index: number, position: number) {
+    props.project.moveTrackToPosition(index, position);
+    props.setTracks(props.project.tracks);
+  }
+
+  function deleteTrack(index: number) {
+    props.engine.handleTrackEvent({
+      type: TrackEventType.Removed,
+      track: props.project.tracks[index],
+    });
+
+    props.project.deleteTrack(index);
+    props.setTracks(props.project.tracks);
+  }
+
+  function appendTrack(trackType: string) {
+    if (trackType === 'audio') {
+      const track = new AudioTrack();
+      props.project.appendTrack(track);
+
+      props.engine.handleTrackEvent({
+        type: TrackEventType.Added,
+        track: track,
+      });
+
+      props.setTracks(props.project.tracks);
+    }
+  }
 
   const changeLooping = (looping: boolean) => {
     setLooping(looping);
@@ -138,10 +171,13 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
         setLooping={changeLooping}
       />
       <Arrangement
-        tracks={props.project.tracks}
+        tracks={props.tracks}
         updateTrackEnablement={() => props.project.updateTrackEnablement()}
+        appendTrack={appendTrack}
+        moveTrackToPosition={moveTrackToPosition}
+        deleteTrack={deleteTrack}
         totalWidth={totalWidth}
-        totalHeight={props.project.tracks.length * TRACK_HEIGHT_PX}
+        totalHeight={(props.tracks.length + 1) * TRACK_HEIGHT_PX}
         scale={timelineScale}
         timeSignature={props.project.timeSignature}
         converter={props.project.locationToTime}
