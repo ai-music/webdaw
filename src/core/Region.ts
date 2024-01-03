@@ -32,6 +32,10 @@ export interface MidiRegionData extends BaseRegionData {
 
 export type RegionData = AudioRegionData | MidiRegionData;
 
+export type Cache = {
+  [id: string]: string;
+};
+
 /**
  * The interface of a region towards the Engine.
  */
@@ -65,6 +69,11 @@ export interface RegionInterface extends NamedObject, ColoredObject, MutableObje
    * The data contained in this region.
    */
   data: RegionData;
+
+  /**
+   * Cache for UX rendering of the region data.
+   */
+  cache: Cache;
 }
 
 export abstract class AbstractRegion implements RegionInterface {
@@ -82,6 +91,8 @@ export abstract class AbstractRegion implements RegionInterface {
   ) {
     this._name = name;
   }
+
+  public cache: Cache = {} as Cache;
 
   get name(): string {
     return this._name;

@@ -76,16 +76,31 @@ export const Region: FunctionComponent<RegionProps> = (props: RegionProps) => {
     backgroundColor: selected ? props.region.color : 'transparent',
   };
 
+  function retrieveImage(width: number, offset: number, duration: number): string {
+    const cacheKey = width;
+    const cachedItem = props.region.cache[cacheKey];
+
+    if (cachedItem) {
+      return cachedItem;
+    } else if (props.region.data.type === RegionDataType.Audio) {
+      const image = audioToImage(props.region.data.audioBuffer, width * 16, 0, duration);
+      props.region.cache[cacheKey] = image;
+      return image;
+    } else {
+      return '';
+    }
+  }
+
   const renderData = useRef<string>('');
   if (renderData.current === '' && props.region.data.type === RegionDataType.Audio) {
     console.log('rendering audio');
-    renderData.current = audioToImage(props.region.data.audioBuffer, width * 16, 0, duration);
+    renderData.current = retrieveImage(width, 0, duration);
   }
 
   useEffect(() => {
     if (props.region.data.type === RegionDataType.Audio) {
       console.log('re-rendering audio');
-      renderData.current = audioToImage(props.region.data.audioBuffer, width * 16, 0, duration);
+      renderData.current = retrieveImage(width, 0, duration);
     }
   }, [duration, props.scale, props.region.length]);
 
