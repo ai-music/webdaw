@@ -37,6 +37,8 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props: Arrangem
   const lastRegionScrollTop = useRef(0);
   const lastRegionScrollLeft = useRef(0);
 
+  const [colorChangeTracker, setColorChangeTracker] = useState(0);
+
   const onScrollTimeline = (e: ReactUIEvent<HTMLDivElement, UIEvent>) => {
     const target = e.target as HTMLDivElement;
 
@@ -189,6 +191,9 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props: Arrangem
                   ></i>
                   <TrackInfo
                     delete={() => props.deleteTrack(index)}
+                    colorChange={(color) => {
+                      setColorChangeTracker(colorChangeTracker + 1);
+                    }}
                     index={index}
                     track={track}
                     updateTrackEnablement={props.updateTrackEnablement}

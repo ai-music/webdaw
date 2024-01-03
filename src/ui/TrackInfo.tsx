@@ -1,4 +1,12 @@
-import { Button, ButtonGroup, EditableText, Overlay, Slider } from '@blueprintjs/core';
+import {
+  Button,
+  ButtonGroup,
+  Card,
+  EditableText,
+  Overlay,
+  Popover,
+  Slider,
+} from '@blueprintjs/core';
 import { FunctionComponent, useEffect, useState } from 'react';
 
 import styles from './TrackInfo.module.css';
@@ -21,6 +29,7 @@ export interface TrackInfoProps {
   index: number;
   track: TrackInterface;
   updateTrackEnablement: () => void;
+  colorChange: (color: string) => void;
 }
 
 export const TrackInfo: FunctionComponent<TrackInfoProps> = (props: TrackInfoProps) => {
@@ -73,6 +82,7 @@ export const TrackInfo: FunctionComponent<TrackInfoProps> = (props: TrackInfoPro
   function changeColor(color: string) {
     setColor(color);
     props.track.color = color;
+    props.colorChange(color);
   }
 
   return (
@@ -126,20 +136,35 @@ export const TrackInfo: FunctionComponent<TrackInfoProps> = (props: TrackInfoPro
           </div>
         </div>
         <div className={styles.secondRow}>
-          <Button
-            icon="menu"
-            small
-            minimal
-            outlined={false}
-            onSelect={(e) => {
-              e.preventDefault();
-              return false;
-            }}
-            onClick={() => {
-              props.delete();
-            }}
-            className={styles.menu}
-          />
+          <Popover
+            content={
+              <Card>
+                <h3>Track Properties</h3>
+                <h4>Track Color</h4>
+                <Compact color={color} onChange={(val) => changeColor(val.hex)} />
+                <h4>Danger Zone</h4>
+                <Button intent="danger" onClick={() => props.delete()}>
+                  Delete Track
+                </Button>
+              </Card>
+            }
+            position="bottom"
+          >
+            <Button
+              icon="menu"
+              small
+              minimal
+              outlined={false}
+              onSelect={(e) => {
+                e.preventDefault();
+                return false;
+              }}
+              // onClick={() => {
+              //   props.delete();
+              // }}
+              className={styles.menu}
+            />
+          </Popover>
           <Slider
             min={MIN_VOLUME_DB}
             max={MAX_VOLUME_DB}
