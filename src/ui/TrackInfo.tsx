@@ -148,7 +148,7 @@ export const TrackInfo: FunctionComponent<TrackInfoProps> = (props: TrackInfoPro
                 </Button>
               </Card>
             }
-            position="bottom"
+            placement="right-start"
           >
             <Button
               icon="menu"

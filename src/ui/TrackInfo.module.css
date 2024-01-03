@@ -53,6 +53,11 @@
   display: flex;
 }
 
+.menu {
+  /* TODO: This following line is a bit of cheeting to have the popover connect at the right location */
+  transform: translateY(40%);
+}
+
 .menu:focus {
   outline: none;
 }
