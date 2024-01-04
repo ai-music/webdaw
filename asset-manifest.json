@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "https://ai-music.github.io/webdaw/static/css/main.f917dc56.css",
-    "main.js": "https://ai-music.github.io/webdaw/static/js/main.0db5f8a3.js",
+    "main.css": "https://ai-music.github.io/webdaw/static/css/main.94a76d83.css",
+    "main.js": "https://ai-music.github.io/webdaw/static/js/main.a5b763e4.js",
     "blueprint-icons-all-paths-loader.js": "https://ai-music.github.io/webdaw/static/js/blueprint-icons-all-paths-loader.dd6a5c0f.chunk.js",
     "blueprint-icons-split-paths-by-size-loader.js": "https://ai-music.github.io/webdaw/static/js/blueprint-icons-split-paths-by-size-loader.03c746c4.chunk.js",
     "static/js/787.0cabf616.chunk.js": "https://ai-music.github.io/webdaw/static/js/787.0cabf616.chunk.js",
@@ -19,8 +19,8 @@
     "static/media/blueprint-icons-20.woff2?": "https://ai-music.github.io/webdaw/static/media/blueprint-icons-20.02bba2420fd6f2359caa.woff2",
     "static/media/blueprint-icons-16.woff2?": "https://ai-music.github.io/webdaw/static/media/blueprint-icons-16.e45a6485f41e3cfcf741.woff2",
     "index.html": "https://ai-music.github.io/webdaw/index.html",
-    "main.f917dc56.css.map": "https://ai-music.github.io/webdaw/static/css/main.f917dc56.css.map",
-    "main.0db5f8a3.js.map": "https://ai-music.github.io/webdaw/static/js/main.0db5f8a3.js.map",
+    "main.94a76d83.css.map": "https://ai-music.github.io/webdaw/static/css/main.94a76d83.css.map",
+    "main.a5b763e4.js.map": "https://ai-music.github.io/webdaw/static/js/main.a5b763e4.js.map",
     "blueprint-icons-all-paths-loader.dd6a5c0f.chunk.js.map": "https://ai-music.github.io/webdaw/static/js/blueprint-icons-all-paths-loader.dd6a5c0f.chunk.js.map",
     "blueprint-icons-split-paths-by-size-loader.03c746c4.chunk.js.map": "https://ai-music.github.io/webdaw/static/js/blueprint-icons-split-paths-by-size-loader.03c746c4.chunk.js.map",
     "787.0cabf616.chunk.js.map": "https://ai-music.github.io/webdaw/static/js/787.0cabf616.chunk.js.map",
@@ -29,7 +29,7 @@
     "blueprint-icons-20px-paths.65de2047.chunk.js.map": "https://ai-music.github.io/webdaw/static/js/blueprint-icons-20px-paths.65de2047.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.f917dc56.css",
-    "static/js/main.0db5f8a3.js"
+    "static/css/main.94a76d83.css",
+    "static/js/main.a5b763e4.js"
   ]
 }
