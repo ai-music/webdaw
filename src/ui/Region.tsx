@@ -3,6 +3,7 @@ import { FunctionComponent, useEffect, useRef, useState } from 'react';
 import styles from './Region.module.css';
 import { RegionDataType, RegionInterface } from '../core/Region';
 import { LocationToTime } from '../core/Common';
+import { REGION_HEIGHT_PX, REGION_RENDERING_HEIGHT_PX, TRACK_HEIGHT_PX } from './Config';
 
 export interface RegionProps {
   region: RegionInterface;
@@ -19,7 +20,7 @@ function audioToImage(
 ): string {
   const canvas = document.createElement('canvas');
   canvas.width = width; // Set to desired width
-  canvas.height = 100; // Set to desired height
+  canvas.height = 64; // Set to desired height
   drawAudioBuffer(audioBuffer, canvas, offset, duration);
   return canvas.toDataURL();
 }
@@ -48,7 +49,7 @@ function drawAudioBuffer(
   let x = 0;
   for (let i = startOffset; i < endOffset; i++) {
     const v = data[i] / 2.0 + 0.5;
-    const y = (v * canvas.height) / 2;
+    const y = v * canvas.height;
     if (i === 0) {
       context.moveTo(x, y);
     } else {
@@ -71,8 +72,9 @@ export const Region: FunctionComponent<RegionProps> = (props: RegionProps) => {
   const style = {
     borderColor: props.region.color,
     width: `${width}rem`,
+    height: `${REGION_HEIGHT_PX}px`,
     left: `${props.converter.convertLocation(props.region.position) * props.scale}rem`,
-    top: `${props.trackIndex * 5 * 16}px`,
+    top: `${props.trackIndex * TRACK_HEIGHT_PX}px`,
     backgroundColor: selected ? props.region.color : 'transparent',
   };
 
@@ -113,8 +115,8 @@ export const Region: FunctionComponent<RegionProps> = (props: RegionProps) => {
       <div>{props.region.name}</div>
       {props.region.data.type === RegionDataType.Audio && (
         <img
-          alt="{props.region.name}"
-          height="100%"
+          alt={props.region.name}
+          height={REGION_RENDERING_HEIGHT_PX}
           width="100%"
           src={renderData.current}
           // style={{ border: '1px solid black' }}

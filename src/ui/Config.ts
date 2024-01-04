@@ -9,6 +9,16 @@ export const TRACK_HEIGHT_PX = 80;
 export const TIMELINE_FACTOR_PX = 16;
 
 /**
+ * Height of region boxes in pixels.
+ */
+export const REGION_HEIGHT_PX = 64;
+
+/**
+ * Height of region renderings in pixels.
+ */
+export const REGION_RENDERING_HEIGHT_PX = 48;
+
+/**
  * Dimensions of a scroll bar. This is really browser-specific, but for now we are simply hardwiring those values.
  * May may investigate a more robust solution later, which may rely on browser-specific CSS extensions (such as
  * `::-webkit-scrollbar). See also the design note on scrolling.
