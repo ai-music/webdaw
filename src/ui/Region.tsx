@@ -19,8 +19,8 @@ function audioToImage(
   duration: number = audioBuffer.duration,
 ): string {
   const canvas = document.createElement('canvas');
-  canvas.width = width; // Set to desired width
-  canvas.height = 64; // Set to desired height
+  canvas.width = width;
+  canvas.height = REGION_RENDERING_HEIGHT_PX;
   drawAudioBuffer(audioBuffer, canvas, offset, duration);
   return canvas.toDataURL();
 }
