@@ -11,7 +11,7 @@ accessible via the [GitHub Pages for this project](https://ai-music.github.io/we
 
 To invoke the application, simply navigate to [https://ai-music.github.io/webdaw/](https://ai-music.github.io/webdaw/).
 
-End-user documentation is accesible from the _Help_ menu inside the application.
+End-user documentation is accessible from the _Help_ menu inside the application.
 
 ![WebDAW Screenshot](./notes/images/screenshot.png)
 
