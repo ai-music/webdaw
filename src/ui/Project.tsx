@@ -1,4 +1,4 @@
-import { FunctionComponent, useEffect, useState } from 'react';
+import { FunctionComponent, useEffect, useRef, useState } from 'react';
 
 import { Transport } from './Transport';
 import { Mixer } from './Mixer';
@@ -8,9 +8,18 @@ import { Project as ProjectObj } from '../core/Project';
 import { Engine } from '../core/Engine';
 import { PlaybackPositionEvent, TrackEventType, TransportEventType } from '../core/Events';
 import { Arrangement } from './Arrangement';
-import { TIMELINE_FACTOR_PX, TRACK_HEIGHT_PX } from './Config';
+import {
+  BROWSER_WIDTH_INITIAL,
+  BROWSER_WIDTH_MAX,
+  BROWSER_WIDTH_MIN,
+  TIMELINE_FACTOR_PX,
+  TRACK_HEIGHT_PX,
+} from './Config';
 import { AudioTrack } from '../core/AudioTrack';
 import { AbstractTrack, TrackInterface } from '../core/Track';
+
+import styles from './Project.module.css';
+import { Browser } from './Browser';
 
 export type ProjectProps = {
   project: ProjectObj;
@@ -19,6 +28,8 @@ export type ProjectProps = {
   engine: Engine;
   mixerVisible: boolean;
   setMixerVisible: (visible: boolean) => void;
+  browserVisible: boolean;
+  setBrowserVisible: (visible: boolean) => void;
 };
 
 export const Project: FunctionComponent<ProjectProps> = (props) => {
@@ -144,9 +155,53 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
     timelineScale *
     TIMELINE_FACTOR_PX;
 
-  // const [infoPanelVisible, setInfoPanelVisible] = useState(false);
+  const [browserWidth, setBrowserWidth] = useState(BROWSER_WIDTH_INITIAL);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStart = useRef(0);
+  const dragStartWidth = useRef(0);
+  const dragTarget = useRef<HTMLElement | null>(null);
 
-  // TODO: Need to add buttons to the toolbar to show/hide the Browser and InfoPanel
+  function onBeginDragSeparator(event: React.PointerEvent<HTMLDivElement>) {
+    if (!isDragging && dragTarget.current === null) {
+      event.currentTarget.setPointerCapture(event.pointerId);
+      dragTarget.current = event.currentTarget;
+      dragStart.current = event.clientX;
+      dragStartWidth.current = browserWidth;
+      setIsDragging(true);
+    }
+  }
+  function onDragSeparator(event: React.PointerEvent<HTMLDivElement>) {
+    if (isDragging) {
+      const delta = event.clientX - dragStart.current;
+      const newWidth = Math.min(
+        Math.max(dragStartWidth.current + delta, BROWSER_WIDTH_MIN),
+        BROWSER_WIDTH_MAX,
+      );
+
+      if (newWidth !== browserWidth) {
+        setBrowserWidth(newWidth);
+      }
+    }
+  }
+
+  function onEndDragSeparator(event: React.PointerEvent<HTMLDivElement>) {
+    if (isDragging) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+      const delta = event.clientX - dragStart.current;
+      const newWidth = Math.min(
+        Math.max(dragStartWidth.current + delta, BROWSER_WIDTH_MIN),
+        BROWSER_WIDTH_MAX,
+      );
+
+      if (newWidth !== browserWidth) {
+        setBrowserWidth(newWidth);
+      }
+
+      dragTarget.current = null;
+      setIsDragging(false);
+    }
+  }
+
   //
   // Browser to the left, InfoPanel to the right, in the center stack of Arrangement, Editor
   return (
@@ -170,30 +225,55 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
         looping={looping}
         setLooping={changeLooping}
       />
-      <Arrangement
-        tracks={props.tracks}
-        updateTrackEnablement={() => props.project.updateTrackEnablement()}
-        appendTrack={appendTrack}
-        moveTrackToPosition={moveTrackToPosition}
-        deleteTrack={deleteTrack}
-        totalWidth={totalWidth}
-        totalHeight={(props.tracks.length + 1) * TRACK_HEIGHT_PX}
-        scale={timelineScale}
-        timeSignature={props.project.timeSignature}
-        converter={props.project.locationToTime}
-        timestamp={timestamp}
-        setTimestamp={changeTimestamp}
-        current={current}
-        setCurrent={changeCurrent}
-        loopStart={loopStart}
-        setLoopStart={changeLoopStart}
-        loopEnd={loopEnd}
-        setLoopEnd={changeLoopEnd}
-        end={end}
-        setEnd={changeEnd}
-        looping={looping}
-        setLooping={changeLooping}
-      />
+      <div className={styles.center}>
+        {props.browserVisible && (
+          <>
+            <div
+              className={styles.browser}
+              style={{
+                width: `${browserWidth}px`,
+                minWidth: `${browserWidth}px`,
+                maxWidth: `${browserWidth}px`,
+              }}
+            >
+              <div className={styles.browserInner}>
+                <Browser />
+              </div>
+            </div>
+            <div
+              className={styles.separator}
+              onPointerDown={onBeginDragSeparator}
+              onPointerMove={onDragSeparator}
+              onPointerUp={onEndDragSeparator}
+            />
+          </>
+        )}
+
+        <Arrangement
+          tracks={props.tracks}
+          updateTrackEnablement={() => props.project.updateTrackEnablement()}
+          appendTrack={appendTrack}
+          moveTrackToPosition={moveTrackToPosition}
+          deleteTrack={deleteTrack}
+          totalWidth={totalWidth}
+          totalHeight={(props.tracks.length + 1) * TRACK_HEIGHT_PX}
+          scale={timelineScale}
+          timeSignature={props.project.timeSignature}
+          converter={props.project.locationToTime}
+          timestamp={timestamp}
+          setTimestamp={changeTimestamp}
+          current={current}
+          setCurrent={changeCurrent}
+          loopStart={loopStart}
+          setLoopStart={changeLoopStart}
+          loopEnd={loopEnd}
+          setLoopEnd={changeLoopEnd}
+          end={end}
+          setEnd={changeEnd}
+          looping={looping}
+          setLooping={changeLooping}
+        />
+      </div>
       <div>
         <Drawer
           isOpen={props.mixerVisible}

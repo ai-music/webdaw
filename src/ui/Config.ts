@@ -19,3 +19,26 @@ export const SCROLLBAR_DIMENSIONS_PX = 15;
  * The scaling factor we apply to the pan value to convert it to a UX value.
  */
 export const UX_PAN_SCALE = 50;
+
+/**
+ * Initial width when we open the browser/library view.
+ */
+export const BROWSER_WIDTH_INITIAL = 250;
+
+/**
+ * Minimum width of the browser/library view.
+ */
+export const BROWSER_WIDTH_MIN = 40;
+
+/**
+ * Maximum width of the browser/library view.
+ */
+export const BROWSER_WIDTH_MAX = 400;
+
+/**
+ * Library JSON file. This is temporary until we have proper workspace and project mamanagement.
+ *
+ * The file is created using https://www.npmjs.com/package/directory-tree, and then written to disk
+ * using `writeFileSync(path, JSON.stringify(json, null, 2), 'utf8');`
+ */
+export const LIBRARY_JSON = 'library.json';

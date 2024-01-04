@@ -19,8 +19,10 @@
     "@types/react": "^18.2.39",
     "@types/react-dom": "^18.2.17",
     "@uiw/react-color-compact": "^2.0.5",
+    "directory-tree": "^3.5.1",
     "electron": "^28.0.0",
     "gapi-script": "^1.2.0",
+    "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
@@ -57,6 +59,7 @@
     ]
   },
   "devDependencies": {
+    "@types/lodash-es": "^4.17.12",
     "autoprefixer": "^10.4.16",
     "css-loader": "^6.8.1",
     "eslint-config-prettier": "^9.1.0",
