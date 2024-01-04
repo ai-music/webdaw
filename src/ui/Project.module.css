@@ -1,7 +1,7 @@
 .center {
   width: auto;
   max-height: inherit;
-  min-height: 20rem;
+  min-height: 10rem;
   height: 100%;
   flex: 1;
   display: flex;
@@ -10,7 +10,7 @@
 
 .browser {
   flex: 0;
-  min-height: 20rem;
+  min-height: 10rem;
   max-height: inherit;
   width: auto;
   height: 100%;

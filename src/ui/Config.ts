@@ -33,7 +33,7 @@ export const BROWSER_WIDTH_MIN = 40;
 /**
  * Maximum width of the browser/library view.
  */
-export const BROWSER_WIDTH_MAX = 400;
+export const BROWSER_WIDTH_MAX = 500;
 
 /**
  * Library JSON file. This is temporary until we have proper workspace and project mamanagement.
