@@ -107,6 +107,7 @@ export const Browser: FunctionComponent = () => {
   // Load the tree nodes when the component is first mounted
   useEffect(() => {
     loadTreeNodes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // The tree state is managed by a reducer
