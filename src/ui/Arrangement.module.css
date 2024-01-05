@@ -142,3 +142,11 @@ i.grip::after {
 .dragging {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);  
 }
+
+.regionPlaceholder {
+  border: 2px solid gray;
+  border-radius: 0.25rem;
+  background-color: rgba(0, 0, 0, 0.10);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);  
+  z-index: 1000000;
+}

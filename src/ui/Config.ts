@@ -52,3 +52,18 @@ export const BROWSER_WIDTH_MAX = 500;
  * using `writeFileSync(path, JSON.stringify(json, null, 2), 'utf8');`
  */
 export const LIBRARY_JSON = 'library.json';
+
+/**
+ * The ID of the region area.
+ */
+export const REGION_AREA_ID = 'region-area';
+
+/**
+ * The ID of the region scroll view containing the area.
+ */
+export const REGION_SCROLL_VIEW_ID = 'region-scroll-view';
+
+/**
+ * The ID of the region placeholder box for dragging new regions into the arrangement.
+ */
+export const REGION_PLACEHOLDER_ID = 'region-placeholder';

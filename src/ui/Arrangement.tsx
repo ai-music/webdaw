@@ -5,7 +5,15 @@ import { Timeline, TimelineProps } from './Timeline';
 import { TrackInterface } from '../core/Track';
 import { TrackInfo } from './TrackInfo';
 import { Region } from './Region';
-import { SCROLLBAR_DIMENSIONS_PX, TIMELINE_FACTOR_PX, TRACK_HEIGHT_PX } from './Config';
+import {
+  REGION_AREA_ID,
+  REGION_HEIGHT_PX,
+  REGION_PLACEHOLDER_ID,
+  REGION_SCROLL_VIEW_ID,
+  SCROLLBAR_DIMENSIONS_PX,
+  TIMELINE_FACTOR_PX,
+  TRACK_HEIGHT_PX,
+} from './Config';
 import { Button, ButtonGroup } from '@blueprintjs/core';
 
 /**
@@ -227,8 +235,14 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props: Arrangem
             style={{ height: SCROLLBAR_DIMENSIONS_PX, minHeight: SCROLLBAR_DIMENSIONS_PX, flex: 0 }}
           />
         </div>
-        <div ref={regionScroll} className={styles.regionScroll} onScroll={onScrollRegions}>
+        <div
+          id={REGION_SCROLL_VIEW_ID}
+          ref={regionScroll}
+          className={styles.regionScroll}
+          onScroll={onScrollRegions}
+        >
           <div
+            id={REGION_AREA_ID}
             style={{
               height: `${props.totalHeight}px`,
               minHeight: `${props.totalHeight}px`,
@@ -250,6 +264,19 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props: Arrangem
                 />
               )),
             )}
+            <div
+              id={REGION_PLACEHOLDER_ID}
+              className={styles.regionPlaceholder}
+              style={{
+                display: 'block',
+                top: 2 * TRACK_HEIGHT_PX,
+                left: 300,
+                width: 200,
+                position: 'absolute',
+                height: REGION_HEIGHT_PX,
+                lineHeight: `${TRACK_HEIGHT_PX}px`,
+              }}
+            />
             <div
               className={styles.trackPlaceholder}
               style={{

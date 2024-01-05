@@ -1,0 +1,4 @@
+.dragLabel {
+  position: fixed;
+  z-index: 1000000;
+}
