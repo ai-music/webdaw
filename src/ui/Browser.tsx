@@ -155,6 +155,10 @@ export const Browser: FunctionComponent = () => {
   const dragTarget = useRef<Element | null>(null);
   const startDragTimeout = useRef<number | null>(null);
 
+  // Instead of directly launching into drag mode, we wait a bit to see if the user
+  // is just clicking on the node to select it.
+  // We are using a timeout, which allows us to cancel the drag if the user
+  // releases the pointer before the timeout expires.
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
     if (
       !isDragging &&
@@ -168,6 +172,7 @@ export const Browser: FunctionComponent = () => {
     }
   }
 
+  // This is called when the user has held the pointer down long enough to start a drag.
   function onStartDrag(e: React.PointerEvent<HTMLDivElement>) {
     startDragTimeout.current = null;
 
@@ -184,6 +189,7 @@ export const Browser: FunctionComponent = () => {
     dragLabel.current!.style['top'] = `${e.clientY}px`;
   }
 
+  // This is called when the user releases the pointer.
   function onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
     if (startDragTimeout.current !== null) {
       window.clearTimeout(startDragTimeout.current);
