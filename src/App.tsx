@@ -48,7 +48,6 @@ function App() {
   );
   const [loading, setLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0); // [0, 1]
-  const [showDisclaimer, setShowDisclaimer] = useState(true);
   const [confirmStopAudio, setConfirmStopAudio] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [mixerVisible, setMixerVisible] = useState(false);
@@ -134,28 +133,6 @@ function App() {
         </DialogBody>
         <DialogFooter
           actions={<Button intent="primary" text="Close" onClick={() => setShowAbout(false)} />}
-        />
-      </Dialog>
-      <Dialog title="Attention" icon="warning-sign" isOpen={showDisclaimer}>
-        <DialogBody>
-          <p>
-            This application is a work in progress. It is not feature complete. There are many bugs
-            and missing features. At this point in time, do not expect any particular feature to be
-            available or working.
-          </p>
-          <p>
-            It is definitively not intended for use in a production environment. USE AT YOUR OWN
-            RISK.
-          </p>
-          <p>
-            That being said, if you are interested in actively contributing to this project, please
-            get in touch via the <a href="https://github.com/ai-music/webdaw">Github repository</a>.
-          </p>
-        </DialogBody>
-        <DialogFooter
-          actions={
-            <Button intent="danger" text="I Acknowledge" onClick={() => setShowDisclaimer(false)} />
-          }
         />
       </Dialog>
       <Dialog title="Loading" icon="cloud-download" isOpen={loading}>
