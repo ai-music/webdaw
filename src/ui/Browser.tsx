@@ -202,8 +202,10 @@ export const Browser: FunctionComponent = () => {
       const regionPlaceholder = document.getElementById(REGION_PLACEHOLDER_ID);
       regionPlaceholder!.style['display'] = 'none';
       dragLabel.current!.style['display'] = 'none';
-
       dragTarget.current = null;
+
+      // TODO: Add the region to the arrangement, if the last position was inside the scroll view
+      // Distinguish between addition of the region to an existing track, and creation of a new track
     }
   }
 
@@ -271,7 +273,7 @@ export const Browser: FunctionComponent = () => {
       />
       <div
         ref={dragLabel}
-        className={styles.dragLabel}
+        className={`${styles.dragLabel} ${styles.noselect}`}
         style={{ top: 0, left: 0, display: 'none' }}
       >
         <Icon icon="music" /> {dragLabelText.current}
