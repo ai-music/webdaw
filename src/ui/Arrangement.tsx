@@ -268,7 +268,7 @@ export const Arrangement: FunctionComponent<ArrangementProps> = (props: Arrangem
               id={REGION_PLACEHOLDER_ID}
               className={styles.regionPlaceholder}
               style={{
-                display: 'block',
+                display: 'none',
                 top: 2 * TRACK_HEIGHT_PX,
                 left: 300,
                 width: 200,
