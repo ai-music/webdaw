@@ -1,12 +1,13 @@
 // This file contains controller functions associated with the "Project" menu
 
+import { AudioFileManager } from '../core/AudioFileManager';
 import { PUBLIC_URL } from '../core/Common';
 import { Project } from '../core/Project';
 
 /**
  * Project > New
  */
-export function createProject(callback: (project: Project) => void) {
+export function createProject(afm: AudioFileManager, callback: (project: Project) => void) {
   /* ... */
   console.log('Creating a new project.');
   const urlString = `${PUBLIC_URL.toString()}/templates/default-project.json`;
@@ -24,6 +25,9 @@ export function createProject(callback: (project: Project) => void) {
     })
     .then((json) => {
       const project = Project.fromJson(json);
+      project.audioFiles.forEach((audioFile) => {
+        afm.registerAudioFile(audioFile);
+      });
       callback(project);
     });
 }
@@ -31,7 +35,7 @@ export function createProject(callback: (project: Project) => void) {
 /**
  * Project > Load...
  */
-export function loadProject() {
+export function loadProject(afm: AudioFileManager) {
   /* ... */
   console.log('Loading an existing project.');
 }

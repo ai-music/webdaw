@@ -1,4 +1,4 @@
-import { FunctionComponent, useEffect, useRef, useState } from 'react';
+import { FunctionComponent, useContext, useEffect, useRef, useState } from 'react';
 
 import { Transport } from './Transport';
 import { Mixer } from './Mixer';
@@ -20,12 +20,12 @@ import { AbstractTrack, TrackInterface } from '../core/Track';
 
 import styles from './Project.module.css';
 import { Browser } from './Browser';
+import { EngineContext } from './Context';
 
 export type ProjectProps = {
   project: ProjectObj;
   tracks: TrackInterface[];
   setTracks: (tracks: AbstractTrack[]) => void;
-  engine: Engine;
   mixerVisible: boolean;
   setMixerVisible: (visible: boolean) => void;
   browserVisible: boolean;
@@ -33,6 +33,8 @@ export type ProjectProps = {
 };
 
 export const Project: FunctionComponent<ProjectProps> = (props) => {
+  const engine = useContext(EngineContext)!;
+
   const [timelineScale, setTimelineScale] = useState(4);
 
   const [timestamp, setTimestamp] = useState(0); // [hh, mm, ss, uuuu]
@@ -42,7 +44,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
   const [loopEnd, setLoopEnd] = useState(props.project.loopEnd);
   const [end, setEnd] = useState(props.project.end);
 
-  const [looping, setLooping] = useState(props.engine.looping);
+  const [looping, setLooping] = useState(engine.looping);
 
   function moveTrackToPosition(index: number, position: number) {
     props.project.moveTrackToPosition(index, position);
@@ -50,7 +52,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
   }
 
   function deleteTrack(index: number) {
-    props.engine.handleTrackEvent({
+    engine.handleTrackEvent({
       type: TrackEventType.Removed,
       track: props.project.tracks[index],
     });
@@ -64,7 +66,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
       const track = new AudioTrack();
       props.project.appendTrack(track);
 
-      props.engine.handleTrackEvent({
+      engine.handleTrackEvent({
         type: TrackEventType.Added,
         track: track,
       });
@@ -75,7 +77,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
 
   const changeLooping = (looping: boolean) => {
     setLooping(looping);
-    props.engine.handleTransportEvent({
+    engine.handleTransportEvent({
       type: TransportEventType.LoopingChanged,
       looping: looping,
     });
@@ -86,7 +88,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
     setCurrent(position);
     props.project.current = position;
     setTimestamp(timestamp);
-    props.engine.handleTransportEvent({
+    engine.handleTransportEvent({
       type: TransportEventType.PositionChanged,
       location: position,
     });
@@ -97,7 +99,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
     setCurrent(location);
     props.project.current = location;
     setTimestamp(timestamp);
-    props.engine.handleTransportEvent({
+    engine.handleTransportEvent({
       type: TransportEventType.PositionChanged,
       location: location,
     });
@@ -106,7 +108,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
   const changeLoopStart = (location: LocationValue) => {
     setLoopStart(location);
     props.project.loopStart = location;
-    props.engine.handleTransportEvent({
+    engine.handleTransportEvent({
       type: TransportEventType.LoopStartLocatorChanged,
       location: location,
     });
@@ -115,7 +117,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
   const changeLoopEnd = (location: LocationValue) => {
     setLoopEnd(location);
     props.project.loopEnd = location;
-    props.engine.handleTransportEvent({
+    engine.handleTransportEvent({
       type: TransportEventType.LoopEndLocatorChanged,
       location: location,
     });
@@ -124,7 +126,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
   const changeEnd = (location: LocationValue) => {
     setEnd(location);
     props.project.end = location;
-    props.engine.handleTransportEvent({
+    engine.handleTransportEvent({
       type: TransportEventType.PlaybackEndLocatorChanged,
       location: location,
     });
@@ -143,11 +145,11 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
   }, [props.project]);
 
   useEffect(() => {
-    props.engine.registerPlaybackPositionEventHandler(positionEventHandler);
+    engine.registerPlaybackPositionEventHandler(positionEventHandler);
     return () => {
-      props.engine.unregisterPlaybackPositionEventHandler(positionEventHandler);
+      engine.unregisterPlaybackPositionEventHandler(positionEventHandler);
     };
-  }, [props.engine]);
+  }, [engine]);
 
   const timelineRange = props.project.end.add(new Duration(1, 0, 0), props.project.timeSignature);
   const totalWidth =
@@ -207,7 +209,6 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
   return (
     <>
       <Transport
-        engine={props.engine}
         project={props.project}
         totalWidth={totalWidth}
         timelineScale={timelineScale}

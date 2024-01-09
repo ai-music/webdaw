@@ -35,7 +35,9 @@ export class Metronome implements PlaybackScheduling, NamedObject, MutableObject
       this.initializeAudio(context);
     }
 
-    this._audioFile.load(context, callback);
+    this._audioFile.load(context, callback, (file, error) => {
+      // TODO: Handle error
+    });
   }
 
   initializeAudio(context: AudioContext): void {

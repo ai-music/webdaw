@@ -92,15 +92,21 @@ export class Project implements NamedObject, ToJson, AudioFileResolver {
 
     this.audioFiles.forEach((file) => {
       if (!file.ready) {
-        file.load(context, (/*file*/) => {
-          --remaining;
+        file.load(
+          context,
+          (/*file*/) => {
+            --remaining;
 
-          if (remaining === 0) {
-            onComplete(this);
-          } else {
-            onProgress(this, (total - remaining) / total);
-          }
-        });
+            if (remaining === 0) {
+              onComplete(this);
+            } else {
+              onProgress(this, (total - remaining) / total);
+            }
+          },
+          (file, error) => {
+            // TODO: Wire up the error handling
+          },
+        );
       }
     });
   }

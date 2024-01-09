@@ -9,7 +9,11 @@ import {
 } from './Common';
 
 export class AudioFile implements NamedObject, Identifiable, ToJson {
+  // After successful loading, the audio buffer is stored here.
   private _audioBuffer: AudioBuffer | null;
+
+  // If loading failed, the error is stored here.
+  private _error: Error | null = null;
 
   // We maintain a mipmap of renderings of the audio file.
   // The highst resolution corresponds to 2048 pixels/samples per second.
@@ -58,6 +62,10 @@ export class AudioFile implements NamedObject, Identifiable, ToJson {
     return this._audioBuffer !== null;
   }
 
+  public get error(): Error | null {
+    return this._error;
+  }
+
   public get buffer(): AudioBuffer {
     if (this._audioBuffer !== null) {
       return this._audioBuffer;
@@ -66,7 +74,11 @@ export class AudioFile implements NamedObject, Identifiable, ToJson {
     }
   }
 
-  async load(context: AudioContext, callback: (audioFile: AudioFile) => void) {
+  async load(
+    context: AudioContext,
+    callback: (audioFile: AudioFile) => void,
+    onError: (audioFile: AudioFile, error: Error) => void,
+  ) {
     const file = this;
     if (file._audioBuffer === null) {
       try {
@@ -83,8 +95,8 @@ export class AudioFile implements NamedObject, Identifiable, ToJson {
           callback(file);
         });
       } catch (err: any) {
-        // TODO: What should we really do with such errors during fetching or decoding?
         console.error(`Unable to fetch the audio file. Error: ${err.message}`);
+        onError(file, err);
       }
     }
   }

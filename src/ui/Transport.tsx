@@ -1,4 +1,4 @@
-import { FunctionComponent, useEffect, useState } from 'react';
+import { FunctionComponent, useContext, useEffect, useState } from 'react';
 import { Location } from './Location';
 import { Time } from './Time';
 import { Button, ButtonGroup, EditableText, Intent, Switch } from '@blueprintjs/core';
@@ -9,6 +9,7 @@ import { PlaybackEvent, PlaybackEventType } from '../core/Events';
 import { MAX_TIMELINE_SCALE, MIN_TIMELINE_SCALE } from './Timeline';
 
 import styles from './Transport.module.css';
+import { EngineContext } from './Context';
 
 /**
  * The different states of playback
@@ -21,7 +22,6 @@ export enum PlaybackState {
 
 export type TransportProps = {
   project: ProjectObj;
-  engine: Engine;
   totalWidth: number;
   timelineScale: number;
   setTimelineScale: (scale: number) => void;
@@ -60,6 +60,8 @@ export type TransportProps = {
 };
 
 export const Transport: FunctionComponent<TransportProps> = (props: TransportProps) => {
+  const engine = useContext(EngineContext)!;
+
   const [playback, setPlayback] = useState(PlaybackState.Stopped);
   const [bpm, setBpm] = useState(120);
   const [numerator, setNumerator] = useState(4);
@@ -87,15 +89,15 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
   }
 
   useEffect(() => {
-    props.engine.registerPlaybackEventHandler(onPlaybackEvent);
+    engine.registerPlaybackEventHandler(onPlaybackEvent);
     return () => {
-      props.engine.unregisterPlaybackEventHandler(onPlaybackEvent);
+      engine.unregisterPlaybackEventHandler(onPlaybackEvent);
     };
-  }, [props.engine]);
+  }, [engine]);
 
   function toggleMetronome() {
     setMetronome(!metronome);
-    props.engine.metronome = !metronome;
+    engine.metronome = !metronome;
   }
 
   function onBegin() {
@@ -149,14 +151,14 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
     console.log('Play');
     // should chnage the behavior to play from the current position
     setPlayback(PlaybackState.Playing);
-    props.engine.start();
+    engine.start();
   }
 
   function pause() {
     console.log('Pause');
     // needs to be changed such that the audio generation stops more or less immediately
     setPlayback(PlaybackState.Stopped);
-    props.engine.stop();
+    engine.stop();
   }
 
   function record() {
@@ -164,7 +166,7 @@ export const Transport: FunctionComponent<TransportProps> = (props: TransportPro
     // should change the behavior to record from the current position
     // ultimately, this will require a count-in prior to the recording starting
     setPlayback(PlaybackState.Recording);
-    props.engine.start();
+    engine.start();
   }
 
   function repeat() {

@@ -22,9 +22,12 @@ import { Engine } from './core/Engine';
 import { BUFFER_SIZE, SAMPLE_RATE } from './core/Config';
 
 import styles from './App.module.css';
+import { AudioFileManager } from './core/AudioFileManager';
+import { AudioFileManagerContext, EngineContext } from './ui/Context';
 
 const audioContext = new AudioContext();
 
+// MIT License
 const LICENSE =
   'MIT License\n\nCopyright (c) 2023, 2024 Hans-Martin Will\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
 
@@ -39,13 +42,14 @@ function openDocumentation() {
 
 function App() {
   const initialProject = new ProjectObj();
+  const engine = useRef<Engine>(
+    new Engine(audioContext, { bufferSize: BUFFER_SIZE, sampleRate: SAMPLE_RATE }, initialProject),
+  );
+  const audioFileManager = useRef<AudioFileManager>(new AudioFileManager());
 
   const [project, setProject] = useState(initialProject);
   const [tracks, setTracks] = useState(initialProject.tracks); // [TrackInterface]
 
-  const [engine, setEngine] = useState(
-    new Engine(audioContext, { bufferSize: BUFFER_SIZE, sampleRate: SAMPLE_RATE }, initialProject),
-  );
   const [loading, setLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0); // [0, 1]
   const [confirmStopAudio, setConfirmStopAudio] = useState(false);
@@ -57,8 +61,8 @@ function App() {
   const continueChangeProject = useRef<() => void>();
 
   useEffect(() => {
-    initializeEngine(engine);
-  }, [engine]);
+    initializeEngine(engine.current);
+  }, []);
 
   function initializeEngine(engine: Engine) {
     setLoading(true);
@@ -70,9 +74,9 @@ function App() {
   function loadFiles(project: ProjectObj) {
     setLoading(true);
     project.loadFiles(
-      engine.context,
+      engine.current.context,
       (project) => {
-        engine.project = project;
+        engine.current.project = project;
         setProject(project);
         setTracks(project.tracks);
         setLoading(false);
@@ -85,7 +89,7 @@ function App() {
 
   function changeProject(action: () => void) {
     continueChangeProject.current = action;
-    if (engine.isPlaying) {
+    if (engine.current.isPlaying) {
       setConfirmStopAudio(true);
     } else {
       action();
@@ -93,7 +97,7 @@ function App() {
   }
 
   return (
-    <>
+    <EngineContext.Provider value={engine.current}>
       <Dialog title="About" icon="info-sign" isOpen={showAbout}>
         <DialogBody>
           <img src="logo-192.png" alt="WebDAW Logo" width="96" style={{ float: 'right' }} />
@@ -174,8 +178,11 @@ function App() {
                     text="New Project"
                     onClick={() => {
                       changeProject(() => {
-                        engine.stop();
-                        createProject(loadFiles);
+                        engine.current.stop();
+                        project.audioFiles.forEach((audioFile) => {
+                          audioFileManager.current.unregisterAudioFile(audioFile);
+                        });
+                        createProject(audioFileManager.current, loadFiles);
                       });
                     }}
                   />
@@ -184,8 +191,8 @@ function App() {
                     text="Load..."
                     onClick={() => {
                       changeProject(() => {
-                        engine.stop();
-                        loadProject();
+                        engine.current.stop();
+                        loadProject(audioFileManager.current);
                       });
                     }}
                   />
@@ -270,7 +277,6 @@ function App() {
           </Navbar.Group>
         </Navbar>
         <Project
-          engine={engine}
           project={project}
           tracks={tracks}
           setTracks={setTracks}
@@ -287,7 +293,7 @@ function App() {
         title="Settings"
         onClose={() => setShowSettings(false)}
       ></Drawer>
-    </>
+    </EngineContext.Provider>
   );
 }
 
