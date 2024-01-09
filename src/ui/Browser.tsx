@@ -2,17 +2,20 @@ import { Icon, Tree, TreeNodeInfo } from '@blueprintjs/core';
 import { FunctionComponent, useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { PUBLIC_URL } from '../core/Common';
 import { LIBRARY_JSON, REGION_PLACEHOLDER_ID, REGION_SCROLL_VIEW_ID } from './Config';
-import { cloneDeep } from 'lodash';
+import { clone, cloneDeep } from 'lodash';
 
 import styles from './Browser.module.css';
 import { DownloadControl, DownloadControlStatus } from './DownloadControl';
 import { AudioFile } from '../core/AudioFile';
+
+export type NodePath = number[];
 
 // TODO: Can we simplify the status information to not include the heavy-weight AudioFile object?
 // Instead, the audio file itself could be owner in the AudioFileManager, with only the URL (id) and
 // download status information in the tree node.
 type DownloadStatus = {
   downloadStatus: DownloadControlStatus;
+  path: NodePath;
 };
 
 type NodeData = DownloadStatus | null;
@@ -21,7 +24,6 @@ export const Browser: FunctionComponent = () => {
   const INITIAL_STATE: TreeNodeInfo<NodeData>[] = [];
 
   // A path to a node in the tree is an array of indices, one for each level of the tree.
-  type NodePath = number[];
 
   // A tree action is a message that can be sent to the tree reducer
   type TreeAction =
@@ -81,13 +83,13 @@ export const Browser: FunctionComponent = () => {
       case 'RELOAD_TREE_NODES':
         return action.payload.nodes;
       case 'SET_DOWNLOAD_STATUS':
-        const newState4 = cloneDeep(state);
+        const newState4 = clone(state); //cloneDeep(state);
         forNodeAtPath(newState4, action.payload.path, (node) => {
           const nodeData = node.nodeData as DownloadStatus;
           nodeData.downloadStatus = action.payload.status;
           node.className =
             action.payload.status === DownloadControlStatus.Local ? '' : styles.notDownloaded;
-          node.secondaryLabel = createSecondaryLabel(nodeData, action.payload.path);
+          node.secondaryLabel = createSecondaryLabel(node);
 
           if (action.payload.status === DownloadControlStatus.Local) {
             node.icon = 'music';
@@ -102,14 +104,15 @@ export const Browser: FunctionComponent = () => {
   // The tree state is managed by a reducer
   const [nodes, dispatch] = useReducer(treeReducer, INITIAL_STATE);
 
-  function createSecondaryLabel(downloadStatus: DownloadStatus, nodePath: number[]) {
+  function createSecondaryLabel(nodeInfo: TreeNodeInfo<NodeData>) {
     return (
       <DownloadControl
-        state={downloadStatus.downloadStatus}
+        state={nodeInfo.nodeData!.downloadStatus}
         setState={(state) => {
+          //nodeInfo.nodeData!.downloadStatus = state;
           dispatch({
             type: 'SET_DOWNLOAD_STATUS',
-            payload: { path: nodePath, status: state },
+            payload: { path: nodeInfo.nodeData!.path, status: state },
           });
         }}
       />
@@ -138,19 +141,20 @@ export const Browser: FunctionComponent = () => {
       return node;
     } else {
       // create an audio file node
-      const audioFile = AudioFile.create(new URL(`${PUBLIC_URL.toString()}${json.path}`));
-      const nodeData = { audioFile, downloadStatus: DownloadControlStatus.RemoteOnly };
-
-      return {
-        id: audioFile.url.toString(),
+      const nodeId = `${PUBLIC_URL.toString()}${json.path}`;
+      const nodeData = { downloadStatus: DownloadControlStatus.RemoteOnly, path: nodePath };
+      const nodeInfo: TreeNodeInfo<NodeData> = {
+        id: nodeId,
         label: json.name,
         isExpanded: false,
         childNodes: undefined,
         icon: <Icon icon="music" className="bp5-icon-standard bp5-tree-node-icon" color="#ccc" />,
-        secondaryLabel: createSecondaryLabel(nodeData, nodePath),
         className: styles.notDownloaded,
         nodeData,
       };
+
+      nodeInfo.secondaryLabel = createSecondaryLabel(nodeInfo);
+      return nodeInfo;
     }
   }
 

@@ -18,19 +18,26 @@ export interface DownloadControlProps {
 export const DownloadControl: FunctionComponent<DownloadControlProps> = (
   props: DownloadControlProps,
 ) => {
+  const [state, setState] = useState<DownloadControlStatus>(props.state);
+
+  function setStateAndPropagate(state: DownloadControlStatus) {
+    setState(state);
+    props.setState(state);
+  }
+
   return (
     <span className={styles.downloadControl}>
-      {props.state === DownloadControlStatus.RemoteOnly && (
+      {state === DownloadControlStatus.RemoteOnly && (
         <Icon
           icon="cloud-download"
-          onClick={() => props.setState(DownloadControlStatus.Downloading)}
+          onClick={() => setStateAndPropagate(DownloadControlStatus.Downloading)}
         />
       )}
-      {props.state === DownloadControlStatus.Downloading && (
-        <Spinner size={16} onClick={() => props.setState(DownloadControlStatus.Local)} />
+      {state === DownloadControlStatus.Downloading && (
+        <Spinner size={16} onClick={() => setStateAndPropagate(DownloadControlStatus.Local)} />
       )}
-      {props.state === DownloadControlStatus.Error && <Icon icon="error" />}
-      {props.state === DownloadControlStatus.Local && <Icon icon="tick" />}
+      {state === DownloadControlStatus.Error && <Icon icon="error" />}
+      {state === DownloadControlStatus.Local && <Icon icon="tick" />}
     </span>
   );
 };
