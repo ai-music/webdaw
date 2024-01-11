@@ -55,3 +55,15 @@ yet.
 
 This can be either an LRU type cache that maintains the last, say 20 files, or it is implemented using
 an explicit clear operation invoked by the user.
+
+## UX Logic
+
+There's quite a bit of state transition logic that needs to be implemented in the UX:
+- Drag'n'drop can only be initiated from a file that is local. Change the mouse pointer to identify tree nodes from where a drag'n'drop gesture can be initiated vs. where not (`grab` versus `default`).
+- Adjust the size of the placeholder region to the real region size during the drag operation
+- Drag'n'drop of audio regions can only end on an existing audio track or o create a new audio track. Adjust the pointer shape based on whether it is over a valid drop target location or not. That is, while dragging outside of arrangement areas, use `grabbing`. If over an invalid drop target, use `not-allowed`.
+- If the target is a new track, create the new track and place the new region snapped to the minor timeline tick granularity.
+- If the target is an existing track, we need to ensure that regions on the track do not overlap post the addition of the new region. A meaningful logic is as follows:
+  - If the start of the new region overlaps with an existing region, then truncate the existing region to stop at the beginning of the new region.
+  - Then truncate the new region up the the new start of any existing region.
+  - We don't allow dropping a new region unless there is at least space for one minor timeline tick duration. This also needs to be indicated by the pointer shape
