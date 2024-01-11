@@ -1,5 +1,13 @@
 import { Icon, Tree, TreeNodeInfo } from '@blueprintjs/core';
-import { FunctionComponent, useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import {
+  FunctionComponent,
+  useCallback,
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from 'react';
 import { PUBLIC_URL } from '../core/Common';
 import { LIBRARY_JSON, REGION_PLACEHOLDER_ID, REGION_SCROLL_VIEW_ID } from './Config';
 import { clone, cloneDeep } from 'lodash';
@@ -7,6 +15,7 @@ import { clone, cloneDeep } from 'lodash';
 import styles from './Browser.module.css';
 import { DownloadControl, DownloadControlStatus } from './DownloadControl';
 import { AudioFile } from '../core/AudioFile';
+import { AudioContextContext } from './Context';
 
 export type NodePath = number[];
 
@@ -16,11 +25,14 @@ export type NodePath = number[];
 type DownloadStatus = {
   downloadStatus: DownloadControlStatus;
   path: NodePath;
+  audioFile?: AudioFile;
 };
 
 type NodeData = DownloadStatus | null;
 
 export const Browser: FunctionComponent = () => {
+  const audioContext = useContext(AudioContextContext)!;
+
   const INITIAL_STATE: TreeNodeInfo<NodeData>[] = [];
 
   // A path to a node in the tree is an array of indices, one for each level of the tree.
@@ -57,6 +69,18 @@ export const Browser: FunctionComponent = () => {
     callback(Tree.nodeFromPath(path, nodes));
   }
 
+  function cloneAtPath(state: TreeNodeInfo<NodeData>[], path: NodePath): TreeNodeInfo<NodeData>[] {
+    const newState = clone(state);
+    var nodeArray = newState;
+
+    for (const index of path) {
+      nodeArray[index] = clone(nodeArray[index]);
+      nodeArray = clone(nodeArray[index].childNodes!);
+    }
+
+    return newState;
+  }
+
   // The tree reducer handles all tree actions
   function treeReducer(state: TreeNodeInfo<NodeData>[], action: TreeAction) {
     switch (action.type) {
@@ -64,6 +88,7 @@ export const Browser: FunctionComponent = () => {
         const newState1 = cloneDeep(state);
         forEachNode(newState1, (node) => (node.isSelected = false));
         return newState1;
+
       case 'SET_IS_EXPANDED':
         const newState2 = cloneDeep(state);
         forNodeAtPath(
@@ -72,6 +97,7 @@ export const Browser: FunctionComponent = () => {
           (node) => (node.isExpanded = action.payload.isExpanded),
         );
         return newState2;
+
       case 'SET_IS_SELECTED':
         const newState3 = cloneDeep(state);
         forNodeAtPath(
@@ -80,13 +106,32 @@ export const Browser: FunctionComponent = () => {
           (node) => (node.isSelected = action.payload.isSelected),
         );
         return newState3;
+
       case 'RELOAD_TREE_NODES':
         return action.payload.nodes;
+
       case 'SET_DOWNLOAD_STATUS':
-        const newState4 = clone(state); //cloneDeep(state);
+        // just enough state change to trigger a re-render
+        const newState4 = clone(state);
         forNodeAtPath(newState4, action.payload.path, (node) => {
           const nodeData = node.nodeData as DownloadStatus;
           nodeData.downloadStatus = action.payload.status;
+
+          if (action.payload.status === DownloadControlStatus.Downloading) {
+            nodeData.audioFile = AudioFile.create(new URL(node.id as string));
+
+            nodeData.audioFile.load(
+              audioContext,
+              (audioFile) => {
+                downloadDispatch(action.payload.path, DownloadControlStatus.Local);
+              },
+              (audioFile, error) => {
+                console.log(`Failed to load ${audioFile.url}: ${error}`);
+                downloadDispatch(action.payload.path, DownloadControlStatus.Error);
+              },
+            );
+          }
+
           node.className =
             action.payload.status === DownloadControlStatus.Local ? '' : styles.notDownloaded;
           node.secondaryLabel = createSecondaryLabel(node);
@@ -95,7 +140,8 @@ export const Browser: FunctionComponent = () => {
             node.icon = 'music';
           }
         });
-        return newState4;
+        return cloneAtPath(newState4, action.payload.path);
+
       default:
         return state;
     }
@@ -104,16 +150,20 @@ export const Browser: FunctionComponent = () => {
   // The tree state is managed by a reducer
   const [nodes, dispatch] = useReducer(treeReducer, INITIAL_STATE);
 
+  function downloadDispatch(path: NodePath, status: DownloadControlStatus) {
+    // What is necessary to actually download the file?
+    dispatch({
+      type: 'SET_DOWNLOAD_STATUS',
+      payload: { path, status },
+    });
+  }
+
   function createSecondaryLabel(nodeInfo: TreeNodeInfo<NodeData>) {
     return (
       <DownloadControl
         state={nodeInfo.nodeData!.downloadStatus}
         setState={(state) => {
-          //nodeInfo.nodeData!.downloadStatus = state;
-          dispatch({
-            type: 'SET_DOWNLOAD_STATUS',
-            payload: { path: nodeInfo.nodeData!.path, status: state },
-          });
+          downloadDispatch(nodeInfo.nodeData!.path, state);
         }}
       />
     );
@@ -235,7 +285,9 @@ export const Browser: FunctionComponent = () => {
       dragTarget.current === null &&
       currentTreeNode.current !== null &&
       //currentTreeNode.current.icon === 'music'
-      currentTreeNode.current.childNodes === undefined
+      currentTreeNode.current.childNodes === undefined &&
+      currentTreeNode.current.nodeData !== null &&
+      currentTreeNode.current.nodeData!.downloadStatus === DownloadControlStatus.Local
     ) {
       startDragTimeout.current = window.setTimeout(() => {
         onStartDrag(e);
