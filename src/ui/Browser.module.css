@@ -17,3 +17,11 @@
   color: #ccc;
   filter: grayscale(100%);
 }
+
+.canDrag {
+  cursor: grab;
+}
+
+.dragging {
+  cursor: grabbing;
+}

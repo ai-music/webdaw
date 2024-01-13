@@ -89,7 +89,7 @@ export class InstrumentTrack extends AbstractTrack {
   // Support for JSON serialization/deserialization
   public static TYPE_TAG = 'instrument';
 
-  get typeTag(): string {
+  get type(): string {
     return InstrumentTrack.TYPE_TAG;
   }
 

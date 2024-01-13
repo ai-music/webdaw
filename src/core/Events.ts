@@ -148,6 +148,7 @@ export interface RegionEventArgs {
 export class RegionEvent {
   constructor(
     public readonly type: RegionEventType,
+    public readonly track: TrackInterface,
     public readonly region: RegionInterface,
     public readonly args?: RegionEventArgs,
   ) {

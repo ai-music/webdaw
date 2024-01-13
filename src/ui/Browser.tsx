@@ -8,14 +8,22 @@ import {
   useRef,
   useState,
 } from 'react';
-import { PUBLIC_URL } from '../core/Common';
-import { LIBRARY_JSON, REGION_PLACEHOLDER_ID, REGION_SCROLL_VIEW_ID } from './Config';
+import { Duration, Location, LocationToTime, PUBLIC_URL, TimeSignature } from '../core/Common';
+import {
+  LIBRARY_JSON,
+  REGION_PLACEHOLDER_ID,
+  REGION_SCROLL_VIEW_ID,
+  TIMELINE_FACTOR_PX,
+  TRACK_HEIGHT_PX,
+} from './Config';
 import { clone, cloneDeep } from 'lodash';
 
 import styles from './Browser.module.css';
 import { DownloadControl, DownloadControlStatus } from './DownloadControl';
 import { AudioFile } from '../core/AudioFile';
 import { AudioContextContext } from './Context';
+import { TrackInterface } from '../core/Track';
+import { start } from 'repl';
 
 export type NodePath = number[];
 export type CompactNodePath = Uint32Array;
@@ -31,7 +39,36 @@ type DownloadStatus = {
 
 type NodeData = DownloadStatus | null;
 
-export const Browser: FunctionComponent = () => {
+function canDrag(node: TreeNodeInfo<NodeData>) {
+  if (node.nodeData === undefined || node.nodeData === null) {
+    return false;
+  } else {
+    return node.nodeData.downloadStatus === DownloadControlStatus.Local;
+  }
+}
+
+export type BrowserProps = {
+  scale: number;
+  timeSignature: TimeSignature;
+  converter: LocationToTime;
+  totalWidth: number;
+  totalHeight: number;
+
+  tracks: TrackInterface[];
+  createNewAudioTrackWithRegion: (
+    region: AudioFile,
+    location: Location,
+    duration: Duration,
+  ) => void;
+  addRegionToTrack: (
+    region: AudioFile,
+    trackIndex: number,
+    location: Location,
+    duration: Duration,
+  ) => void;
+};
+
+export const Browser: FunctionComponent<BrowserProps> = (props: BrowserProps) => {
   const audioContext = useContext(AudioContextContext)!;
 
   const INITIAL_STATE: TreeNodeInfo<NodeData>[] = [];
@@ -329,6 +366,11 @@ export const Browser: FunctionComponent = () => {
     dragLabel.current!.style['display'] = 'block';
     dragLabel.current!.style['left'] = `${e.clientX}px`;
     dragLabel.current!.style['top'] = `${e.clientY}px`;
+
+    const audioFile = currentTreeNode.current!.nodeData!.audioFile!;
+    const duration = audioFile.buffer.duration;
+    const regionPlaceholder = document.getElementById(REGION_PLACEHOLDER_ID);
+    regionPlaceholder!.style['width'] = `${duration * props.scale * TIMELINE_FACTOR_PX}px`;
   }
 
   // This is called when the user releases the pointer.
@@ -346,8 +388,37 @@ export const Browser: FunctionComponent = () => {
       dragLabel.current!.style['display'] = 'none';
       dragTarget.current = null;
 
-      // TODO: Add the region to the arrangement, if the last position was inside the scroll view
-      // Distinguish between addition of the region to an existing track, and creation of a new track
+      // Are we inside the scroll view?
+      const regionScrollView = document.getElementById(REGION_SCROLL_VIEW_ID);
+      const scrollViewRect = regionScrollView!.getBoundingClientRect();
+
+      if (
+        e.clientX >= scrollViewRect.left &&
+        e.clientX <= scrollViewRect.right &&
+        e.clientY >= scrollViewRect.top &&
+        e.clientY <= scrollViewRect.bottom
+      ) {
+        const effectiveX = e.clientX - scrollViewRect.left + regionScrollView!.scrollLeft;
+        const startTime = effectiveX / props.scale / TIMELINE_FACTOR_PX;
+        const location = props.converter.convertTime(startTime);
+
+        const effectiveY = e.clientY - scrollViewRect.top + regionScrollView!.scrollTop;
+        const trackIndex = Math.floor(effectiveY / TRACK_HEIGHT_PX);
+
+        const audioFile = currentTreeNode.current!.nodeData!.audioFile!;
+        const audioDuration = audioFile.buffer.duration;
+        const endTime = startTime + audioDuration;
+        const endLocation = props.converter.convertTime(endTime);
+        const duration = location.diff(endLocation, props.timeSignature);
+
+        if (trackIndex >= props.tracks.length) {
+          props.createNewAudioTrackWithRegion(audioFile, location, duration);
+        } else {
+          if (props.tracks[trackIndex].type === 'audio') {
+            props.addRegionToTrack(audioFile, trackIndex, location, duration);
+          }
+        }
+      }
     }
   }
 
@@ -392,6 +463,11 @@ export const Browser: FunctionComponent = () => {
     console.log(`Mouse entered ${node.id}`);
     currentTreeNode.current = node;
     dragLabelText.current = node.label as string;
+
+    if (canDrag(node)) {
+      const element = tree.current!.getNodeContentElement(node.id as string);
+      element!.classList.add(styles.canDrag);
+    }
   };
 
   // This is called when the user moves the pointer off a node.
@@ -399,7 +475,11 @@ export const Browser: FunctionComponent = () => {
   // We clear the ref, so that we don't use the node when the user starts dragging.
   const handleNodeMouseLeave = (node: TreeNodeInfo<NodeData>, _nodePath: NodePath) => {
     console.log(`Mouse left ${node.id}`);
-    currentTreeNode.current = null;
+    if (currentTreeNode.current !== null) {
+      const element = tree.current!.getNodeContentElement(node.id as string);
+      element!.classList.remove(styles.canDrag);
+      currentTreeNode.current = null;
+    }
   };
 
   // Ther browser also has a search box at the top

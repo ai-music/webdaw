@@ -32,7 +32,7 @@ export class MidiTrack extends AbstractTrack {
   // Support for JSON serialization/deserialization
   public static TYPE_TAG = 'midi';
 
-  get typeTag(): string {
+  get type(): string {
     return MidiTrack.TYPE_TAG;
   }
 

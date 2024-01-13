@@ -195,8 +195,13 @@ export class AudioTrack extends AbstractTrack {
   // Support for JSON serialization/deserialization
   public static TYPE_TAG = 'audio';
 
-  get typeTag(): string {
+  get type(): string {
     return AudioTrack.TYPE_TAG;
+  }
+
+  public addRegion(region: AudioRegion, location: Location): void {
+    this.regions.push(region);
+    this.regions.sort((a, b) => a.position.compare(b.position));
   }
 
   static fromJson(file: JSONValue, resolver: AudioFileResolver): AudioTrack {

@@ -2,11 +2,15 @@ import { FunctionComponent, useContext, useEffect, useRef, useState } from 'reac
 
 import { Transport } from './Transport';
 import { Mixer } from './Mixer';
-import { Duration, Location as LocationValue } from '../core/Common';
+import { Duration, Location, Location as LocationValue } from '../core/Common';
 import { Drawer } from '@blueprintjs/core';
 import { Project as ProjectObj } from '../core/Project';
-import { Engine } from '../core/Engine';
-import { PlaybackPositionEvent, TrackEventType, TransportEventType } from '../core/Events';
+import {
+  PlaybackPositionEvent,
+  RegionEventType,
+  TrackEventType,
+  TransportEventType,
+} from '../core/Events';
 import { Arrangement } from './Arrangement';
 import {
   BROWSER_WIDTH_INITIAL,
@@ -21,6 +25,9 @@ import { AbstractTrack, TrackInterface } from '../core/Track';
 import styles from './Project.module.css';
 import { Browser } from './Browser';
 import { EngineContext } from './Context';
+import { AudioFile } from '../core/AudioFile';
+import { AudioRegion } from '../core/AudioRegion';
+import { clone } from 'lodash';
 
 export type ProjectProps = {
   project: ProjectObj;
@@ -204,6 +211,40 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
     }
   }
 
+  function createNewAudioTrackWithRegion(file: AudioFile, location: Location, duration: Duration) {
+    const region = new AudioRegion(file, file.name, 'black', location, duration);
+    const track = new AudioTrack([region], [], file.name);
+    props.project.appendTrack(track);
+    engine.handleTrackEvent({
+      type: TrackEventType.Added,
+      track: track,
+    });
+    props.setTracks(props.project.tracks);
+  }
+
+  function addRegionToTrack(
+    file: AudioFile,
+    trackIndex: number,
+    location: Location,
+    duration: Duration,
+  ) {
+    const region = new AudioRegion(file, file.name, 'black', location, duration);
+    const track = props.project.tracks[trackIndex];
+
+    if (track.type !== 'audio') {
+      return;
+    }
+
+    const audioTrack = track as AudioTrack;
+    audioTrack.addRegion(region, location);
+    engine.handleRegionEvent({
+      type: RegionEventType.Added,
+      track: props.project.tracks[trackIndex],
+      region: region,
+    });
+    props.setTracks(clone(props.project.tracks));
+  }
+
   //
   // Browser to the left, InfoPanel to the right, in the center stack of Arrangement, Editor
   return (
@@ -238,7 +279,16 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
               }}
             >
               <div className={styles.browserInner}>
-                <Browser />
+                <Browser
+                  tracks={props.tracks}
+                  totalWidth={totalWidth}
+                  totalHeight={(props.tracks.length + 1) * TRACK_HEIGHT_PX}
+                  scale={timelineScale}
+                  timeSignature={props.project.timeSignature}
+                  converter={props.project.locationToTime}
+                  createNewAudioTrackWithRegion={createNewAudioTrackWithRegion}
+                  addRegionToTrack={addRegionToTrack}
+                />
               </div>
             </div>
             <div

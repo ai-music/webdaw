@@ -134,6 +134,11 @@ export interface TrackInterface
     RecordableObject,
     PlaybackScheduling {
   /**
+   * The type of this track.
+   */
+  readonly type: string;
+
+  /**
    * Accessor to regions on this track.
    */
   regions: RegionInterface[];
@@ -180,7 +185,7 @@ export abstract class AbstractTrack implements TrackInterface, ToJson {
 
   toJson(): JSONValue {
     return {
-      type: this.typeTag,
+      type: this.type,
       name: this.name,
       color: this.color,
       muted: this.muted,
@@ -244,7 +249,7 @@ export abstract class AbstractTrack implements TrackInterface, ToJson {
   /**
    * Concrete sub-classes implement this type tag property used for conversion to JSON.
    */
-  abstract get typeTag(): string;
+  abstract get type(): string;
 
   static fromJson(file: JSONValue, resolver: AudioFileResolver): AbstractTrack {
     if (typeof file !== 'object') {
