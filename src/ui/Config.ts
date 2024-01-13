@@ -46,6 +46,11 @@ export const BROWSER_WIDTH_MIN = 40;
 export const BROWSER_WIDTH_MAX = 500;
 
 /**
+ * Timeout before we switch from click to drag mode.
+ */
+export const CLICK_TO_DRAG_TIMEOUT_MS = 200;
+
+/**
  * Library JSON file. This is temporary until we have proper workspace and project mamanagement.
  *
  * The file is created using https://www.npmjs.com/package/directory-tree, and then written to disk

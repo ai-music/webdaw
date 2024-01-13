@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { Duration, Location, LocationToTime, PUBLIC_URL, TimeSignature } from '../core/Common';
 import {
+  CLICK_TO_DRAG_TIMEOUT_MS,
   LIBRARY_JSON,
   REGION_PLACEHOLDER_ID,
   REGION_SCROLL_VIEW_ID,
@@ -24,6 +25,7 @@ import { AudioFile } from '../core/AudioFile';
 import { AudioContextContext } from './Context';
 import { TrackInterface } from '../core/Track';
 import { start } from 'repl';
+import { TimelineSettings } from './Timeline';
 
 export type NodePath = number[];
 export type CompactNodePath = Uint32Array;
@@ -51,6 +53,8 @@ export type BrowserProps = {
   scale: number;
   timeSignature: TimeSignature;
   converter: LocationToTime;
+  end: Location;
+
   totalWidth: number;
   totalHeight: number;
 
@@ -347,7 +351,7 @@ export const Browser: FunctionComponent<BrowserProps> = (props: BrowserProps) =>
     ) {
       startDragTimeout.current = window.setTimeout(() => {
         onStartDrag(e);
-      }, 500);
+      }, CLICK_TO_DRAG_TIMEOUT_MS);
     }
   }
 
@@ -400,10 +404,16 @@ export const Browser: FunctionComponent<BrowserProps> = (props: BrowserProps) =>
       ) {
         const effectiveX = e.clientX - scrollViewRect.left + regionScrollView!.scrollLeft;
         const startTime = effectiveX / props.scale / TIMELINE_FACTOR_PX;
-        const location = props.converter.convertTime(startTime);
+        const timelineSettings = new TimelineSettings(props.scale);
+        const location = timelineSettings.snap(
+          startTime,
+          props.end,
+          props.timeSignature,
+          props.converter,
+        );
 
         const effectiveY = e.clientY - scrollViewRect.top + regionScrollView!.scrollTop;
-        const trackIndex = Math.floor(effectiveY / TRACK_HEIGHT_PX);
+        const trackIndex = Math.round(effectiveY / TRACK_HEIGHT_PX);
 
         const audioFile = currentTreeNode.current!.nodeData!.audioFile!;
         const audioDuration = audioFile.buffer.duration;
@@ -479,6 +489,11 @@ export const Browser: FunctionComponent<BrowserProps> = (props: BrowserProps) =>
       const element = tree.current!.getNodeContentElement(node.id as string);
       element!.classList.remove(styles.canDrag);
       currentTreeNode.current = null;
+    }
+
+    if (startDragTimeout.current !== null) {
+      window.clearTimeout(startDragTimeout.current);
+      startDragTimeout.current = null;
     }
   };
 

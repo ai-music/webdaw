@@ -59,6 +59,57 @@ class TimelineGenerator implements IterableIterator<Location> {
 export const MIN_TIMELINE_SCALE = 0.25;
 export const MAX_TIMELINE_SCALE = 64.0;
 
+export class TimelineSettings {
+  public readonly majorStep: Duration;
+  public readonly minorStep: Duration;
+  public readonly label: (location: Location) => string;
+
+  static barLabel(location: Location): string {
+    return `${location.bar}`;
+  }
+
+  static beatLabel(location: Location): string {
+    return `${location.bar}:${location.beat}`;
+  }
+
+  constructor(scale: number) {
+    if (scale >= 16) {
+      this.majorStep = new Duration(0, 1, 0);
+      this.minorStep = new Duration(0, 0, PPQN / 4);
+      this.label = TimelineSettings.beatLabel;
+    } else if (scale >= 2) {
+      this.majorStep = new Duration(1, 0, 0);
+      this.minorStep = new Duration(0, 1, 0);
+      this.label = TimelineSettings.barLabel;
+    } else {
+      this.majorStep = new Duration(4 / scale, 0, 0);
+      this.minorStep = new Duration(1 / scale, 0, 0);
+      this.label = TimelineSettings.barLabel;
+    }
+  }
+
+  public snap(
+    timestamp: number,
+    endRange: Location,
+    signature: TimeSignature,
+    converter: LocationToTime,
+  ): Location {
+    const tickIterator = new TimelineGenerator(
+      new Location(1, 1, 1),
+      endRange, //.add(this.majorStep, signature),
+      this.minorStep,
+      signature,
+    );
+
+    return Array.from(tickIterator).reduce((prev, curr) => {
+      return Math.abs(timestamp - converter.convertLocation(prev)) <
+        Math.abs(timestamp - converter.convertLocation(curr))
+        ? prev
+        : curr;
+    });
+  }
+}
+
 // A timeline component across the top of the arrangement view.
 // It needs to be aligned with the actual track content visualizations and
 // provides UX interactions for positioning of the playback head and the zoom level.
@@ -74,47 +125,11 @@ export const MAX_TIMELINE_SCALE = 64.0;
 // Labels are shown for each 4th bar, indicating bar number.
 
 export const Timeline: FunctionComponent<TimelineProps> = (props: TimelineProps) => {
-  function barLabel(location: Location): string {
-    return `${location.bar}`;
-  }
-
-  function beatLabel(location: Location): string {
-    return `${location.bar}:${location.beat}`;
-  }
-
   const rangeStart = new Location(1, 1, 1);
   const rangeEnd = props.end;
   const signature = props.timeSignature;
 
-  type Settings = {
-    majorStep: Duration;
-    minorStep: Duration;
-    label: (location: Location) => string;
-  };
-
-  function calculateSettings(scale: number): Settings {
-    if (scale >= 16) {
-      return {
-        majorStep: new Duration(0, 1, 0),
-        minorStep: new Duration(0, 0, PPQN / 4),
-        label: beatLabel,
-      };
-    } else if (scale >= 2) {
-      return {
-        majorStep: new Duration(1, 0, 0),
-        minorStep: new Duration(0, 1, 0),
-        label: barLabel,
-      };
-    } else {
-      return {
-        majorStep: new Duration(4 / scale, 0, 0),
-        minorStep: new Duration(1 / scale, 0, 0),
-        label: barLabel,
-      };
-    }
-  }
-
-  const settings = calculateSettings(props.scale);
+  const settings = new TimelineSettings(props.scale);
 
   const labelIterator = new TimelineGenerator(rangeStart, rangeEnd, settings.majorStep, signature);
   const tickIterator = new TimelineGenerator(rangeStart, rangeEnd, settings.minorStep, signature);

@@ -286,6 +286,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
                   scale={timelineScale}
                   timeSignature={props.project.timeSignature}
                   converter={props.project.locationToTime}
+                  end={end}
                   createNewAudioTrackWithRegion={createNewAudioTrackWithRegion}
                   addRegionToTrack={addRegionToTrack}
                 />
