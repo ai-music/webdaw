@@ -185,6 +185,33 @@ export class Duration {
   }
 
   /**
+   * Compare this duration to another one.
+   *
+   * The comparison is based on the lexicgraphic order of bars, beats and ticks. Durations are not
+   * normalized as part of the comparison operation, but are rather assumed to be normalized.
+   *
+   * @param other   the other duration
+   * @returns       -1 if this location is shorter, 1 if it is longer, and 0 if they are equal
+   */
+  public compare(other: Duration): number {
+    if (this.bar < other.bar) {
+      return -1;
+    } else if (this.bar > other.bar) {
+      return 1;
+    } else if (this.beat < other.beat) {
+      return -1;
+    } else if (this.beat > other.beat) {
+      return 1;
+    } else if (this.tick < other.tick) {
+      return -1;
+    } else if (this.tick > other.tick) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
+  /**
    * Recreate a duration from a JSON value.
    *
    * The JSON value must be an array of three numbers representing the number of bars, beats and ticks.
@@ -291,11 +318,11 @@ export class Location {
     const ticksPerBeat = (PPQN * 4) / beatNote;
 
     const [ticks, ticksCarry] =
-      duration.tick < ticksPerBeat
+      this.tick - 1 >= duration.tick
         ? [this.tick - 1 - duration.tick, 0]
         : [this.tick - 1 - duration.tick + ticksPerBeat, 1];
     const [beats, beatsCarry] =
-      duration.beat + ticksCarry < beatsPerBar
+      this.beat - 1 - ticksCarry >= duration.beat
         ? [this.beat - 1 - duration.beat - ticksCarry, 0]
         : [this.beat - 1 - duration.beat - ticksCarry + beatsPerBar, 1];
     const bars = this.bar - duration.bar - beatsCarry;

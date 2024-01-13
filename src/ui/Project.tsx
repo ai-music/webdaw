@@ -236,7 +236,7 @@ export const Project: FunctionComponent<ProjectProps> = (props) => {
     }
 
     const audioTrack = track as AudioTrack;
-    audioTrack.addRegion(region, location);
+    audioTrack.addRegion(region, location, props.project.timeSignature);
     engine.handleRegionEvent({
       type: RegionEventType.Added,
       track: props.project.tracks[trackIndex],

@@ -10,6 +10,7 @@ export class AudioRegion extends AbstractRegion {
     position: Location = new Location(),
     size: Duration = new Duration(),
     length: Duration = size,
+    public trim: Duration = new Duration(0, 0, 0),
     looping: boolean = false,
     muted: boolean = false,
     soloed: boolean = false,
@@ -42,6 +43,7 @@ export class AudioRegion extends AbstractRegion {
     const position = Location.fromJson(obj['position']);
     const size = Duration.fromJson(obj['size']);
     const length = Duration.fromJson(obj['length']);
+    const trim = Duration.fromJson(obj['trim']);
 
     return new AudioRegion(
       audioFile,
@@ -50,6 +52,7 @@ export class AudioRegion extends AbstractRegion {
       position,
       size,
       length,
+      trim,
       looping,
       muted,
       soloed,

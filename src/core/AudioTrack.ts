@@ -1,8 +1,17 @@
+import { clone } from 'lodash';
 import { Registry } from '../effects/Default';
 import { AudioEffect } from './AudioEffect';
 import { AudioFileResolver } from './AudioFile';
 import { AudioRegion } from './AudioRegion';
-import { JSONObject, JSONValue, Location, LocationToTime, assert } from './Common';
+import {
+  Duration,
+  JSONObject,
+  JSONValue,
+  Location,
+  LocationToTime,
+  TimeSignature,
+  assert,
+} from './Common';
 import { AbstractTrack } from './Track';
 
 type AudioState = {
@@ -199,9 +208,90 @@ export class AudioTrack extends AbstractTrack {
     return AudioTrack.TYPE_TAG;
   }
 
-  public addRegion(region: AudioRegion, location: Location): void {
+  public addRegion(region: AudioRegion, location: Location, signature: TimeSignature): void {
     this.regions.push(region);
     this.regions.sort((a, b) => a.position.compare(b.position));
+
+    // Logic to ensure that the region is not overlapping with any other region
+    var index = this.regions.indexOf(region);
+    if (index > 0) {
+      const previousRegion = this.regions[index - 1];
+      if (previousRegion.position.compare(location) === 0) {
+        // if the previous regions starts at the same location, we swap these two regions and move to
+        // the next check
+        this.regions[index] = previousRegion;
+        this.regions[index - 1] = region;
+        --index;
+      } else {
+        const previousRegionByLength = previousRegion.position.add(
+          previousRegion.length,
+          signature,
+        );
+        if (previousRegionByLength.compare(location) > 0) {
+          const truncatedLength = location.sub(previousRegion.position, signature);
+          previousRegion.length = truncatedLength;
+        }
+
+        // TODO: How should this logic work once we can loop regions?
+        const previousRegionBySize = previousRegion.position.add(previousRegion.size, signature);
+        if (previousRegionBySize.compare(location) > 0) {
+          const truncatedSize = location.sub(previousRegion.position, signature);
+          previousRegion.size = truncatedSize;
+        }
+      }
+    }
+
+    // Logic to ensure that the region is not overlapping with any other region
+    while (index < this.regions.length - 1) {
+      const nextRegion = this.regions[index + 1];
+      const newRegionByLength = location.add(region.length, signature);
+      const newRegionBySize = location.add(region.size, signature);
+
+      // Two cases: the next region starts at a time later than the new region to be added.
+      // In this case, we need to truncate the length of the new region to fit.
+      if (nextRegion.position.compare(location) === 0) {
+        // Alternatively, the next region starts at the same time as the new region to be added.
+        const nextDuration = nextRegion.length;
+        const newDuration = region.length;
+
+        if (nextDuration.compare(newDuration) > 0) {
+          // The old region is the longer one. We need to truncate the length of the old region from
+          // the front such that the new region fits before it.
+          const nextRegionEndByLength = nextRegion.position.add(nextRegion.length, signature);
+          const nextRegionEndBySize = nextRegion.position.add(nextRegion.size, signature);
+          const newNextPosition = location.add(newDuration, signature);
+          const newNextLength = nextRegionEndByLength.sub(newNextPosition, signature);
+
+          // TODO: Revisit once we add looping at region level
+          const newNextSize = nextRegionEndBySize.sub(newNextPosition, signature);
+          const newNextTrim = nextRegion.trim.add(newDuration, signature);
+
+          nextRegion.position = newNextPosition;
+          nextRegion.length = newNextLength;
+          nextRegion.size = newNextSize;
+          nextRegion.trim = newNextTrim;
+
+          break;
+        } else {
+          // The new region is the longer one. We remove the existing region and iterate.
+          this.regions.splice(index + 1, 1);
+        }
+      } else if (nextRegion.position.compare(newRegionByLength) < 0) {
+        const truncatedLength = nextRegion.position.sub(location, signature);
+        region.length = truncatedLength;
+
+        if (nextRegion.position.compare(newRegionBySize) < 0) {
+          const truncatedSize = nextRegion.position.sub(location, signature);
+          region.size = truncatedSize;
+        }
+
+        break;
+      } else {
+        break;
+      }
+    }
+
+    //this.regions = clone(this.regions);
   }
 
   static fromJson(file: JSONValue, resolver: AudioFileResolver): AudioTrack {
@@ -258,6 +348,10 @@ export class AudioTrack extends AbstractTrack {
       var endPosition =
         startPosition + converter.convertDurationAtLocation(region.length, region.position);
       const unclippedTime = endPosition;
+      const audioBufferTimeOffset = converter.convertDurationAtLocation(
+        region.trim,
+        region.position,
+      );
 
       if (discontinuationTime !== undefined && endPosition > discontinuationTime) {
         endPosition = discontinuationTime;
@@ -279,7 +373,7 @@ export class AudioTrack extends AbstractTrack {
         source.connect(state.channelStripInput);
         const duration = Math.min(buffer.duration, endPosition - continuationTime);
         const offset = continuationTime - startPosition;
-        source.start(timeOffset + continuationTime, offset /*, duration*/);
+        source.start(timeOffset + continuationTime, audioBufferTimeOffset + offset /*, duration*/);
 
         // trim playback if needed
         if (discontinuationTime !== undefined && endPosition >= discontinuationTime) {
@@ -314,7 +408,7 @@ export class AudioTrack extends AbstractTrack {
         source.buffer = buffer;
         source.connect(state.channelStripInput);
         const duration = Math.min(buffer.duration, endPosition - startPosition);
-        source.start(timeOffset + startPosition, 0 /*, duration*/);
+        source.start(timeOffset + startPosition, audioBufferTimeOffset /*, duration*/);
 
         // trim playback if needed
         if (discontinuationTime !== undefined && endPosition >= discontinuationTime) {
