@@ -12,7 +12,7 @@ This document is an outline of how WebDAW may evolve towards a usable music prod
 - [X] Ability to rename each track
 - [X] Ability to add and remove audio tracks
 - [X] Ability to change order of audio tracks (drag and drop)
-- [ ] Ability to place regions referencing audio files to a track
+- [X] Ability to place regions referencing audio files to a track
 - [ ] Ability to move regions within their containing track
 - [ ] Ability to move regions from one audio track to another
 - [ ] Ability to cut a region into two
