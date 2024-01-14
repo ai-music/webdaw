@@ -55,7 +55,7 @@ function App() {
   const [confirmStopAudio, setConfirmStopAudio] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [mixerVisible, setMixerVisible] = useState(false);
-  const [browserVisible, setBrowserVisible] = useState(false);
+  const [browserVisible, setBrowserVisible] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
 
   const continueChangeProject = useRef<() => void>();
