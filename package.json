@@ -73,6 +73,6 @@
     "sass-loader": "^13.3.2",
     "style-loader": "^3.3.3",
     "typedoc": "^0.25.4",
-    "@babel/plugin-proposal-private-property-in-object": "7.21.11"
+    "@babel/plugin-transform-private-property-in-object": "7.23.4"
   }
 }
