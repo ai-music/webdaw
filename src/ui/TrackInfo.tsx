@@ -12,7 +12,7 @@ import { FunctionComponent, useEffect, useState } from 'react';
 
 import styles from './TrackInfo.module.css';
 import { Knob } from './Knob';
-import { TRACK_HEIGHT_PX, UX_PAN_SCALE } from './Config';
+import { COLORS, TRACK_HEIGHT_PX, UX_PAN_SCALE } from './Config';
 import { TrackInterface } from '../core/Track';
 import { MAX_VOLUME_DB, MIN_VOLUME_DB } from '../core/Config';
 import Compact from '@uiw/react-color-compact';
@@ -142,7 +142,12 @@ export const TrackInfo: FunctionComponent<TrackInfoProps> = (props: TrackInfoPro
               <Card compact>
                 <H4>Track Properties</H4>
                 <H5>Track Color</H5>
-                <Compact color={color} onChange={(val) => changeColor(val.hex)} />
+                <Compact
+                  color={color}
+                  colors={COLORS}
+                  onChange={(val) => changeColor(val.hex)}
+                  style={{ width: '16rem' }}
+                />
                 <H5>Danger Zone</H5>
                 <Button intent="danger" onClick={() => props.delete()}>
                   Delete Track
