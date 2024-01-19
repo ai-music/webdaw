@@ -10,6 +10,7 @@ import {
   TRACK_HEIGHT_PX,
 } from './Config';
 import { AudioRegion } from '../core/AudioRegion';
+import { EditableText } from '@blueprintjs/core';
 
 export interface RegionProps {
   region: RegionInterface;
@@ -58,6 +59,7 @@ function drawAudioBuffer(audioBuffer: AudioBuffer, canvas: HTMLCanvasElement) {
 
 export const Region: FunctionComponent<RegionProps> = (props: RegionProps) => {
   const [selected, setSelected] = useState(false);
+  const [name, setName] = useState(props.region.name);
 
   const duration = props.converter.convertDurationAtLocation(
     props.region.length,
@@ -128,9 +130,28 @@ export const Region: FunctionComponent<RegionProps> = (props: RegionProps) => {
     setSelected(!selected);
   }
 
+  function changeName(name: string) {
+    setName(name);
+    props.region.name = name;
+  }
+
   return (
     <div className={styles.region} style={style} onClick={toggleSelection}>
-      <div>{props.region.name}</div>
+      <div className={styles.handles}>
+        <div className={styles.leftHandle} />
+        <div className={styles.centerHandle} />
+        <div className={styles.rightHandle} />
+        <div className={styles.loopHandle} />
+      </div>
+      <div>
+        <EditableText
+          alwaysRenderInput={true}
+          value={props.region.name}
+          onChange={(value: string) => {
+            changeName(value);
+          }}
+        />
+      </div>
       {props.region.data.type === RegionDataType.Audio && (
         <div
           style={{

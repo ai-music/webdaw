@@ -99,7 +99,7 @@ export abstract class AbstractRegion implements RegionInterface {
   }
 
   set name(value: string) {
-    throw new Error('Region name cannot be changed.');
+    this._name = value;
   }
 
   abstract get data(): RegionData;
