@@ -15,13 +15,13 @@ This document is an outline of how WebDAW may evolve towards a usable music prod
 - [X] Ability to place regions referencing audio files to a track
 - [ ] Ability to move regions within their containing track
 - [ ] Ability to move regions from one audio track to another
-- [ ] Ability to cut a region into two
-- [ ] Ability to combine two or more consecutive regions on the same track into a single one
 - [ ] Ability to clone a region and place it within the arrangement
 - [ ] Ability to subset region within audio file by selecting start offset and size
 - [ ] Ability remove audio regions from audio tracks
 - [ ] Ability to mute/unmute individual audio regions
 - [ ] Ability to rename and color individual regions
+- [ ] Ability to cut a region into two
+- [ ] Ability to combine two or more consecutive regions on the same track into a single one
 
 ## Milestone 2: Adding Project Management
 

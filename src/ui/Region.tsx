@@ -57,6 +57,17 @@ function drawAudioBuffer(audioBuffer: AudioBuffer, canvas: HTMLCanvasElement) {
   context.stroke();
 }
 
+/**
+ * The state of the drag operation.
+ */
+enum DragState {
+  None,
+  Left,
+  Right,
+  Region,
+  Loop,
+}
+
 export const Region: FunctionComponent<RegionProps> = (props: RegionProps) => {
   const [selected, setSelected] = useState(false);
   const [name, setName] = useState(props.region.name);
@@ -135,13 +146,130 @@ export const Region: FunctionComponent<RegionProps> = (props: RegionProps) => {
     props.region.name = name;
   }
 
+  // Internal state variable to track the drag state.
+  const dragState = useRef<DragState>(DragState.None);
+  const dragStartX = useRef<number>(0);
+  const dragStartY = useRef<number>(0);
+
+  function onDragLeftStart(event: React.PointerEvent<HTMLDivElement>) {
+    if (dragState.current === DragState.None) {
+      dragState.current = DragState.Left;
+      dragStartX.current = event.clientX;
+      dragStartY.current = event.clientY;
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+  }
+
+  function onDragLeftMove(event: React.PointerEvent<HTMLDivElement>) {
+    // for a non-looped region, the drag left gesture changes the start position within the
+    // audio file that is being played back. At most, the start position can be moved to the
+    // beginning of the audio file. I fmoved to the right, it can be moved at most to the
+    // end of the audio file.
+    // For a looped region, the drag left gesture changes the loop start position. That is,
+    // maintaining the loop length and looping iterval, the loop start determines where playback
+    // begins within the loop.
+  }
+
+  function onDragLeftEnd(event: React.PointerEvent<HTMLDivElement>) {
+    if (dragState.current === DragState.Left) {
+      dragState.current = DragState.None;
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  }
+
+  function onDragRightStart(event: React.PointerEvent<HTMLDivElement>) {
+    if (dragState.current === DragState.None) {
+      dragState.current = DragState.Right;
+      dragStartX.current = event.clientX;
+      dragStartY.current = event.clientY;
+    }
+  }
+
+  function onDragRightMove(event: React.PointerEvent<HTMLDivElement>) {
+    // for a non-looped region, the drag right gesture changes the end position within the
+    // audio file that is being played back. At most, the end position can be moved to the
+    // end of the audio file. If moved to the left, it can be moved at most to the
+    // beginning of the audio file.
+    // For a looped region, the drag right gesture changes the loop end position. That is,
+    // maintaining the loop length and looping iterval, the loop end determines where playback
+    // ends within the loop.
+  }
+
+  function onDragRightEnd(event: React.PointerEvent<HTMLDivElement>) {
+    if (dragState.current === DragState.Right) {
+      dragState.current = DragState.None;
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  }
+
+  function onDragRegionStart(event: React.PointerEvent<HTMLDivElement>) {
+    if (dragState.current === DragState.None) {
+      dragState.current = DragState.Region;
+      dragStartX.current = event.clientX;
+      dragStartY.current = event.clientY;
+    }
+  }
+
+  function onDragRegionMove(event: React.PointerEvent<HTMLDivElement>) {
+    // The drag region gesture moves the entire region. The start and end positions are
+    // moved by the same amount. If the move operation would result in the region overalpping
+    // another region on he same track, then we truncate the move region to fit within the
+    // available free space on the track.
+  }
+
+  function onDragRegionEnd(event: React.PointerEvent<HTMLDivElement>) {
+    if (dragState.current === DragState.Region) {
+      dragState.current = DragState.None;
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  }
+
+  function onDragLoopStart(event: React.PointerEvent<HTMLDivElement>) {
+    if (dragState.current === DragState.None) {
+      dragState.current = DragState.Loop;
+      dragStartX.current = event.clientX;
+      dragStartY.current = event.clientY;
+    }
+  }
+
+  function onDragLoopMove(event: React.PointerEvent<HTMLDivElement>) {
+    //
+  }
+
+  function onDragLoopEnd(event: React.PointerEvent<HTMLDivElement>) {
+    if (dragState.current === DragState.Loop) {
+      dragState.current = DragState.None;
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  }
+
   return (
     <div className={styles.region} style={style} onClick={toggleSelection}>
       <div className={styles.handles}>
-        <div className={styles.leftHandle} />
-        <div className={styles.centerHandle} />
-        <div className={styles.rightHandle} />
-        <div className={styles.loopHandle} />
+        <div
+          className={styles.leftHandle}
+          onPointerDown={onDragLeftStart}
+          onPointerMove={onDragLeftMove}
+          onPointerUp={onDragLeftEnd}
+        />
+        <div
+          className={styles.centerHandle}
+          onPointerDown={onDragRegionStart}
+          onPointerMove={onDragRegionMove}
+          onPointerUp={onDragRegionEnd}
+        />
+        <div
+          className={styles.rightHandle}
+          onPointerDown={onDragRightStart}
+          onPointerMove={onDragRightMove}
+          onPointerUp={onDragRightEnd}
+        />
+        <div
+          className={styles.loopHandle}
+          onPointerDown={onDragLoopStart}
+          onPointerMove={onDragLoopMove}
+          onPointerUp={onDragLoopEnd}
+        />
       </div>
       <div>
         <EditableText
